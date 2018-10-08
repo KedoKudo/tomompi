@@ -1,0 +1,5 @@
+#!/bin/csh
+
+cd /clhome/TIEMAN/workspace/TomoMPI/bin
+
+/clhome/aps_tools/mpich-1.2.6/bin/mpirun -machinefile /clhome/TIEMAN/workspace/TomoMPI/bin/testnodes.list -np 5 /clhome/TIEMAN/workspace/TomoMPI/bin/tomompi /data/tieman/tomography/tomo_512x512x720 sample02.hdf

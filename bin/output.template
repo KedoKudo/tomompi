@@ -1,0 +1,12 @@
+;This is a test comment
+<NXentry:entry1>
+
+	[data,VAR,"Image",NX_INT16]
+	[orientation,CONST,"XZ",NX_INT16]
+
+<NXentry:End>
+
+<EndTemplate>
+;End of file
+
+

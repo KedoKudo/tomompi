@@ -1,0 +1,23 @@
+#
+#usage:
+#       subtomojob <job name> <tomo1/tomo2> <sample path> <exp file name>
+
+echo "Got $NSLOTS processors."
+echo "Machines:"
+cat $TMPDIR/machines
+
+date
+ssh orthros /clhome/TIEMAN/bin/logbook/eLogTomoMPIStarted $1 $2 
+
+echo "Starting reconstruction..."
+
+#/clhome/mvapich/bin/mpirun -np $NSLOTS -machinefile $TMPDIR/machines /clhome/TIEMAN/user_cluster/tomompi $1 $2
+
+/clhome/aps_tools/mpich-1.2.6/bin/mpirun -np $NSLOTS -machinefile $TMPDIR/machines /clhome/TIEMAN/workspace/TomoMPI/bin/tomompi $1 $2
+
+echo "Reconstruction complete."
+
+ssh orthros /clhome/TIEMAN/bin/logbook/eLogTomoMPICompleted $1 $2 
+date
+
+

@@ -1,0 +1,13 @@
+#!/bin/csh
+
+# cd /clhome/TIEMAN/workspace/TomoMPI/bin
+
+#/clhome/mvapich/bin/mpirun_rsh -ssh -hostfile /clhome/TIEMAN/workspace/TomoMPI/bin/nodes.list -np 12 /clhome/TIEMAN/workspace/TomoMPI/bin/tomompi /data/tieman/tomography/tomo_512x512x720 sample02.hdf
+
+cd /clhome/TOMO/PANY/projects/TomoMPI/trunk/bin
+
+/clhome/aps_tools/mpich-1.2.6/bin/mpirun -machinefile /clhome/TOMO/PANY/projects/TomoMPI/trunk/bin/pjnode.list -np 8 /clhome/TOMO/PANY/projects/TomoMPI/trunk/bin/tomompi /tomography/PANY/Sam14_Patrick Sam14_exp.hdf
+
+# /clhome/TOMO/PANY/utilities/mpich/bin/mpirun -machinefile /clhome/TOMO/PANY/projects/TomoMPI/trunk/bin/pjnode.list -np 8 /clhome/TOMO/PANY/projects/TomoMPI/trunk/bin/tomompi /tomography/PANY/Sam14_Patrick Sam14_exp.hdf
+
+

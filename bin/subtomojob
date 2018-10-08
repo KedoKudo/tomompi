@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# Adjust MPICH procgroup to ensure smooth shutdown
+MPICH_PROCESS_GROUP=no; export MPICH_PROCESS_GROUP
+
+qsub -N $1 -cwd -j y -pe $2 5 -S /bin/csh ./qtomo $3 $4
+

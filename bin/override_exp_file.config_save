@@ -1,0 +1,132 @@
+##/development/tomography/tomo_2048x2048x1440/
+##sample10.hdf
+##TomoMPI Version:V2.0
+
+##Reconstruction Algorithm
+##	Options:
+##		FBP Delay Only
+##		GRIDREC Delay Only
+##		FBP No Optimization
+##		FBP Optimized
+##		FBP Cylinder Only
+##		GRIDREC
+<Reconstruction Algorithm>GRIDREC
+
+##Filter Algorithm
+##	Options:
+##	None
+##	Shepp/Logan
+##	Hann
+##	Hamming
+##	Ramp
+##	FBP
+<Filter Algorithm>Hann
+
+##Output File Format
+##	Options:
+##		HDF4
+##		HDF5
+<Output File Format>HDF5
+
+##Use Slices File
+##	Options:
+##		true
+##		false
+<Use Slices File>false
+
+##Files Per Pass
+##	Options:
+##		power of 2 prefered
+<Files Per Pass>128
+
+##Use Fixed Shift
+##	Options:
+##		true
+##		false
+##	Requires:
+##		<Fixed Shift Value>int
+<Use Fixed Shift>true
+##Fixed Shift Value
+##	Options:
+##		fixed shift value<int>
+##	Requires:
+##		<Use Fixed Shift>true
+<Fixed Shift Value>0
+
+##Auto-Centering
+##	Options:
+##		true
+##		false
+<Auto-Centering>true
+
+##Use Ring Removal
+##	Options:
+##		true
+##		false
+##	Requires:
+##		<Ring Removal Coefficient>float
+<Use Ring Removal>false
+##Ring Removal Coefficient
+##	Options:
+##		coefficient value<float>
+##	Requires:
+##		<Use Ring Removal>true
+<Ring Removal Coefficient>1.000000
+
+##Average White Fields
+##	Options:
+##		true
+##		false
+<Average White Fields>true
+
+##Data Index
+##	Options:
+##		example: ;entry1;data;data
+<Data Index>;entry1;data;data
+
+##Compressiong Type
+##	Options:
+##		NONE
+##		LZW
+##		RLE
+##		HUF
+<Compression Type>LZW
+
+##Rescale To Int
+##	Options:
+##		true
+##		false
+##	Requires:
+##		<Data Range Min>float
+##		<Data Range Max>float
+<Rescale To Int>false
+##Data Range Min
+##	Options:
+##		minimum value to scale from<float>
+##	Requires:
+##		<Rescale To Int>true
+<Data Range Min>-0.005000
+##Data Range Max
+##	Options:
+##		maximum value to scale from<float>
+##	Requires:
+##		<Rescale To Int>true
+<Data Range Max>0.005000
+
+##Debug
+##	Options:
+##		None
+##		White Field
+##		Dark Field
+##		Sinogram Pre-Norm
+##		Sinogram Post-Norm
+##		Post Centering
+##		Post Ring Removal
+##		Full
+##		No Output
+##		No Reconstruction
+<Debug>None
+
+
+
+<End>

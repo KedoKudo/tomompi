@@ -1,0 +1,37 @@
+#!/bin/sh
+# 
+# EXAMPLE MPICH SCRIPT FOR SGE
+# Modified by Basement Supercomputing 1/2/2006 DJE
+# To use, change "MPICH_JOB", "NUMBER_OF_CPUS" 
+# and "MPICH_PROGRAM_NAME" to real values. 
+#
+# Your job name 
+#$ -N tomography
+#
+# Use current working directory
+#$ -cwd
+#
+# Join stdout and stderr
+#$ -j y
+#
+# pe request for MPICH. Set your number of processors here. 
+# Make sure you use the "mpich" parallel environemnt.
+#$ -pe tomo2 13
+#
+# Run job through bash shell
+#$ -S /bin/csh
+#
+# The following is for reporting only. It is not really needed
+# to run the job. It will show up in your output file.
+echo "Got $NSLOTS processors."
+echo "Machines:"
+cat $TMPDIR/machines
+# Adjust MPICH procgroup to ensure smooth shutdown
+setenv MPICH_PROCESS_GROUP no
+#
+# Use full pathname to make sure we are using the right mpirun
+echo "Starting reconstruction..."
+cd /home/tieman/workspace/TomoMPI/bin
+/export/mvapich/bin/mpirun -np $NSLOTS -machinefile $TMPDIR/machines /home/tieman/workspace/TomoMPI/bin/tomompi $1 $2 
+echo "Reconstruction complete."
+

@@ -1,0 +1,380 @@
+__________________________________________________________________
+TomoMPI_Client.cpp
+
+Controlling code for TomoMPI Client calculations.
+Developed and maintained by:
+       Brian Tieman
+       Argonne National Laboratory
+       tieman@aps.anl.gov
+
+8/20/2003   V1.0   BT  First version with acknowledgements
+9/4/2003    V1.0   BT  Integer sinograms and now passed to the client.
+        The client does the normalization step upon recieving the integer
+        sinograms and a sinogram of the white fields and dark fields.
+9/12/2003   V1.2   BT  Added code to shift back the reconstruction by the
+        number of pixels it was shifted during the centering step.  This
+        appears to fix the jumping around of the image that was occuring
+        with some samples.
+9/12/2003   V1.2   BT  Fixed a few minor de-allocation bugs that were causing
+        the system to fail to shut down properly--sometimes loosing the last
+        few reconstructions.
+9/12/2003   V1.2   BT  Fixed a bug that would cause the system to hang if there
+        were fewer reconstructions to do than processors to do them on.  This
+        mostly makes debugging easier as I can now reconstruct fewer images to
+        test the system.
+1/30/2004   V1.3   BT  Upgraded cluster to run on RedHat 9.0.  This version fails
+        to run properly when linked with the MKL.  A few memory issues were fixed
+        as a result of this upgrade.
+2/26/2004   V1.4   BT  Dark fields are now averaged before being sent to the client.
+        This allows for more flexibility in the acquisition--for example, it's now
+        possible to take a number of darks at the end or take darks at regular
+        intervals throughout the dat set and the same reconstruction code can
+        handle it transparently.
+3/15/2004   V1.5   BT  The client now recieves the centering related fields--
+        fixed_shift and fixed_shift_value.  If fixed_shift is non-zero, the auto
+        findcenter routine will be ignored and the value in fixed_shift_value will
+        be used for the shift value for all sinograms.
+3/26/2004   V1.5   BT  The client will now write out the filter it is using to the
+        log file.
+5/20/2004   V1.5   BT  There is now support for intermediate calculation debug info.
+        There are several points in the calculation chain where sinograms may be
+        written out to disk.  The debug type is specified in the recdonstruction.cfg
+        file by dsetting the <Debug> field to one of the following types:
+        None -- no debuging
+        SinoPreNorm -- sinograms before normalization
+        SinoPostNorm -- sinograms post normlalization
+        PostCentering -- sinograms after centering
+        PostRingRemoval -- sinograms post ring removal
+6/1/2004    V1.5  BT  Added a new debug mode
+        MarkSuspicious -- look for suspicious reconstructions and note them in the
+        log.  Also, try and output the whitefield, darkfield, raw sinogram, normalized
+        sinogram, post centering sinogram, and post ring removal sinogram for that slice.
+        This mode chews up a lot of memory so it might be better to run just a single
+        client on each node.
+6/7/2004    V1.6  BT  Added another new debug mode
+        I broke down and did the accounting that needed to be done to write all intermediate
+        results from outside the reconstruction thread.  This means that all intermediate
+        results may now be written at once while avoiding thread issues with HDF not being
+        thread safe.  The new debug mode is:
+        Full -- write all intermediate results.  Note, this mode creates additional client
+        memory and uses a ton of disk space!
+6/22/2004   V1.7  BT  Finally!  I finally found the bug that was causing random slices to 
+        be reconstructed incorrectly!  The problem turned out to be in the interplay of the
+        ring removal routine and the normalize routine.  The normalize routine had an
+        improperly structured while loop--while (frame_number <= recon_info_record.sinogram_ydim)--
+        instead of--while (frame_number < recon_info_record.sinogram_ydim).  The = sign was causing
+        the loop to execute 1 extra time and thus it overwrote part of the buffer that
+        happened to be used by the ring removal routine.  As the two routines are in different
+        threads, the result was a random, unpredictable, poorly reconstructed slice.
+12/10/2004	V1.8  BT Built tomompi on development cluster (AMD opteron machines).  Turned on
+		compiler optimizations.  ALso built with MPE profiling libraries so I could start
+		trying to use jumpshot to profile our performance.
+12/10/2004	V1.8  BT Created a recon info record structure that contains all the initialization
+		parameters needed by the clients.  This allowed for a significant reduction of MPI
+		sends to the clients upon initialization as nearly the entire structure can be sent
+		at once--as opposed to each datum being sent seperately.  Also did this for the sinogram
+		data that was being sent each time a sinogram was requested.  This appears to have about
+		a 10% impact on performance.
+8/9/2005	V1.8  BT Modified nromalize routine to take into account sinograms that are not a
+		power of 2 in size (as required by gridrec).  This was done by introducing an
+		sinogram_adjusted_xdim and sinogram_adjusted_size to the information structure
+		and subsequently using that information to create appropriate space for the larger
+		data structures.  The raw sinogram is then centered in the larger power of 2 sinogram
+		with the dead space before the raw sinogram being filled with the results for the first
+		pixel and the dead space after the raw sinogram being filled with the results from the
+		last pixel in the raw sinogram.  This is handled in the normalization routine while the
+		sinograms are being  normalized.  It's possible that in the future we will also crop
+		the resulting reconstruction to remove the dead space and save disk space/write time.
+1/12/2006	V1.9  BT A problem was found where the sinogram_ydim and theta_list_size values were one
+		bigger than correct.  This was due to a miscount of the files.  To figure out the sinogram
+		size the cluster reads the exp file and counts the projections.  But the projections were
+		being counted in a while loop where the counter was being incremented at the end of the loop.
+		It wasn't until count = projections+1 that the while condition failed and exitied then
+		sinogram_ydim was set to counter.  This then was propogated throughout the system.
+1/24/2006	V1.9  BT Added a reconstruction.cfg flag <Ring Removal> which can be 0 or 1.  1 means
+		use ring removal.  0 means do not use ring removal.
+1/31/2006	V1.10 BT Added a reconstruction.cfg parameter <Ring Removal Coeff> which can be 0= < coeff <= 5.
+		This adjusts a coefficient used in the ring removal code.  See the CenteringCalss comments for
+		more specific information about what this does.
+2/13/2006	V1.10 BT Fixed a problem with the output of the Post Center and Post Ring buffers that
+		crept in after the code was modified to padd the data to a multiple of 2 wide.  Basically,
+		the Post Center and Post Ring buffers were being written to disk with an incorrect width dimension.
+3/23/2006	V1.11 BT Added a methode to compress reconstructed files.  Just using the built in loss-less
+		compression in HDF provides poor compression results on the floating point reconstructed values.
+		However, as the reconstruction only occupies a circle in the image, it's possible to set the corners
+		to 0.0 without loosing any data.  All these 0.0 values then compress rather well yielding an
+		approximate 25% reduction in file size for the saved reconstruction files.
+		The appropriate reconstruction.cfg flag is <Copression Type> and its values may be:
+			NONE -- no compression (corners will not even be set to 0.0
+			LZW -- gzip type compression (this appears to be the best for most data sets
+			RLE -- Run Length Encoding
+			NONE -- Skipping-Huffman
+3/23/2006	V1.11 BT While debugging the problem noted in the centeringclass.cpp on 3/22/2006 it
+		was discovered that averaging the white fields can sometimes give a far superior result.
+		A flag was added that allows the user to switch from using a single white field per projection
+		to averaging all the white fields and using the average white field for all projections.  The
+		flag is <Average White Fields> and it should be set to 1 to average all the whites or to 0
+		to use a single white field (last acquired white field before acquisition of projection)
+		per projection
+4/23/2006	V1.13 BT Added a new debug mode:
+		No Reconstruction -- perform all the steps of a reconstruction, but, to save time, do not
+		actually reconstruct the data.
+4/23/2006	V1.13 BT Removed MarkSuspicious from the possible debug modes--it wasn't useful.
+4/23/2006   V1.13 BT Modified handling of filter type to be done by int rather than by string.
+8/1/2006	V1.14 BT Modified to use FFTW as the fft algorithm.  FFTW does an algorithm performance
+		comparison the first time it is called to determine what the fastest algorithm to use is.
+		It then uses that algorithm for subsequent fft calls--provided the input data is the same
+		size.  FFTW appears to be about 3x faster than Numerical Recipies for 2048 sinograms.
+10/20/2006  V1.15 BT Fixed a few array indexing errors in the normalization routine.  These errors
+		were causing normalization to be done improperly by not indexing the white fields as they should.
+		This resulted in reconstructions where the ring removal routine failed to work as well as it
+		should.  There is still one last problem we know of with the normalization:  the first band
+		of sinogram lines are still not being normalized properly--they appear brighter than the rest
+		of the sinogam.  It is not known where this error comes from or if it has a serious impact on
+		the reconstructions.
+1/10/2007   V2.0 BT Change of pace--a new major version number!  This version is in subversion control
+		at svn+ssh://m81-cluster.aps.anl.gov/home/svn/repository/cpp.  The other major change is the
+		upgrade to Nexus V3.0.0.  This brings with it the ability to write HDF5 files.  HDF5 will be the
+		default file format and will have the extension .h5--hdf4 will retain the .hdf extension.  It
+		is possible to use the override file to force HDF4.  When saving in HDF5, the only comrpession
+		format available is NX_COMP_LZW--all other compression formats are not supported.  As an aside
+		this is the first version built completely under Eclipse.
+4/12/2007   V2.1 BT Added calculations to the clients to compute the data min and max for the entire
+		reconstruction.  The clients track the min/max for all the slices they calculate then report
+		their local min/max to the server who then computes the full reconstruction min/max.  The
+		results are then stored in the exp file at ;experiment;reconstruction;data_range_min and
+		;experiment;reconstruction;data_range_max.
+4/12/2007	V2.1 BT Added ability to scale data into short ints by using a user supplied data_range_min
+		and data_range_max values.  These values must be supplied prior to reconstructing as the full
+		data range of the reconstruction can not be calculated until completion.  The data_range_min/
+		data_range_max values of a previous reconstruction are generally good values to use.  The actual
+		data_range_min/max values are stored in the exp file as ;experiment;reconstruction;scaled_data_min
+		and ;experiment;reconstruction;scaled_data_max for reference.
+11/14/2007	V2.3 BT Added a BIN file type to the output file types.  If a user selects BIN as the
+		<output file type> the output files will be written as binary without any sort of header.
+		Eventually, we will need a bit of a header, but we haven't settled on one yet.  Bin files
+		can not be compressed
+1/28/2008   V2.3 BT Modified code to not read a reconstruction.cfg file but to get that information
+        from the command line.  This will allow for the program to be queued in a system like N1
+        Grid Engine.  As queued applications can be reprioritized by the system, having a single
+        reconstruction.cfg file is problematic as it's impossible to keep the file in sync with
+        the correct application in the queue--now each instance can get that info from the
+        command prompt.
+1/28/2008   V2.3 BT Modified the location of the log files to be in the smaple tree.  Also allow
+        for versioning of the log and override files.  This is done by creating a new log directory
+        "logs_##" each time the sample is reconstructed.  This way, we can keep a running list
+        of logs and configurations in case the sample is reconstructed multiple times.
+2/4/2008    V2.3 BT Added an error log file that will only be created if there is an error.  The
+        error log will log all errros encountered by the system.  This provides a convenient location
+        to look for problems if reconstructions fail or do not look quite right.
+2/4/2008    V2.3 BT The system should no longer crash due to a raw data file missing.  Instead, the
+        system will mark in the error log that the file is missing and will grab the previous file
+        of the same type to fill in.  If a projection is missing, the previous projection will
+        be used to complete the reconstruction.
+2/11/2008  V2.3 BT Added a small header to the binary output files.  The header is xdim<32bits>,
+       ydim<32bits>, byte_depth<32bits>.  This is the bare minimum information needed to understand
+       how to open the file if someone forgets or can not look it up elsewhere.
+7/29/2009  V2.4 BT Added two new parameters to the cluster override_exp_file.config.  <start_fixed_shift
+	   is the start value of a range of shifts.  <end_shift_value> is the end value of the range.
+	   If <use_slices_file> is true, the slices in the slice file will be reconstructed at each of the
+	   shifts in the range start-end and save in the reconstructed directory with a unique file name
+	   containing the shift value.
+6/30/2011 V2.5 Yongsheng Pan and BT Added the zero padding functionality to the GridRec algorithm. An entry named
+          <GRIDREC Zero Padding> is added to the overwrite_exp_file.config, with GRIDREC_PADDING_NONE
+          GRIDREC_PADDING_HALF(default) and GRIDREC_PADDING_ONE_AND_HALF as options. This functionality
+          removes artifacts from GridRec.
+
+
+__________________________________________________________________
+__________________________________________________________________
+NexusBox library
+
+Top level interface to a group of classes used to read and write HDF files.
+Developed and maintained by:
+       Brian Tieman
+       Argonne National Laboratory
+       tieman@aps.anl.gov
+
+8/20/2003  V4.0   BT  First version with acknowledgements
+8/20/2003  V4.0   BT  Ported to Kylix
+1/10/2006  V5.0   BT  Upgraded to make use of Nexus 3.0.0.  This allows for
+		use of HDF5 to read/write files.  Modifications were made to handle
+		data compression with the HDF5 data format.  HDF5 only supports LZW
+		compression--thus, for HDF5, if RLE or HUF is requested, I made the
+		to force LZW compression.  Also, the ability to write XML files is not
+		tested very well--and isn't even built into the linux stuff.  The XML
+		format is incredibly slow so it's unlikely anyone will want it anyway.
+
+
+
+
+
+
+
+
+
+__________________________________________________________________
+__________________________________________________________________
+ReconAlgorithm class
+
+Parent class definition for reconstruction algorithm classes.
+All reconstruction algorithms should be placed in a class derived
+from this one.  This should allow for the highest level of interopability
+with the least amount of maintenance
+Developed and Maintained by:
+       Brian Tieman
+       Argonne National Laboratory
+       tieman@aps.anl.gov
+
+8/20/2003  V1.0   BT  First version with acknowledgements
+4/23/2006  V1.13  BT  Modified handling of filter type to be done by
+		int rather than by string.
+
+
+
+__________________________________________________________________
+__________________________________________________________________
+
+FBP class
+
+Class for performing Filtered Back Projection Reconstructions.
+Origional source code developed in C by:
+       Steve Wang 
+CPP Class Developed and Maintained by:
+       Brian Tieman & Francesco DeCarlo
+       Argonne National Laboratory
+       tieman@aps.anl.gov
+
+8/20/2003  V1.0   BT  First version with acknowledgements
+8/20/2003  V1.0   BT  Ported C code to a CPP object structure
+8/27/2003  V1.0   BT  Fixed a bug in type conversion that was
+                      only allowing the bottom right quandrant to
+                      be reconstructed.
+8/27/2003  V1.0   BT  Cleaned up some memory usage--got rid of variable
+                      t which was only a placeholder for calculations
+                      but was sinogram_x*sizeof(float) in size.
+8/27/2003  V1.0   BT  Converted to use same FFT routines as everyone else.
+                      Previously this routine was using an FFT routine
+                      written by Steve Wang that required the data as
+                      double and had a distinctly different calling
+                      convention as the numerical recipies routines--which
+                      are now the standard FFT calling convention throughout
+                      TomoMPI.
+                      In addition, this changed allowed for the removal of
+                      the bit_swap and lut arrays--which were each fairly
+                      large.
+9/7/2003  V1.3   BT   Re-optimized FBP1.  Reconstruct times are now 25%
+9/7/2003  V1.3   BT   faster.
+
+
+__________________________________________________________________
+__________________________________________________________________
+OptimizedFBP class
+
+Class for performing a code optimized Filtered Back Projection Reconstructions.
+Origional source code developed in C by:
+       Steve Wang 
+CPP Class Developed and Maintained by:
+       Brian Tieman & Francesco DeCarlo
+       Argonne National Laboratory
+       tieman@aps.anl.gov
+
+8/20/2003  V1.0   BT  First version with acknowledgements
+8/20/2003  V1.0   BT  Ported C code to a CPP object structure
+8/27/2003  V1.0   BT  Fixed a bug in type conversion that was
+                      only allowing the bottom right quandrant to
+                      be reconstructed.
+8/27/2003  V1.0   BT  Cleaned up some memory usage--got rid of variable
+                      t which was only a placeholder for calculations
+                      but was sinogram_x*sizeof(float) in size.
+                      Got rid of lut array which wasn't used.
+9/7/2003  V1.3   BT   Re-optimized FBP1.  Reconstruct times are now 15%
+9/7/2003  V1.3   BT   faster.
+
+
+__________________________________________________________________
+__________________________________________________________________
+CircleFBP class
+
+Class for performing optimized Filtered Back Projection Reconstructions.
+Optimazation is done by restricting calculations to circular area around data.
+Origional source code developed in C by:
+       Steve Wang 
+CPP Class Developed and Maintained by:
+       Brian Tieman & Francesco DeCarlo
+       Argonne National Laboratory
+       tieman@aps.anl.gov
+
+8/20/2003  V1.0   BT  First version with acknowledgements
+8/20/2003  V1.0   BT  Ported C code to a CPP object structure
+8/27/2003  V1.0   BT  Cleaned up some memory usage--got rid of variable
+                      t which was only a placeholder for calculations
+                      but was sinogram_x*sizeof(float) in size.
+                      Got rid of lut array which wasn't used.
+
+
+__________________________________________________________________
+__________________________________________________________________
+GridRec class
+
+Class for performing reconstructions based on the "GridRec" algorythm.
+Origional source code developed in C by:
+       Still trying to find out who--there were no comments in the code 
+Developed and Maintained by:
+       Brian Tieman & Francesco DeCarlo
+       Argonne National Laboratory
+       tieman@aps.anl.gov
+
+8/20/2003  V1.0   BT  First version with acknowledgements
+8/20/2003  V1.0   BT  Ported C code to a CPP object structure
+
+
+__________________________________________________________________
+__________________________________________________________________
+Centering class
+
+Class for performing auto-centering of sinograms as well as ring removal.
+Origional algorithm developed and maintened in C by:
+       Antonio Brunetti
+C++ class developed and maintained by:
+       Brian Tieman & Francesco DeCarlo
+       Argonne National Laboratory
+       tieman@aps.anl.gov
+
+8/20/2003  V1.0   BT  First version with acknowledgements
+8/20/2003  V1.0   BT  Ported C code to a CPP object structure
+9/10/2003  V1.2   BT  In the LogProj routine, added check that if data is < 0
+        set it to 1.0.  This avoids taking the log of a negative number which
+        was occasionally causing the reconstruction routine to blow up.  Should
+        look into why data is negative in the first place...
+9/11/2003  V1.2   BT  Class now centers two sinograms--taking advantage
+        of gridrec's ability to reconstruct 2 sinograms.  If you only need one
+        sinogram centered--pass the same sinogram twice.
+2/26/2004  V1.3   BT  The centering routine will now abort if the shift of
+        either sinogram is > 25.  This is hard coded in the define MAX_SHIFT.
+3/15/2004  V1.5   BT  Fixed and error with the aborting of centering when MAX_SHIFT
+        is exceeded.  Turns out I was only abborting on positive shifts.  The code
+        now compares abs (shift) to MAX_SHIFT.
+1/31/2006  V1.10  BT  Added a ring coefficient parameter which can be 0= < coeff <= 5.
+		This was done in void CenteringClass::RingCorrectionSingle (float *data, float ring_coeff)
+		Specifically the code
+			if ((data[i*sinogram_x_dim+j]-tmp)>0.0)
+			    data[i*sinogram_x_dim+j] -= tmp;
+		    else
+		        data[i*sinogram_x_dim+j] = 0.0;
+		was changed to
+			if ((data[i*sinogram_x_dim+j]-(tmp * ring_coeff))>0.0)
+			    data[i*sinogram_x_dim+j] -= (tmp * ring_coeff);
+		    else
+		        data[i*sinogram_x_dim+j] = 0.0;
+3/22/2006 V1.10  BT  A serious problem was found in the LogProj routine.  The LogProj routine
+		attempted to normalize the data to the average pixel value of the first 10 pixels plus
+		the last ten pixels over every row in the sinogram.  Due to background intensity variations
+		from projection to projection, this mean value would cause data to be clipped in data
+		sets with low contrast.  The resulting reconstruction looked like a reconstruction with
+		slices missing--which it was due to the data being clipped.  The best fix found was to
+		normalize each row to the maximum data value in that row.  This is how the new LogProj
+		works.
+
+
+__________________________________________________________________
