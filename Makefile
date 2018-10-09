@@ -1,31 +1,15 @@
 ### Generated automatically from Makefile.in by configure.
 all: fft recon support main link install reconsolo
 reconsolo : fft recon support tomosolo link_tomosolo
-# ALL: default                                    
+
 ##### User configurable options #####
 
-#MPI_ROOT	= /usr/local/mpi
-#MPI_ROOT	= /export/mvapich
-#MPI_ROOT	= /clhome/mvapich
-#MPI_ROOT	= /clhome/aps_tools/mvapich-1.1
-
-# for pj0200
-MPI_ROOT	= /clhome/aps_tools/mpich-1.2.6
-# for tomo
-# MPI_ROOT	= /clhome/tomo_tools/mpich-1.2.6
-
-# org
-# USR_HOME		= /clhome/TIEMAN
-USR_HOME		= /clhome/TOMO2/TomoMPI
-
+MPI_ROOT    = /clhome/aps_tools/mpi/mpi
+USR_HOME		= /clhome/B224538
 SYS_HOME		= /clhome/aps_tools
 USR_LOCAL_SHARED	= /clhome/aps_tools/shared
 
-# for tomo
-# SYS_HOME		= /clhome/tomo_tools
-# USR_LOCAL_SHARED	= /clhome/tomo_tools/shared
-
-
+# sys env
 SHELL       = /bin/sh
 ARCH        = linux
 CC          = $(MPI_ROOT)/bin/mpicc 
@@ -43,7 +27,7 @@ HDF_FLAGS = -D__unix__ -DHDF4 -DHDF5
 #Root directory for various code modules
 
 # TOMOMPI_ROOT 	= 	$(USR_HOME)/workspace/TomoMPI
-TOMOMPI_ROOT 	= 	$(USR_HOME)/trunk
+TOMOMPI_ROOT 	= 	$(USR_HOME)/tomompi
 # NEXUSLIB_ROOT	=	$(USR_HOME)/workspace/NexusLibrary
 NEXUSLIB_ROOT	=	$(USR_HOME)/workspace/NexusLibrary/trunk
 
