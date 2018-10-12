@@ -65,6 +65,18 @@ char    output[1024];
 
 //__________________________________________________________________________
 
+void errorlogclass::close (void)
+{
+    if (error_file != NULL)
+    {
+        error_file->close ();
+        delete (error_file);
+        error_file = NULL;
+    }
+}
+
+//__________________________________________________________________________
+
 errorlogclass::~errorlogclass()
 {
     if (error_file != NULL)
