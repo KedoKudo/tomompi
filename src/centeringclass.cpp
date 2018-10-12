@@ -9,8 +9,7 @@
 
 //---------------------------------------------------------------------------
 
-void CenteringClass::acknowledgements (LogFileClass *acknowledge_file)
-{
+void CenteringClass::acknowledgements (LogFileClass *acknowledge_file){
     acknowledge_file->Message ("__________________________________________________________________");
     acknowledge_file->Message ("Centering class");
     acknowledge_file->Message ("");
@@ -63,34 +62,36 @@ void CenteringClass::acknowledgements (LogFileClass *acknowledge_file)
 
 //---------------------------------------------------------------------------
 
-void CenteringClass::init (ReconAlgorithm *recon_algorithm)
-{
+void CenteringClass::init (ReconAlgorithm *recon_algorithm){
     this->recon_algorithm = recon_algorithm;
 
-    this->sinogram_x_dim = recon_algorithm->getSinogramXDimension (); 
-    this->sinogram_y_dim = recon_algorithm->getSinogramYDimension (); 
+    this->sinogram_x_dim = recon_algorithm->getSinogramXDimension(); 
+    this->sinogram_y_dim = recon_algorithm->getSinogramYDimension(); 
  
     sinogram1= (float *) malloc(sizeof(float)*sinogram_x_dim*sinogram_y_dim); 
     sinogram2= (float *) malloc(sizeof(float)*sinogram_x_dim*sinogram_y_dim); 
  
-    recon1 = (float *) malloc (sizeof(float)*sinogram_x_dim*sinogram_x_dim); 
-    recon2 = (float *) malloc (sizeof(float)*sinogram_x_dim*sinogram_x_dim); 
+    recon1 = (float *) malloc(sizeof(float)*sinogram_x_dim*sinogram_x_dim); 
+    recon2 = (float *) malloc(sizeof(float)*sinogram_x_dim*sinogram_x_dim); 
  
-    shifted_data = (float *) malloc (sizeof(float)*sinogram_x_dim*sinogram_y_dim+1); 
+    shifted_data = (float *) malloc(sizeof(float)*sinogram_x_dim*sinogram_y_dim+1); 
  
     wtemp = (unsigned short *) malloc(sizeof(unsigned short)*sinogram_x_dim); 
  
-    mean_vect = (float  *) malloc (sizeof(float)*sinogram_y_dim); 
+    mean_vect = (float  *) malloc(sizeof(float)*sinogram_y_dim); 
  
-    low_pass_sino_lines_data = (float  *) malloc (sizeof(float)*sinogram_x_dim); 
-    mean_sino_line_data = (float *) malloc (sizeof(float)*sinogram_x_dim); 
+    low_pass_sino_lines_data = (float  *) malloc(sizeof(float)*sinogram_x_dim); 
+    mean_sino_line_data = (float *) malloc(sizeof(float)*sinogram_x_dim); 
 } 
 
 //---------------------------------------------------------------------------
 
-void CenteringClass::FindCenter (float *origional_sinogram1, float *origional_sinogram2, 
-				 int *shift_1, int *shift_2, float ring_coeff)
-{
+void CenteringClass::FindCenter (float *origional_sinogram1, 
+                                 float *origional_sinogram2, 
+				                 int *shift_1, 
+                                 int *shift_2, 
+                                 float ring_coeff
+                                 ){
 
 // ********************************************************************* 
 // important: sinogram cointains the logarithmic sinogram data 
@@ -115,8 +116,8 @@ bool                shift1_found,
  
     for (i=-1;i<=1;i++) 
     { 
-        memcpy (sinogram1, origional_sinogram1, sizeof(float)*sinogram_x_dim*sinogram_y_dim); 
-        memcpy (sinogram2, origional_sinogram2, sizeof(float)*sinogram_x_dim*sinogram_y_dim); 
+        memcpy(sinogram1, origional_sinogram1, sizeof(float)*sinogram_x_dim*sinogram_y_dim); 
+        memcpy(sinogram2, origional_sinogram2, sizeof(float)*sinogram_x_dim*sinogram_y_dim); 
  
         OffCenterCorrSingleManual (sinogram1, i); 
         RingCorrectionSingle (sinogram1, ring_coeff); 
@@ -144,7 +145,7 @@ bool                shift1_found,
         pixel_count2[i+1] = count; 
     } 
  
-    //if 0 is the best shift, the shift has been found! 
+    //if 0 is the best shift, the shift has been found!
     if ((pixel_count1[1] <= pixel_count1[0]) && (pixel_count1[1] <= pixel_count1[2])) 
     { 
         shift1 = shift_value1[1]; 
@@ -239,9 +240,12 @@ bool                shift1_found,
 } 
 
 
-void CenteringClass::FindCenter (float *origional_sinogram1, float *origional_sinogram2, 
-				 float *shift_1, float *shift_2, float ring_coeff)
-{
+void CenteringClass::FindCenter (float *origional_sinogram1, 
+                                 float *origional_sinogram2, 
+				                 float *shift_1, 
+                                 float *shift_2, 
+                                 float ring_coeff
+                                 ){
 
 // ********************************************************************* 
 // important: sinogram cointains the logarithmic sinogram data 
@@ -447,8 +451,7 @@ void CenteringClass::OffCenterCorrSingleManual (float *data, int shift)
  
 //--------------------------------------------------------------------------- 
  
-void CenteringClass::RingCorrectionSingle (float *data, float ring_coeff) 
-{ 
+void CenteringClass::RingCorrectionSingle (float *data, float ring_coeff) { 
   int         i, j, m; 
   float       mean_total; 
   float       tmp; 
@@ -471,6 +474,8 @@ void CenteringClass::RingCorrectionSingle (float *data, float ring_coeff)
         mean_total /= sinogram_y_dim; 
  
         // renormalization of each projection to the global mean 
+        // NOTE: low-pass filter is used on the sum of projection 
+        //       => remove the high frenqency artifacts??
         for (i=0;i<sinogram_y_dim;i++) 
             for (j=0;j<sinogram_x_dim;j++) 
                 if (mean_vect[i] != 0.0) 
@@ -488,6 +493,7 @@ void CenteringClass::RingCorrectionSingle (float *data, float ring_coeff)
  
         for (j=1;j<sinogram_x_dim-1;j++) 
             low_pass_sino_lines_data[j] = (mean_sino_line_data[j-1]+mean_sino_line_data[j]+mean_sino_line_data[j+1])/3.0; 
+        
         low_pass_sino_lines_data[0] = mean_sino_line_data[0]; 
         low_pass_sino_lines_data[sinogram_x_dim-1] = mean_sino_line_data[sinogram_x_dim-1]; 
  
@@ -496,10 +502,10 @@ void CenteringClass::RingCorrectionSingle (float *data, float ring_coeff)
             for (j=0;j<sinogram_x_dim;j++) 
             { 
                 tmp = mean_sino_line_data[j]-low_pass_sino_lines_data[j]; 
-		if ((data[i*sinogram_x_dim+j] - (tmp * ring_coeff) ) > 0.0) 
-		  data[i*sinogram_x_dim+j] -= (tmp * ring_coeff); 
-		else 
-		  data[i*sinogram_x_dim+j] = 0.0; 
+		        if ((data[i*sinogram_x_dim+j] - (tmp * ring_coeff) ) > 0.0) 
+		            data[i*sinogram_x_dim+j] -= (tmp * ring_coeff); 
+		        else 
+		            data[i*sinogram_x_dim+j] = 0.0; 
             } 
     } 
  
@@ -507,24 +513,26 @@ void CenteringClass::RingCorrectionSingle (float *data, float ring_coeff)
  
 //--------------------------------------------------------------------------- 
  
-void CenteringClass::LogProj(float *data) 
-{ 
+void CenteringClass::LogProj(float *data) { 
   int     i, k; 
   float   mean, max; 
   
-  for (i=0;i<sinogram_y_dim;i++) {
-	
-    max = data[i*sinogram_x_dim]; 
-    for (k=0;k<sinogram_x_dim;k++) {
-      if (data[i*sinogram_x_dim+k] > max) 
-	max = data[i*sinogram_x_dim+k]; 
-    }
+  for (i=0;i<sinogram_y_dim;i++) 
+  {
+      max = data[i*sinogram_x_dim];
 
-    for (k=0;k<sinogram_x_dim;k++) { 
-      if (data[i*sinogram_x_dim+k] <= 0.0) 
-	data[i*sinogram_x_dim+k] = 1.0; // this is really only to check if is == 0 
- 
-      data[i*sinogram_x_dim+k] = log (max/data[i*sinogram_x_dim+k]); 
+      for (k=0;k<sinogram_x_dim;k++) 
+      {
+          if (data[i*sinogram_x_dim+k] > max) 
+          max = data[i*sinogram_x_dim+k]; 
+      }
+
+    for (k=0;k<sinogram_x_dim;k++) 
+    {
+        if (data[i*sinogram_x_dim+k] <= 0.0)
+            data[i*sinogram_x_dim+k] = 1.0; // this is really only to check if is == 0 
+        
+        data[i*sinogram_x_dim+k] = log (max/data[i*sinogram_x_dim+k]); 
     } 
   } 
 } 
@@ -564,8 +572,7 @@ float   mean;
 */
 //---------------------------------------------------------------------------
 
-void CenteringClass::Gridrec ()
-{
+void CenteringClass::Gridrec () {
 int     i, 
         j; 
 float   min_image_value1=0, 
