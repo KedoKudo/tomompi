@@ -31,3 +31,4 @@
 *.out
 *.app
 .vscode/sftp.json
+.DS_Store
