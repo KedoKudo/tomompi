@@ -7,29 +7,6 @@
 
 #pragma package(smart_init)
 
-
-//---------------------------------------------------------------------------
-
-CenteringClass::CenteringClass (void)
-{
-    recon_algorithm = NULL;
-
-    sinogram1= NULL;
-    sinogram2= NULL; 
- 
-    recon1 = NULL; 
-    recon2 = NULL; 
- 
-    shifted_data = NULL; 
- 
-    wtemp = NULL; 
- 
-    mean_vect = NULL; 
- 
-    low_pass_sino_lines_data = NULL; 
-    mean_sino_line_data = NULL; 
-} 
-
 //---------------------------------------------------------------------------
 
 void CenteringClass::acknowledgements (LogFileClass *acknowledge_file)
