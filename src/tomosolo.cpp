@@ -40,11 +40,11 @@ ReconAlgorithm  *recon_algorithm;
  *
  */
 
-void InputData (char *sinogramFile, char *thetaListFile)
-{
-FILE	*inputFile;
-char	fileName[256];
-int		recordsRead;
+void InputData (char *sinogramFile, char *thetaListFile){
+
+	FILE	*inputFile;
+	char	fileName[256];
+	int		recordsRead;
 
 	//First read sinogram
 	//Sinogram is stored as x<int>, y<int>, elements<int>, data<short int>
@@ -102,14 +102,13 @@ int		recordsRead;
  *
  */
 
-void InitFBP (int optimizationLevel)
-{
+void InitFBP (int optimizationLevel){
 
-	switch (optimizationLevel)
-	{
-		case 1 : recon_algorithm = new FBP (); break;
+	switch (optimizationLevel){
+		case 1 : recon_algorithm = new FBP ();          break;
 		case 2 : recon_algorithm = new OptimizedFBP (); break;
-		case 3 : recon_algorithm = new CircleFBP (); break;
+		case 3 : recon_algorithm = new CircleFBP ();    break;
+		
 		default : recon_algorithm = new OptimizedFBP (); break;
 	}
 
@@ -143,9 +142,9 @@ void InitFBP (int optimizationLevel)
  *
  */
 
-void InitGridrec (void)
-{
-int				loop;
+void InitGridrec (void){
+
+	int	loop;
 
 	recon_algorithm = new GridRec ();
 
@@ -169,8 +168,7 @@ int				loop;
  * to floating point for the reconstruction class.
  */
 
-void Normalize (unsigned short *short_sino, float *norm_sino)
-{
+void Normalize (unsigned short *short_sino, float *norm_sino){
 
 	for (int loopx=0;loopx<sinogram_dimx;loopx++)
 		for (int loopy=0;loopy<sinogram_dimy;loopy++)
@@ -183,13 +181,10 @@ void Normalize (unsigned short *short_sino, float *norm_sino)
 /* Takes the log of the data.
  */
 
-void LogSinogram (float *data)
-{
-int     i,
-        k;
+void LogSinogram (float *data){
 
-    for (i=0;i<sinogram_dimy;i++)
-        for (k=0;k<sinogram_dimx;k++)
+    for (int i=0;i<sinogram_dimy;i++)
+        for (int k=0;k<sinogram_dimx;k++)
 		{
 			if (data[i*sinogram_dimx+k] > 0)
 				data[i*sinogram_dimx+k] = -1 * log (data[i*sinogram_dimx+k]);
@@ -204,8 +199,8 @@ int     i,
 /* Clean up our mess...
  */
 
-void CleanUp ()
-{
+void CleanUp (){
+
 	if (sinogram != NULL)
 		free (sinogram);
 
@@ -228,8 +223,7 @@ void CleanUp ()
 /* Be nice to the poor user--tell them what they are doing wrong.
  */
 
-void PrintUsage ()
-{
+void PrintUsage (){
 	printf ("Usage:\n");
 	printf (">tomosolo <full_path_to_sinogram_file> <full_path_to_theta_file> <fbp|gridrec>\n\n");
 	exit (0);
@@ -237,18 +231,18 @@ void PrintUsage ()
 
 //_____________________________________________________________________________________
 
-int main (int argc, char* argv[])
-{
-char	sinogramFile[256],
-		thetaListFile[256],
-		reconstructionFile[256];
-FILE	*outputFile;
+int main (int argc, char* argv[]){
 
-	sinogram = NULL;
+	char	sinogramFile[256],
+			thetaListFile[256],
+			reconstructionFile[256];
+	FILE	*outputFile;
+
+	sinogram            = NULL;
 	normalized_sinogram = NULL;
-	reconstruction = NULL;
-	theta_list = NULL;
-	recon_algorithm = NULL;
+	reconstruction      = NULL;
+	theta_list          = NULL;
+	recon_algorithm     = NULL;
 
 	if (argc != 4)
 		PrintUsage ();
@@ -260,13 +254,11 @@ FILE	*outputFile;
 
 	InputData (sinogramFile, thetaListFile);
 
-	if (strcmp (argv[3], "fbp") == 0)
-	{
+	if (strcmp (argv[3], "fbp") == 0){
 		printf ("Using Filtered Back Projection...\n");
 		InitFBP(1);
 	}
-	if (strcmp (argv[3], "gridrec") == 0)
-	{
+	if (strcmp (argv[3], "gridrec") == 0){
 		printf ("Using gridrec...\n");
 		InitGridrec();
 	}
@@ -282,17 +274,14 @@ FILE	*outputFile;
 
 	//if gridrec, we can work on 2 sinograms at a time--we'll just feed it the same one twice for demonstration
 	//else if fbp we can use a single sinogram
-	if (strcmp (argv[3], "gridrec") == 0)
-	{
+	if (strcmp (argv[3], "gridrec") == 0){
 		recon_algorithm->setSinoAndReconBuffers(1, normalized_sinogram, reconstruction);
 		recon_algorithm->setSinoAndReconBuffers(2, normalized_sinogram, reconstruction);
 	}
 	else
 		recon_algorithm->setSinoAndReconBuffers(1, normalized_sinogram, reconstruction);
 
-
 	recon_algorithm->reconstruct ();
-
 
 	//write the reconstructed image
 	sprintf (reconstructionFile, "./reconstructed.bin");
