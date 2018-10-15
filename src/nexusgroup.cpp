@@ -119,23 +119,13 @@ void NexusGroup::WriteGroup (NXhandle file_handle, long int compression_scheme) 
 
 NexusGroup::~NexusGroup (void){
 
-	if (name != NULL)
-        free (name);
+	if (name != NULL) free (name);
+    if (type != NULL) free (type);
 
-    if (type != NULL)
-        free (type);
-
-    if (attribute_list != NULL)
-        delete (attribute_list);
-
-    if (field_list != NULL)
-        delete (field_list);
-
-    if (subgroup_list != NULL)
-		delete (subgroup_list);
-
-    if (next_group != NULL)
-        delete (next_group);
+    if (attribute_list != NULL)  delete (attribute_list);
+    if (field_list     != NULL)  delete (field_list);
+    if (subgroup_list  != NULL)  delete (subgroup_list);
+    if (next_group     != NULL)  delete (next_group);
 
 }
 
