@@ -95,27 +95,26 @@ void CenteringClass::FindCenter (float *origional_sinogram1,
 
 // ********************************************************************* 
 // important: sinogram cointains the logarithmic sinogram data 
-int                 i, 
-                    j; 
-int                 shift_value1[3], 
-                    shift_value2[3],
-                    pixel_count1[3],
-                    pixel_count2[3],
-                    best_count1,
-                    best_count2,
-                    shift1,
-                    shift2,
-                    step1,
-                    step2,
-                    count;
-bool                shift1_found,
-                    shift2_found;
+    int                 i, 
+                        j; 
+    int                 shift_value1[3], 
+                        shift_value2[3],
+                        pixel_count1[3],
+                        pixel_count2[3],
+                        best_count1,
+                        best_count2,
+                        shift1,
+                        shift2,
+                        step1,
+                        step2,
+                        count;
+    bool                shift1_found,
+                        shift2_found;
  
     shift1_found = false; 
     shift2_found = false; 
  
-    for (i=-1;i<=1;i++) 
-    { 
+    for (i=-1;i<=1;i++) { 
         memcpy(sinogram1, origional_sinogram1, sizeof(float)*sinogram_x_dim*sinogram_y_dim); 
         memcpy(sinogram2, origional_sinogram2, sizeof(float)*sinogram_x_dim*sinogram_y_dim); 
  
@@ -146,40 +145,34 @@ bool                shift1_found,
     } 
  
     //if 0 is the best shift, the shift has been found!
-    if ((pixel_count1[1] <= pixel_count1[0]) && (pixel_count1[1] <= pixel_count1[2])) 
-    { 
+    if ((pixel_count1[1] <= pixel_count1[0]) && (pixel_count1[1] <= pixel_count1[2])) { 
         shift1 = shift_value1[1]; 
         shift1_found = true; 
     } 
  
-    if ((pixel_count2[1] <= pixel_count2[0]) && (pixel_count2[1] <= pixel_count2[2])) 
-    { 
+    if ((pixel_count2[1] <= pixel_count2[0]) && (pixel_count2[1] <= pixel_count2[2])) { 
         shift2 = shift_value2[1]; 
         shift2_found = true; 
     } 
  
     //if -1 is the best shift--continue to step negative--otherwise step positive 
-    if (pixel_count1[0] <= pixel_count1[1]) 
-    { 
+    if (pixel_count1[0] <= pixel_count1[1]) { 
         shift1 = shift_value1[0]; 
         best_count1 = pixel_count1[0]; 
         step1 = -1; 
     } 
-    else 
-    { 
+    else { 
         shift1 = shift_value1[2]; 
         best_count1 = pixel_count1[2]; 
         step1 = 1; 
     } 
  
-    if (pixel_count2[0] <= pixel_count2[1]) 
-    { 
+    if (pixel_count2[0] <= pixel_count2[1]) { 
         shift2 = shift_value2[0]; 
         best_count2 = pixel_count2[0]; 
         step2 = -1; 
     } 
-    else 
-    { 
+    else { 
         shift2 = shift_value2[2]; 
         best_count2 = pixel_count2[2]; 
         step2 = 1; 
@@ -188,13 +181,11 @@ bool                shift1_found,
     //continue to step until both are done 
     while ((!shift1_found || !shift2_found) && 
             (abs (shift1) < MAX_SHIFT) && 
-            (abs (shift2) < MAX_SHIFT)) 
-    { 
-        if (!shift1_found) 
-            shift1 = shift1 + step1; 
+            (abs (shift2) < MAX_SHIFT)) { 
+
+        if (!shift1_found) shift1 = shift1 + step1; 
  
-        if (!shift2_found) 
-            shift2 = shift2 + step2; 
+        if (!shift2_found) shift2 = shift2 + step2; 
  
         memcpy (sinogram1, origional_sinogram1, sizeof(float)*sinogram_x_dim*sinogram_y_dim); 
         memcpy (sinogram2, origional_sinogram2, sizeof(float)*sinogram_x_dim*sinogram_y_dim); 
@@ -213,8 +204,7 @@ bool                shift1_found,
             if (recon1[j] != 0) 
                 count+=1; 
  
-        if (count >= best_count1) 
-        { 
+        if (count >= best_count1) { 
             shift1 = shift1 - step1; 
             shift1_found = true; 
         } 
@@ -226,8 +216,7 @@ bool                shift1_found,
             if (recon2[j] != 0) 
                 count+=1; 
  
-        if (count >= best_count2) 
-        { 
+        if (count >= best_count2) { 
             shift2 = shift2 - step2; 
             shift2_found = true; 
         } 
@@ -246,30 +235,28 @@ void CenteringClass::FindCenter (float *origional_sinogram1,
                                  float *shift_2, 
                                  float ring_coeff
                                  ){
-
 // ********************************************************************* 
 // important: sinogram cointains the logarithmic sinogram data 
-int                 i, 
-                    j; 
-int                 shift_value1[3], 
-                    shift_value2[3],
-                    pixel_count1[3],
-                    pixel_count2[3],
-                    best_count1,
-                    best_count2,
-                    shift1,
-                    shift2,
-                    step1,
-                    step2,
-                    count;
-bool                shift1_found,
-                    shift2_found;
+    int                 i, 
+                        j; 
+    int                 shift_value1[3], 
+                        shift_value2[3],
+                        pixel_count1[3],
+                        pixel_count2[3],
+                        best_count1,
+                        best_count2,
+                        shift1,
+                        shift2,
+                        step1,
+                        step2,
+                        count;
+    bool                shift1_found,
+                        shift2_found;
  
     shift1_found = false; 
     shift2_found = false; 
  
-    for (i=-1;i<=1;i++) 
-    { 
+    for (i=-1;i<=1;i++) { 
         memcpy (sinogram1, origional_sinogram1, sizeof(float)*sinogram_x_dim*sinogram_y_dim); 
         memcpy (sinogram2, origional_sinogram2, sizeof(float)*sinogram_x_dim*sinogram_y_dim); 
  
@@ -300,40 +287,34 @@ bool                shift1_found,
     } 
  
     //if 0 is the best shift, the shift has been found! 
-    if ((pixel_count1[1] <= pixel_count1[0]) && (pixel_count1[1] <= pixel_count1[2])) 
-    { 
+    if ((pixel_count1[1] <= pixel_count1[0]) && (pixel_count1[1] <= pixel_count1[2])) { 
         shift1 = shift_value1[1]; 
         shift1_found = true; 
     } 
  
-    if ((pixel_count2[1] <= pixel_count2[0]) && (pixel_count2[1] <= pixel_count2[2])) 
-    { 
+    if ((pixel_count2[1] <= pixel_count2[0]) && (pixel_count2[1] <= pixel_count2[2])) { 
         shift2 = shift_value2[1]; 
         shift2_found = true; 
     } 
  
     //if -1 is the best shift--continue to step negative--otherwise step positive 
-    if (pixel_count1[0] <= pixel_count1[1]) 
-    { 
+    if (pixel_count1[0] <= pixel_count1[1]) { 
         shift1 = shift_value1[0]; 
         best_count1 = pixel_count1[0]; 
         step1 = -1; 
     } 
-    else 
-    { 
+    else { 
         shift1 = shift_value1[2]; 
         best_count1 = pixel_count1[2]; 
         step1 = 1; 
     } 
  
-    if (pixel_count2[0] <= pixel_count2[1]) 
-    { 
+    if (pixel_count2[0] <= pixel_count2[1]) { 
         shift2 = shift_value2[0]; 
         best_count2 = pixel_count2[0]; 
         step2 = -1; 
     } 
-    else 
-    { 
+    else { 
         shift2 = shift_value2[2]; 
         best_count2 = pixel_count2[2]; 
         step2 = 1; 
@@ -342,13 +323,10 @@ bool                shift1_found,
     //continue to step until both are done 
     while ((!shift1_found || !shift2_found) && 
             (abs (shift1) < MAX_SHIFT) && 
-            (abs (shift2) < MAX_SHIFT)) 
-    { 
-        if (!shift1_found) 
-            shift1 = shift1 + step1; 
- 
-        if (!shift2_found) 
-            shift2 = shift2 + step2; 
+            (abs (shift2) < MAX_SHIFT)) { 
+
+        if (!shift1_found) shift1 = shift1 + step1; 
+        if (!shift2_found) shift2 = shift2 + step2; 
  
         memcpy (sinogram1, origional_sinogram1, sizeof(float)*sinogram_x_dim*sinogram_y_dim); 
         memcpy (sinogram2, origional_sinogram2, sizeof(float)*sinogram_x_dim*sinogram_y_dim); 
@@ -367,8 +345,7 @@ bool                shift1_found,
             if (recon1[j] != 0) 
                 count+=1; 
  
-        if (count >= best_count1) 
-        { 
+        if (count >= best_count1) { 
             shift1 = shift1 - step1; 
             shift1_found = true; 
         } 
@@ -380,8 +357,7 @@ bool                shift1_found,
             if (recon2[j] != 0) 
                 count+=1; 
  
-        if (count >= best_count2) 
-        { 
+        if (count >= best_count2) { 
             shift2 = shift2 - step2; 
             shift2_found = true; 
         } 
@@ -396,31 +372,16 @@ bool                shift1_found,
  
 //--------------------------------------------------------------------------- 
  
-CenteringClass::~CenteringClass ()
-{
-    if (sinogram1 != NULL)
-        free (sinogram1);
-    if (sinogram2 != NULL)
-        free (sinogram2);
-
-    if (recon1 != NULL)
-        free (recon1);
-    if (recon2 != NULL)
-        free (recon2);
-
-    if (shifted_data != NULL)
-        free (shifted_data);
-
-    if (wtemp != NULL)
-        free(wtemp); 
- 
-    if (mean_vect != NULL)
-        free (mean_vect);
-
-    if (mean_sino_line_data != NULL)
-        free (mean_sino_line_data);
-    if (low_pass_sino_lines_data != NULL) 
-        free (low_pass_sino_lines_data); 
+CenteringClass::~CenteringClass (){
+    if (sinogram1                != NULL)   free (sinogram1);
+    if (sinogram2                != NULL)   free (sinogram2);
+    if (recon1                   != NULL)   free (recon1);
+    if (recon2                   != NULL)   free (recon2);
+    if (shifted_data             != NULL)   free (shifted_data);
+    if (wtemp                    != NULL)   free(wtemp); 
+    if (mean_vect                != NULL)   free (mean_vect);
+    if (mean_sino_line_data      != NULL)   free (mean_sino_line_data);
+    if (low_pass_sino_lines_data != NULL)   free (low_pass_sino_lines_data); 
  
 } 
 
@@ -430,41 +391,48 @@ CenteringClass::~CenteringClass ()
 //--------------------------------------------------------------------------- 
 //--------------------------------------------------------------------------- 
  
-void CenteringClass::OffCenterCorrSingleManual (float *data, int shift) 
-{ 
-  int         j, m; 
- 
-  // performs logarithm of the projections 
-  LogProj (data); 
- 
-  if (shift >= 0) {
-    for (j=0;j<sinogram_y_dim;j++) 
-      memcpy (&shifted_data[j*sinogram_x_dim+shift], &data[j*sinogram_x_dim], sizeof(float)*(sinogram_x_dim-shift)); 
-  }
-  else {
-    for (j=0;j<sinogram_y_dim;j++) 
-      memcpy (&shifted_data[j*sinogram_x_dim], &data[j*sinogram_x_dim+abs (shift)], sizeof(float)*(sinogram_x_dim-abs (shift))); 
-  }
-  memcpy (data, shifted_data, sizeof(float)*sinogram_x_dim*sinogram_y_dim); 
- 
+void CenteringClass::OffCenterCorrSingleManual (float *data, int shift) { 
+
+    // performs logarithm of the projections 
+    LogProj (data); 
+
+    if (shift >= 0) {
+    for (int j=0;j<sinogram_y_dim;j++) 
+        memcpy (&shifted_data[j*sinogram_x_dim+shift], 
+                &data[j*sinogram_x_dim], 
+                sizeof(float)*(sinogram_x_dim-shift)
+        ); 
+    }
+    else {
+    for (int j=0;j<sinogram_y_dim;j++) 
+        memcpy (&shifted_data[j*sinogram_x_dim], 
+                &data[j*sinogram_x_dim+abs (shift)], 
+                sizeof(float)*(sinogram_x_dim-abs (shift))
+        ); 
+    }
+
+    memcpy (data, 
+            shifted_data, 
+            sizeof(float)*sinogram_x_dim*sinogram_y_dim
+    ); 
+
 } 
  
 //--------------------------------------------------------------------------- 
  
-void CenteringClass::RingCorrectionSingle (float *data, float ring_coeff) { 
-  int         i, j, m; 
-  float       mean_total; 
-  float       tmp; 
+void CenteringClass::RingCorrectionSingle (float *data, 
+                                           float  ring_coeff) { 
+    int         i, j, m; 
+    float       mean_total; 
+    float       tmp; 
  
-    for (m=0;m<20;m++) 
-    { 
+    for (m=0;m<20;m++) { 
         // normalization of each projection: mean values estimation 
         for (i=0;i<sinogram_y_dim;i++) 
             mean_vect[i] = 0.0; 
         mean_total = 0.0; 
  
-        for (i=0;i<sinogram_y_dim;i++) 
-        { 
+        for (i=0;i<sinogram_y_dim;i++) { 
             for (j=0;j<sinogram_x_dim;j++) 
                 mean_vect[i] += data[i*sinogram_x_dim+j]; 
  
@@ -499,8 +467,7 @@ void CenteringClass::RingCorrectionSingle (float *data, float ring_coeff) {
  
         // ring corrections 
         for (i=0;i<sinogram_y_dim;i++) 
-            for (j=0;j<sinogram_x_dim;j++) 
-            { 
+            for (j=0;j<sinogram_x_dim;j++) { 
                 tmp = mean_sino_line_data[j]-low_pass_sino_lines_data[j]; 
 		        if ((data[i*sinogram_x_dim+j] - (tmp * ring_coeff) ) > 0.0) 
 		            data[i*sinogram_x_dim+j] -= (tmp * ring_coeff); 
@@ -514,71 +481,35 @@ void CenteringClass::RingCorrectionSingle (float *data, float ring_coeff) {
 //--------------------------------------------------------------------------- 
  
 void CenteringClass::LogProj(float *data) { 
-  int     i, k; 
-  float   mean, max; 
-  
-  for (i=0;i<sinogram_y_dim;i++) 
-  {
-      max = data[i*sinogram_x_dim];
+    int     i, k; 
+    float   mean, max; 
 
-      for (k=0;k<sinogram_x_dim;k++) 
-      {
-          if (data[i*sinogram_x_dim+k] > max) 
-          max = data[i*sinogram_x_dim+k]; 
-      }
+    for (i=0;i<sinogram_y_dim;i++) {
+        max = data[i*sinogram_x_dim];
 
-    for (k=0;k<sinogram_x_dim;k++) 
-    {
-        if (data[i*sinogram_x_dim+k] <= 0.0)
+        for (k=0;k<sinogram_x_dim;k++) {
+            if (data[i*sinogram_x_dim+k] > max) max = data[i*sinogram_x_dim+k]; 
+        }
+
+        for (k=0;k<sinogram_x_dim;k++) {
+
+        if (data[i*sinogram_x_dim+k] <= 0.0) 
             data[i*sinogram_x_dim+k] = 1.0; // this is really only to check if is == 0 
         
         data[i*sinogram_x_dim+k] = log (max/data[i*sinogram_x_dim+k]); 
-    } 
-  } 
-} 
- 
-//---------------------------------------------------------------------------
-/*
-//This is a broken routine--the data is being normalized to the average value of the sum of the first and 
-//last 10 pixels in each line over the entire frame.  This leads to drop outs of data that look cause
-//problems in the reconstruction that look very much like missing slices.
-void CenteringClass::LogProj (float *data)
-{
-int     i, 
-        k; 
-float   mean; 
- 
-    mean=0.0; 
-    for (i=0;i<sinogram_y_dim;i++) 
-        for (k=0;k<10;k++) 
-            mean += data[i*sinogram_x_dim+k]+data[(i+1)*sinogram_x_dim-k-1]; 
- 
-    mean = mean/20/(sinogram_y_dim); 
- 
-    if (mean<=0.0) 
-        mean=1.0; 
- 
-    for (i=0;i<sinogram_y_dim;i++) 
-        for (k=0;k<sinogram_x_dim;k++) 
-        { 
-            if (data[i*sinogram_x_dim+k] > mean) 
-                data[i*sinogram_x_dim+k] = mean; 
-            if (data[i*sinogram_x_dim+k] <= 0.0) 
-                data[i*sinogram_x_dim+k] = 1.0; 
- 
-            data[i*sinogram_x_dim+k] = log (mean/data[i*sinogram_x_dim+k]); 
         } 
+    } 
 } 
-*/
+ 
 //---------------------------------------------------------------------------
 
 void CenteringClass::Gridrec () {
-int     i, 
-        j; 
-float   min_image_value1=0, 
-        min_image_value2 = 0, 
-        max_image_value1 = -1e30, 
-        max_image_value2 = -1e30; 
+    int     i, 
+            j; 
+    float   min_image_value1=0, 
+            min_image_value2 = 0, 
+            max_image_value1 = -1e30, 
+            max_image_value2 = -1e30; 
  
     recon_algorithm->setSinoAndReconBuffers (1, sinogram1, recon1); 
     recon_algorithm->setSinoAndReconBuffers (2, sinogram2, recon2); 
@@ -586,18 +517,13 @@ float   min_image_value1=0,
     recon_algorithm->reconstruct (); 
  
     for (i=0;i<sinogram_x_dim;i++) 
-        for (j=0;j<sinogram_x_dim;j++) 
-        { 
-            if (max_image_value1 < recon1[i*sinogram_x_dim+j]) 
-                max_image_value1 = recon1[i*sinogram_x_dim+j]; 
- 
-            if (max_image_value2 < recon2[i*sinogram_x_dim+j]) 
-                max_image_value2 = recon2[i*sinogram_x_dim+j]; 
+        for (j=0;j<sinogram_x_dim;j++) { 
+            if (max_image_value1 < recon1[i*sinogram_x_dim+j]) max_image_value1 = recon1[i*sinogram_x_dim+j]; 
+            if (max_image_value2 < recon2[i*sinogram_x_dim+j]) max_image_value2 = recon2[i*sinogram_x_dim+j]; 
         } 
  
     for (i=0;i<sinogram_x_dim;i++) 
-        for (j=0;j<sinogram_x_dim;j++) 
-        { 
+        for (j=0;j<sinogram_x_dim;j++) { 
             if ((recon1[i*sinogram_x_dim+j]-min_image_value1) > 0.0) 
                 recon1[i*sinogram_x_dim+j] = ((recon1[i*sinogram_x_dim+j]-min_image_value1)/(max_image_value1-min_image_value1)*65535); 
             else 
