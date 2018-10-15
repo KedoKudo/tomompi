@@ -100,11 +100,15 @@ typedef struct {
 class FileListClass : public LinkedListClass
 {
 public:
-char          file_name[256];
+	char	file_name[256];
+    FileListClass (char *file_name){
+		strcpy(this->file_name, file_name);
+		next_in_list = NULL;
+	};
 
-    FileListClass (char *file_name);
-
-	void Print (void);
+	void Print (void){
+		printf ("Found file %s\n", file_name);
+	};
 
     ~FileListClass (void);
 };
