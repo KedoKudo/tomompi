@@ -94,7 +94,7 @@ private:
 class NexusAttribute : public NexusData
 {
 public:
-    NexusAttribute (void);
+    NexusAttribute : next_attribute(NULL) (void);
 
     void PutSDSInfo (char *attrib_name, int attrib_length, int attrib_type, void *attrib_data);
 
