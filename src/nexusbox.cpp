@@ -27,45 +27,37 @@
 //Public Methods for NexusVarAssoc
 //---------------------------------------------------------------------------
 
-NexusVarAssoc::NexusVarAssoc (void)
-{
-    name = NULL;
-    address = NULL;
-    next_in_list = NULL;
+// NexusVarAssoc::NexusVarAssoc (char *new_name, 
+//                               int new_rank, 
+//                               int *new_dims, 
+//                               int new_data_type, 
+//                               void *new_address){
+//     int loop;
 
-};
+//     name = NULL;
+//     address = NULL;
+//     next_in_list = NULL;
 
-//---------------------------------------------------------------------------
+//     name = (char *) malloc ((strlen (new_name) * sizeof (char)) + 1);
+//     if (name == NULL)
+//     	return;
+//     strcpy (name, new_name);
 
-NexusVarAssoc::NexusVarAssoc (char *new_name, int new_rank, int *new_dims, int new_data_type, void *new_address)
-{
-int loop;
+//     rank = new_rank;
+//     for (loop=0;loop<rank;loop++)
+//         dims[loop] = new_dims[loop];
 
-    name = NULL;
-    address = NULL;
-    next_in_list = NULL;
+//     data_type = new_data_type;
 
-    name = (char *) malloc ((strlen (new_name) * sizeof (char)) + 1);
-    if (name == NULL)
-    	return;
-    strcpy (name, new_name);
-
-    rank = new_rank;
-    for (loop=0;loop<rank;loop++)
-        dims[loop] = new_dims[loop];
-
-    data_type = new_data_type;
-
-    address = new_address;
-};
+//     address = new_address;
+// };
 
 //---------------------------------------------------------------------------
 
-void NexusVarAssoc::UpdateVarInfo (int *new_dims, void *new_address)
-{
-int loop;
+void NexusVarAssoc::UpdateVarInfo (int *new_dims, 
+                                  void *new_address){
 
-    for (loop=0;loop<rank;loop++)
+    for (int loop=0;loop<rank;loop++)
         dims[loop] = new_dims[loop];
 
     address = new_address;
@@ -73,11 +65,11 @@ int loop;
 
 //---------------------------------------------------------------------------
 
-void NexusVarAssoc::UpdateVarInfo (int *new_dims, int type, void *new_address)
-{
-int loop;
+void NexusVarAssoc::UpdateVarInfo (int *new_dims, 
+                                   int type, 
+                                   void *new_address){
 
-    for (loop=0;loop<rank;loop++)
+    for (int loop=0;loop<rank;loop++)
         dims[loop] = new_dims[loop];
 
     data_type = type;
@@ -87,13 +79,12 @@ int loop;
 
 //---------------------------------------------------------------------------
 
-NexusVarAssoc::~NexusVarAssoc ()
-{
+NexusVarAssoc::~NexusVarAssoc (){
+
     if (name != NULL)
         free (name);
 
-	if (next_in_list != NULL)
-	{
+	if (next_in_list != NULL){
     	delete ((NexusVarAssoc *) next_in_list);
 		next_in_list = NULL;
 	}
@@ -103,15 +94,6 @@ NexusVarAssoc::~NexusVarAssoc ()
 //Public Methods for NexusFieldList
 //---------------------------------------------------------------------------
 
-NexusFieldList::NexusFieldList (void)
-{
-	nexus_field = NULL;
-    var_info = NULL;
-    next_in_list = NULL;
-};
-
-//---------------------------------------------------------------------------
-
 void NexusFieldList::UpdateFromAssoc (void)
 {
     nexus_field->UpdateVarInfo (var_info->rank, var_info->dims, var_info->data_type, var_info->address);
@@ -119,10 +101,8 @@ void NexusFieldList::UpdateFromAssoc (void)
 
 //---------------------------------------------------------------------------
 
-NexusFieldList::~NexusFieldList (void)
-{
-	if (next_in_list != NULL)
-	{
+NexusFieldList::~NexusFieldList (void){
+	if (next_in_list != NULL){
     	delete ((NexusFieldList *) next_in_list);
 		next_in_list = NULL;
 	}
@@ -132,25 +112,14 @@ NexusFieldList::~NexusFieldList (void)
 //Public Methods for NexusAttribList
 //---------------------------------------------------------------------------
 
-NexusAttribList::NexusAttribList (void)
-{
-	nexus_attribute = NULL;
-    next_in_list = NULL;
-};
-
-//---------------------------------------------------------------------------
-
-void NexusAttribList::UpdateFromAssoc (void)
-{
+void NexusAttribList::UpdateFromAssoc (void){
     nexus_attribute->UpdateVarInfo (var_info->dims[0], var_info->address);
 }
 
 //---------------------------------------------------------------------------
 
-NexusAttribList::~NexusAttribList (void)
-{
-	if (next_in_list != NULL)
-	{
+NexusAttribList::~NexusAttribList (void){
+	if (next_in_list != NULL){
     	delete ((NexusAttribList *) next_in_list);
 		next_in_list = NULL;
 	}
@@ -160,101 +129,26 @@ NexusAttribList::~NexusAttribList (void)
 //Public Methods for NexusFileDirectory
 //---------------------------------------------------------------------------
 
-NexusFileDirectory::NexusFileDirectory (char *entry)
-{
-	nexus_group = NULL;
-	nexus_field = NULL;
-    nexus_attribute = NULL;
-    next_in_list = NULL;
-
-    directory_entry = (char *) malloc (sizeof(char)*strlen(entry)+1);
-    strcpy (directory_entry, entry);
-};
-
-//---------------------------------------------------------------------------
-
-NexusFileDirectory::NexusFileDirectory (char *entry, NexusGroup *group)
-{
-    nexus_group = group;
-    nexus_field = NULL;
-    nexus_attribute = NULL;
-    next_in_list = NULL;
-
-    directory_entry = (char *) malloc (sizeof(char)*strlen(entry)+1);
-    strcpy (directory_entry, entry);
-};
-
-//---------------------------------------------------------------------------
-
-NexusFileDirectory::NexusFileDirectory (char *entry, NexusField *field)
-{
-	nexus_group = NULL;
-    nexus_field = field;
-    nexus_attribute = NULL;
-    next_in_list = NULL;
-
-    directory_entry = (char *) malloc (sizeof(char)*strlen(entry)+1);
-    strcpy (directory_entry, entry);
-};
-
-//---------------------------------------------------------------------------
-
-NexusFileDirectory::NexusFileDirectory (char *entry, NexusAttribute *attribute)
-{
-	nexus_group = NULL;
-    nexus_field = NULL;
-    nexus_attribute = attribute;
-    next_in_list = NULL;
-
-    directory_entry = (char *) malloc (sizeof(char)*strlen(entry)+1);
-    strcpy (directory_entry, entry);
-};
-
-//---------------------------------------------------------------------------
-
-NexusFileDirectory *NexusFileDirectory::FindByIndex (char *search_index)
-{
-NexusFileDirectory 		*current_entry;
+NexusFileDirectory *NexusFileDirectory::FindByIndex (char *search_index){
+    
+    NexusFileDirectory 		*current_entry;
 
 	current_entry = this;
-   	while (stricmp (current_entry->directory_entry, search_index))
-	{
-   	    current_entry = (NexusFileDirectory *) current_entry->NextInList ();
+   	while (stricmp (current_entry->directory_entry, search_index)){    
+        current_entry = (NexusFileDirectory *) current_entry->NextInList ();
        	if (current_entry == NULL)
             return (NULL);
-//			throw (new NexusExceptionClass ((char *) "Error in method NexusBoxClass::FindByIndex!", (char *) "Index not found!"));
    	}
 
     return (current_entry);
 }
 
-//---------------------------------------------------------------------------
-
-NexusFileDirectory::~NexusFileDirectory (void)
-{
-    if (directory_entry != NULL)
-        free (directory_entry);
-
-	if (next_in_list != NULL)
-	{
-    	delete ((NexusFileDirectory *) next_in_list);
-		next_in_list = NULL;
-	}
-};
 
 //---------------------------------------------------------------------------
 //Public Methods for NexusBox
 //---------------------------------------------------------------------------
 
-NexusBoxClass::NexusBoxClass (void)
-{
-    InitFileSystem ();
-}
-
-//---------------------------------------------------------------------------
-
-void NexusBoxClass::acknowledgements (LogFileClass *acknowledge_file)
-{
+void NexusBoxClass::acknowledgements (LogFileClass *acknowledge_file){
     acknowledge_file->Message ("__________________________________________________________________");
     acknowledge_file->Message ("NexusBox library");
     acknowledge_file->Message ("");
@@ -287,12 +181,12 @@ void NexusBoxClass::acknowledgements (LogFileClass *acknowledge_file)
 
 //---------------------------------------------------------------------------
 
-void NexusBoxClass::InitFileSystem()
-{
-char        *group_type,
-            *group_name;
-int 		loop,
-			dims[10];
+void NexusBoxClass::InitFileSystem(){
+
+    char        *group_type,
+                *group_name;
+    int 		loop,
+                dims[10];
 
 	//Default to hdf5
 	file_mode = HDF5_MODE;
@@ -346,16 +240,14 @@ int 		loop,
 
 //---------------------------------------------------------------------------
 
-long int NexusBoxClass::InitTemplate (char *file_path, char *file_name)
-{
-char            *unparsed_template;
-int 			template_file;
-char			cfilename[256];
-int             tag_index;
-struct stat     statbuf;
+long int NexusBoxClass::InitTemplate (char *file_path, char *file_name){
+    char            *unparsed_template;
+    int 			template_file;
+    char			cfilename[256];
+    int             tag_index;
+    struct stat     statbuf;
 
-	try
-    {
+	try{
 		DeleteDataStructures ();
 
 		strcpy (cfilename, file_path);
@@ -393,36 +285,30 @@ struct stat     statbuf;
 
     	free (unparsed_template);
 
-#ifdef USECAPV
+    #ifdef USECAPV
 	    ConnectPVs ();
-#endif
+    #endif
 
         return (0);
 	}
-    catch (NexusExceptionClass &exception)
-    {
-/*#ifdef WIN32
-    	MessageBox (NULL, (LPCTSTR)exception.getErrorString(),(LPCTSTR)"Error!", MB_OK | MB_ICONINFORMATION);
-#endif*/
-
+    catch (NexusExceptionClass &exception){
         return (1);
     }
-
 }
 
 //---------------------------------------------------------------------------
 
-long int NexusBoxClass::InsertTemplate (char * index, char *file_path, char *file_name)
-{
-char                *unparsed_template;
-int 			    template_file;
-char			    cfilename[256];
-int                 tag_index;
-struct stat         statbuf;
-NexusFileDirectory  *insertion_entry;
+long int NexusBoxClass::InsertTemplate (char * index, 
+                                        char *file_path, 
+                                        char *file_name){
+    char                *unparsed_template;
+    int 			    template_file;
+    char			    cfilename[256];
+    int                 tag_index;
+    struct stat         statbuf;
+    NexusFileDirectory  *insertion_entry;
 
-	try
-    {
+	try{
 		strcpy (cfilename, file_path);
 	    strcat (cfilename, file_name);
 
@@ -458,17 +344,12 @@ NexusFileDirectory  *insertion_entry;
 
     	free (unparsed_template);
 
-#ifdef USECAPV
+    #ifdef USECAPV
 	    ConnectPVs ();
-#endif
+    #endif
         return (0);
 	}
-    catch (NexusExceptionClass &exception)
-    {
-/*#ifdef WIN32
-    	MessageBox (NULL, (LPCTSTR)exception.getErrorString(),(LPCTSTR)"Error!", MB_OK | MB_ICONINFORMATION);
-#endif*/
-
+    catch (NexusExceptionClass &exception){
         return (1);
     }
 }
@@ -483,15 +364,14 @@ void NexusBoxClass::ResetFileSystem()
 
 //---------------------------------------------------------------------------
 
-void NexusBoxClass::GetIndexSize (long int *elements)
-{
-NexusFileDirectory  *current_entry;
+void NexusBoxClass::GetIndexSize (long int *elements){
+    
+    NexusFileDirectory  *current_entry;
 
     current_entry = directory;
 
     *elements = 0;
-    while (current_entry->NextInList () != NULL)
-    {
+    while (current_entry->NextInList () != NULL){
         current_entry = (NexusFileDirectory *) current_entry->NextInList ();
 
         if ((current_entry->nexus_group != NULL) || (current_entry->nexus_field != NULL) || (current_entry->nexus_attribute != NULL))
@@ -501,16 +381,15 @@ NexusFileDirectory  *current_entry;
 
 //---------------------------------------------------------------------------
 
-char *NexusBoxClass::GetIndex (long int element_number)
-{
-NexusFileDirectory  *current_entry;
-long int			element;
+char *NexusBoxClass::GetIndex (long int element_number){
+
+    NexusFileDirectory  *current_entry;
+    long int			element;
 
     current_entry = directory;
 
     element = -1;
-    while ((current_entry->NextInList () != NULL) && (element != element_number))
-    {
+    while ((current_entry->NextInList () != NULL) && (element != element_number)){
         current_entry =  (NexusFileDirectory *) current_entry->NextInList ();
 
         if ((current_entry->nexus_group != NULL) || (current_entry->nexus_field != NULL) || (current_entry->nexus_attribute != NULL))
@@ -523,16 +402,14 @@ long int			element;
 
 //---------------------------------------------------------------------------
 
-char *NexusBoxClass::GetIndex (long int element_number, int *index_type)
-{
-NexusFileDirectory  *current_entry;
-long int			element;
+char *NexusBoxClass::GetIndex (long int element_number, int *index_type){
+    NexusFileDirectory  *current_entry;
+    long int			element;
 
     current_entry = directory;
 
     element = -1;
-    while ((current_entry->NextInList () != NULL) && (element != element_number))
-    {
+    while ((current_entry->NextInList () != NULL) && (element != element_number)){
         current_entry =  (NexusFileDirectory *) current_entry->NextInList ();
 
         if ((current_entry->nexus_group != NULL) || (current_entry->nexus_field != NULL) || (current_entry->nexus_attribute != NULL))
@@ -552,10 +429,8 @@ long int			element;
 
 //---------------------------------------------------------------------------
 
-int NexusBoxClass::IndexExists (char *index)
-{
-    try
-    {
+int NexusBoxClass::IndexExists (char *index){
+    try{
         //if this command doesn't throw an exception--the index must exist//
         if (directory == NULL)
             return (0);
@@ -565,20 +440,18 @@ int NexusBoxClass::IndexExists (char *index)
         else
             return(0);
     }
-    catch (NexusExceptionClass &exception)
-    {
+    catch (NexusExceptionClass &exception){
         return (0);
     }
 }
 
 //---------------------------------------------------------------------------
 
-void NexusBoxClass::PutDatum (char *index, char *new_val)
-{
-NexusFileDirectory  *current_entry;
+void NexusBoxClass::PutDatum (char *index, char *new_val){
 
-	try
-    {
+    NexusFileDirectory  *current_entry;
+
+	try{
 	    current_entry = directory->FindByIndex (index);
 
 	    if (current_entry->nexus_field != NULL)
@@ -589,22 +462,15 @@ NexusFileDirectory  *current_entry;
 	        else
 				throw (new NexusExceptionClass ((char *) "Error in method NexusBoxClass::PutDatum!", (char *) "Index not found!"));
     }
-    catch (NexusExceptionClass &exception)
-    {
-/*#ifdef WIN32
-    	MessageBox (NULL, (LPCTSTR)exception.getErrorString(),(LPCTSTR)"Error!", MB_OK | MB_ICONINFORMATION);
-#endif*/
-    }
+    catch (NexusExceptionClass &exception){}
 }
 
 //---------------------------------------------------------------------------
 
-void NexusBoxClass::PutDatum (char *index, unsigned short *new_val)
-{
-NexusFileDirectory  *current_entry;
+void NexusBoxClass::PutDatum (char *index, unsigned short *new_val){
+    NexusFileDirectory  *current_entry;
 
-	try
-    {
+	try{
 	    current_entry = directory->FindByIndex (index);
 
 	    if (current_entry->nexus_field != NULL)
@@ -615,22 +481,15 @@ NexusFileDirectory  *current_entry;
 	        else
 				throw (new NexusExceptionClass ((char *) "Error in method NexusBoxClass::PutDatum!", (char *) "Index not found!"));
 	}
-    catch (NexusExceptionClass &exception)
-    {
-/*#ifdef WIN32
-    	MessageBox (NULL, (LPCTSTR)exception.getErrorString(),(LPCTSTR)"Error!", MB_OK | MB_ICONINFORMATION);
-#endif*/
-    }
+    catch (NexusExceptionClass &exception){}
 }
 
 //---------------------------------------------------------------------------
 
-void NexusBoxClass::PutDatum (char *index, short *new_val)
-{
-NexusFileDirectory  *current_entry;
+void NexusBoxClass::PutDatum (char *index, short *new_val){
+    NexusFileDirectory  *current_entry;
 
-	try
-    {
+	try{
 	    current_entry = directory->FindByIndex (index);
 
 	    if (current_entry->nexus_field != NULL)
@@ -641,23 +500,16 @@ NexusFileDirectory  *current_entry;
         	else
 				throw (new NexusExceptionClass ((char *) "Error in method NexusBoxClass::PutDatum!", (char *) "Index not found!"));
 	}
-    catch (NexusExceptionClass &exception)
-    {
-/*#ifdef WIN32
-    	MessageBox (NULL, (LPCTSTR)exception.getErrorString(),(LPCTSTR)"Error!", MB_OK | MB_ICONINFORMATION);
-#endif*/
-    }
-
+    catch (NexusExceptionClass &exception){}
 }
 
 //---------------------------------------------------------------------------
 
-void NexusBoxClass::PutDatum (char *index, unsigned long *new_val)
-{
-NexusFileDirectory  *current_entry;
+void NexusBoxClass::PutDatum (char *index, unsigned long *new_val){
+    
+    NexusFileDirectory  *current_entry;
 
-	try
-    {
+	try{
 	    current_entry = directory->FindByIndex (index);
 
     	if (current_entry->nexus_field != NULL)
@@ -668,23 +520,16 @@ NexusFileDirectory  *current_entry;
 	        else
    				throw (new NexusExceptionClass ((char *) "Error in method NexusBoxClass::PutDatum!", (char *) "Index not found!"));
 	}
-    catch (NexusExceptionClass &exception)
-    {
-/*#ifdef WIN32
-    	MessageBox (NULL, (LPCTSTR)exception.getErrorString(),(LPCTSTR)"Error!", MB_OK | MB_ICONINFORMATION);
-#endif*/
-    }
+    catch (NexusExceptionClass &exception){}
 
 }
 
 //---------------------------------------------------------------------------
 
-void NexusBoxClass::PutDatum (char *index, long *new_val)
-{
-NexusFileDirectory  *current_entry;
+void NexusBoxClass::PutDatum (char *index, long *new_val){
+    NexusFileDirectory  *current_entry;
 
-	try
-    {
+	try{
 	    current_entry = directory->FindByIndex (index);
 
     	if (current_entry->nexus_field != NULL)
@@ -695,23 +540,16 @@ NexusFileDirectory  *current_entry;
 	        else
 				throw (new NexusExceptionClass ((char *) "Error in method NexusBoxClass::PutDatum!", (char *) "Index not found!"));
 	}
-    catch (NexusExceptionClass &exception)
-    {
-/*#ifdef WIN32
-    	MessageBox (NULL, (LPCTSTR)exception.getErrorString(),(LPCTSTR)"Error!", MB_OK | MB_ICONINFORMATION);
-#endif*/
-    }
+    catch (NexusExceptionClass &exception){}
 
 }
 
 //---------------------------------------------------------------------------
 
-void NexusBoxClass::PutDatum (char *index, float *new_val)
-{
-NexusFileDirectory  *current_entry;
+void NexusBoxClass::PutDatum (char *index, float *new_val){
+    NexusFileDirectory  *current_entry;
 
-	try
-    {
+	try{
 	    current_entry = directory->FindByIndex (index);
 
     	if (current_entry->nexus_field != NULL)
@@ -722,23 +560,16 @@ NexusFileDirectory  *current_entry;
 	        else
 				throw (new NexusExceptionClass ((char *) "Error in method NexusBoxClass::PutDatum!", (char *) "Index not found!"));
 	}
-    catch (NexusExceptionClass &exception)
-    {
-/*#ifdef WIN32
-    	MessageBox (NULL, (LPCTSTR)exception.getErrorString(),(LPCTSTR)"Error!", MB_OK | MB_ICONINFORMATION);
-#endif*/
-    }
+    catch (NexusExceptionClass &exception){}
 
 }
 
 //---------------------------------------------------------------------------
 
-void NexusBoxClass::PutDatum (char *index, double *new_val)
-{
-NexusFileDirectory  *current_entry;
+void NexusBoxClass::PutDatum (char *index, double *new_val){
+    NexusFileDirectory  *current_entry;
 
-	try
-    {
+	try{
 	    current_entry = directory->FindByIndex (index);
 
     	if (current_entry->nexus_field != NULL)
@@ -749,23 +580,15 @@ NexusFileDirectory  *current_entry;
 	        else
 				throw (new NexusExceptionClass ((char *) "Error in method NexusBoxClass::PutDatum!", (char *) "Index not found!"));
 	}
-    catch (NexusExceptionClass &exception)
-    {
-/*#ifdef WIN32
-    	MessageBox (NULL, (LPCTSTR)exception.getErrorString(),(LPCTSTR)"Error!", MB_OK | MB_ICONINFORMATION);
-#endif*/
-    }
-
+    catch (NexusExceptionClass &exception){}
 }
 
 //---------------------------------------------------------------------------
 
-void NexusBoxClass::PutDatum (char *index, void *new_val, int new_rank, int *new_dims, int new_type)
-{
-NexusFileDirectory  *current_entry;
+void NexusBoxClass::PutDatum (char *index, void *new_val, int new_rank, int *new_dims, int new_type){
+    NexusFileDirectory  *current_entry;
 
-	try
-    {
+	try{
 	    current_entry = directory->FindByIndex (index);
 
     	if (current_entry->nexus_field != NULL)
@@ -776,23 +599,16 @@ NexusFileDirectory  *current_entry;
 	        else
 				throw (new NexusExceptionClass ((char *) "Error in method NexusBoxClass::PutDatum!", (char *) "Index not found!"));
 	}
-    catch (NexusExceptionClass &exception)
-    {
-/*#ifdef WIN32
-    	MessageBox (NULL, (LPCTSTR)exception.getErrorString(),(LPCTSTR)"Error!", MB_OK | MB_ICONINFORMATION);
-#endif*/
-    }
+    catch (NexusExceptionClass &exception){}
 
 }
 
 //---------------------------------------------------------------------------
 
-int NexusBoxClass::GetDatumInfo (char *index, int *get_rank, int *get_dims, int *get_type)
-{
-NexusFileDirectory  *current_entry;
-
-	try
-    {
+int NexusBoxClass::GetDatumInfo (char *index, int *get_rank, int *get_dims, int *get_type){
+    NexusFileDirectory  *current_entry;
+    
+    try{
 	    current_entry = directory->FindByIndex (index);
 
 	    if (current_entry->nexus_field != NULL)
@@ -808,11 +624,7 @@ NexusFileDirectory  *current_entry;
 
         return (0);
 	}
-    catch (NexusExceptionClass &exception)
-    {
-/*#ifdef WIN32
-    	MessageBox (NULL, (LPCTSTR)exception.getErrorString(),(LPCTSTR)"Error!", MB_OK | MB_ICONINFORMATION);
-#endif*/
+    catch (NexusExceptionClass &exception){
         return (1);
     }
 
@@ -820,12 +632,10 @@ NexusFileDirectory  *current_entry;
 
 //---------------------------------------------------------------------------
 
-int NexusBoxClass::GetDatum (char *index, unsigned char *get_data)
-{
-NexusFileDirectory  *current_entry;
+int NexusBoxClass::GetDatum (char *index, unsigned char *get_data){
+    NexusFileDirectory  *current_entry;
 
-	try
-    {
+	try{
         if (read_scheme != ENTIRE_CONTENTS)
 			throw (new NexusExceptionClass ((char *) "Error in method NexusBoxClass::GetDatum!", (char *) "File must be in ENTIRE_CONTENTS mode!"));
 
@@ -840,11 +650,7 @@ NexusFileDirectory  *current_entry;
 				throw (new NexusExceptionClass ((char *) "Error in method NexusBoxClass::GetDatum!", (char *) "Index not found!"));
         return (0);
 	}
-    catch (NexusExceptionClass &exception)
-    {
-/*#ifdef WIN32
-    	MessageBox (NULL, (LPCTSTR)exception.getErrorString(),(LPCTSTR)"Error!", MB_OK | MB_ICONINFORMATION);
-#endif*/
+    catch (NexusExceptionClass &exception){
         return (1);
     }
 
@@ -852,10 +658,8 @@ NexusFileDirectory  *current_entry;
 
 //---------------------------------------------------------------------------
 
-int NexusBoxClass::GetDatumSlab (char *index, unsigned char *get_data, int *start_dims, int *size_dims)
-{
-	try
-    {
+int NexusBoxClass::GetDatumSlab (char *index, unsigned char *get_data, int *start_dims, int *size_dims){
+	try{
         if (read_scheme == ENTIRE_CONTENTS)
 			throw (new NexusExceptionClass ((char *) "Error in method NexusBoxClass::GetDatumSlab!", (char *) "File must be in INDEX_ONLY mode!"));
 
@@ -863,23 +667,18 @@ int NexusBoxClass::GetDatumSlab (char *index, unsigned char *get_data, int *star
 
         return (0);
 	}
-    catch (NexusExceptionClass &exception)
-    {
-/*#ifdef WIN32
-    	MessageBox (NULL, (LPCTSTR)exception.getErrorString(),(LPCTSTR)"Error!", MB_OK | MB_ICONINFORMATION);
-#endif*/
+    catch (NexusExceptionClass &exception){
         return (1);
     }
 }
 
 //---------------------------------------------------------------------------
 
-int NexusBoxClass::GetDatum (char *index, char *get_data)
-{
-NexusFileDirectory  *current_entry;
+int NexusBoxClass::GetDatum (char *index, char *get_data){
+    
+    NexusFileDirectory  *current_entry;
 
-	try
-    {
+	try{
         if (read_scheme != ENTIRE_CONTENTS)
 			throw (new NexusExceptionClass ((char *) (char *) "Error in method NexusBoxClass::GetDatumSlab!", (char *) "File must be in ENTIRE_CONTENTS mode!"));
 
@@ -894,11 +693,7 @@ NexusFileDirectory  *current_entry;
 				throw (new NexusExceptionClass ((char *) "Error in method NexusBoxClass::GetDatum!", (char *) "Index not found!"));
         return (0);
 	}
-    catch (NexusExceptionClass &exception)
-    {
-/*#ifdef WIN32
-    	MessageBox (NULL, (LPCTSTR)exception.getErrorString(),(LPCTSTR)"Error!", MB_OK | MB_ICONINFORMATION);
-#endif*/
+    catch (NexusExceptionClass &exception){
         return (1);
     }
 
@@ -906,8 +701,7 @@ NexusFileDirectory  *current_entry;
 
 //---------------------------------------------------------------------------
 
-int NexusBoxClass::GetDatumSlab (char *index, char *get_data, int *start_dims, int *size_dims)
-{
+int NexusBoxClass::GetDatumSlab (char *index, char *get_data, int *start_dims, int *size_dims){
 	try
     {
         if (read_scheme == ENTIRE_CONTENTS)
@@ -917,23 +711,17 @@ int NexusBoxClass::GetDatumSlab (char *index, char *get_data, int *start_dims, i
 
         return (0);
 	}
-    catch (NexusExceptionClass &exception)
-    {
-/*#ifdef WIN32
-    	MessageBox (NULL, (LPCTSTR)exception.getErrorString(),(LPCTSTR)"Error!", MB_OK | MB_ICONINFORMATION);
-#endif*/
+    catch (NexusExceptionClass &exception){
         return (1);
     }
 }
 
 //---------------------------------------------------------------------------
 
-int NexusBoxClass::GetDatum (char *index, unsigned short *get_data)
-{
-NexusFileDirectory  *current_entry;
+int NexusBoxClass::GetDatum (char *index, unsigned short *get_data){
+    NexusFileDirectory  *current_entry;
 
-	try
-    {
+	try{
         if (read_scheme != ENTIRE_CONTENTS)
 			throw (new NexusExceptionClass ((char *)"Error in method NexusBoxClass::GetDatum!", (char *)"File must be in ENTIRE_CONTENTS mode!"));
 
@@ -949,11 +737,7 @@ NexusFileDirectory  *current_entry;
 
         return (0);
 	}
-    catch (NexusExceptionClass &exception)
-    {
-/*#ifdef WIN32
-    	MessageBox (NULL, (LPCTSTR)exception.getErrorString(),(LPCTSTR)"Error!", MB_OK | MB_ICONINFORMATION);
-#endif*/
+    catch (NexusExceptionClass &exception){
         return (1);
     }
 
@@ -961,10 +745,8 @@ NexusFileDirectory  *current_entry;
 
 //---------------------------------------------------------------------------
 
-int NexusBoxClass::GetDatumSlab (char *index, unsigned short *get_data, int *start_dims, int *size_dims)
-{
-	try
-    {
+int NexusBoxClass::GetDatumSlab (char *index, unsigned short *get_data, int *start_dims, int *size_dims){
+	try{
         if (read_scheme == ENTIRE_CONTENTS)
 			throw (new NexusExceptionClass ((char *)"Error in method NexusBoxClass::GetDatumSlab!", (char *)"File must be in INDEX_ONLY mode!"));
 
@@ -972,23 +754,18 @@ int NexusBoxClass::GetDatumSlab (char *index, unsigned short *get_data, int *sta
 
         return (0);
 	}
-    catch (NexusExceptionClass &exception)
-    {
-/*#ifdef WIN32
-    	MessageBox (NULL, (LPCTSTR)exception.getErrorString(),(LPCTSTR)"Error!", MB_OK | MB_ICONINFORMATION);
-#endif*/
+    catch (NexusExceptionClass &exception){
         return (1);
     }
 }
 
 //---------------------------------------------------------------------------
 
-int NexusBoxClass::GetDatum (char *index, short *get_data)
-{
-NexusFileDirectory  *current_entry;
+int NexusBoxClass::GetDatum (char *index, short *get_data){
+    
+    NexusFileDirectory  *current_entry;
 
-	try
-    {
+	try{
         if (read_scheme != ENTIRE_CONTENTS)
 			throw (new NexusExceptionClass ((char *)"Error in method NexusBoxClass::GetDatum!", (char *)"File must be in ENTIRE_CONTENTS mode!"));
 
@@ -1004,11 +781,7 @@ NexusFileDirectory  *current_entry;
 
         return (0);
 	}
-    catch (NexusExceptionClass &exception)
-    {
-/*#ifdef WIN32
-    	MessageBox (NULL, (LPCTSTR)exception.getErrorString(),(LPCTSTR)"Error!", MB_OK | MB_ICONINFORMATION);
-#endif*/
+    catch (NexusExceptionClass &exception){
         return (1);
     }
 
@@ -1016,10 +789,8 @@ NexusFileDirectory  *current_entry;
 
 //---------------------------------------------------------------------------
 
-int NexusBoxClass::GetDatumSlab (char *index, short *get_data, int *start_dims, int *size_dims)
-{
-	try
-    {
+int NexusBoxClass::GetDatumSlab (char *index, short *get_data, int *start_dims, int *size_dims){
+	try{
         if (read_scheme == ENTIRE_CONTENTS)
 			throw (new NexusExceptionClass ((char *)"Error in method NexusBoxClass::GetDatumSlab!", (char *)"File must be in INDEX_ONLY mode!"));
 
@@ -1027,23 +798,18 @@ int NexusBoxClass::GetDatumSlab (char *index, short *get_data, int *start_dims, 
 
         return (0);
 	}
-    catch (NexusExceptionClass &exception)
-    {
-/*#ifdef WIN32
-    	MessageBox (NULL, (LPCTSTR)exception.getErrorString(),(LPCTSTR)"Error!", MB_OK | MB_ICONINFORMATION);
-#endif*/
+    catch (NexusExceptionClass &exception){
         return (1);
     }
 }
 
 //---------------------------------------------------------------------------
 
-int NexusBoxClass::GetDatum (char *index, unsigned int *get_data)
-{
-NexusFileDirectory  *current_entry;
+int NexusBoxClass::GetDatum (char *index, unsigned int *get_data){
+    
+    NexusFileDirectory  *current_entry;
 
-	try
-    {
+	try{
         if (read_scheme != ENTIRE_CONTENTS)
 			throw (new NexusExceptionClass ((char *)"Error in method NexusBoxClass::GetDatum!", (char *)"File must be in ENTIRE_CONTENTS mode!"));
 
@@ -1059,11 +825,7 @@ NexusFileDirectory  *current_entry;
 
         return (0);
 	}
-    catch (NexusExceptionClass &exception)
-    {
-/*#ifdef WIN32
-    	MessageBox (NULL, (LPCTSTR)exception.getErrorString(),(LPCTSTR)"Error!", MB_OK | MB_ICONINFORMATION);
-#endif*/
+    catch (NexusExceptionClass &exception){
         return (1);
     }
 
@@ -1071,10 +833,8 @@ NexusFileDirectory  *current_entry;
 
 //---------------------------------------------------------------------------
 
-int NexusBoxClass::GetDatumSlab (char *index, unsigned int *get_data, int *start_dims, int *size_dims)
-{
-	try
-    {
+int NexusBoxClass::GetDatumSlab (char *index, unsigned int *get_data, int *start_dims, int *size_dims){
+	try{
         if (read_scheme == ENTIRE_CONTENTS)
 			throw (new NexusExceptionClass ((char *)"Error in method NexusBoxClass::GetDatumSlab!", (char *)"File must be in INDEX_ONLY mode!"));
 
@@ -1082,23 +842,18 @@ int NexusBoxClass::GetDatumSlab (char *index, unsigned int *get_data, int *start
 
         return (0);
 	}
-    catch (NexusExceptionClass &exception)
-    {
-/*#ifdef WIN32
-    	MessageBox (NULL, (LPCTSTR)exception.getErrorString(),(LPCTSTR)"Error!", MB_OK | MB_ICONINFORMATION);
-#endif*/
+    catch (NexusExceptionClass &exception){
         return (1);
     }
 }
 
 //---------------------------------------------------------------------------
 
-int NexusBoxClass::GetDatum (char *index, int *get_data)
-{
-NexusFileDirectory  *current_entry;
+int NexusBoxClass::GetDatum (char *index, int *get_data){
+    
+    NexusFileDirectory  *current_entry;
 
-	try
-    {
+	try{
         if (read_scheme != ENTIRE_CONTENTS)
 			throw (new NexusExceptionClass ((char *)"Error in method NexusBoxClass::GetDatum!", (char *)"File must be in ENTIRE_CONTENTS mode!"));
 
@@ -1114,11 +869,7 @@ NexusFileDirectory  *current_entry;
 
         return (0);
 	}
-    catch (NexusExceptionClass &exception)
-    {
-/*#ifdef WIN32
-    	MessageBox (NULL, (LPCTSTR)exception.getErrorString(),(LPCTSTR)"Error!", MB_OK | MB_ICONINFORMATION);
-#endif*/
+    catch (NexusExceptionClass &exception){
         return (1);
     }
 
@@ -1126,10 +877,8 @@ NexusFileDirectory  *current_entry;
 
 //---------------------------------------------------------------------------
 
-int NexusBoxClass::GetDatumSlab (char *index, int *get_data, int *start_dims, int *size_dims)
-{
-	try
-    {
+int NexusBoxClass::GetDatumSlab (char *index, int *get_data, int *start_dims, int *size_dims){
+	try{
         if (read_scheme == ENTIRE_CONTENTS)
 			throw (new NexusExceptionClass ((char *)"Error in method NexusBoxClass::GetDatumSlab!", (char *)"File must be in INDEX_ONLY mode!"));
 
@@ -1137,23 +886,18 @@ int NexusBoxClass::GetDatumSlab (char *index, int *get_data, int *start_dims, in
 
         return (0);
 	}
-    catch (NexusExceptionClass &exception)
-    {
-/*#ifdef WIN32
-    	MessageBox (NULL, (LPCTSTR)exception.getErrorString(),(LPCTSTR)"Error!", MB_OK | MB_ICONINFORMATION);
-#endif*/
+    catch (NexusExceptionClass &exception){
         return (1);
     }
 }
 
 //---------------------------------------------------------------------------
 
-int NexusBoxClass::GetDatum (char *index, unsigned long *get_data)
-{
-NexusFileDirectory  *current_entry;
+int NexusBoxClass::GetDatum (char *index, unsigned long *get_data){
+    
+    NexusFileDirectory  *current_entry;
 
-	try
-    {
+	try{
         if (read_scheme != ENTIRE_CONTENTS)
 			throw (new NexusExceptionClass ((char *)"Error in method NexusBoxClass::GetDatum!", (char *)"File must be in ENTIRE_CONTENTS mode!"));
 
@@ -1169,11 +913,7 @@ NexusFileDirectory  *current_entry;
 
         return (0);
 	}
-    catch (NexusExceptionClass &exception)
-    {
-/*#ifdef WIN32
-    	MessageBox (NULL, (LPCTSTR)exception.getErrorString(),(LPCTSTR)"Error!", MB_OK | MB_ICONINFORMATION);
-#endif*/
+    catch (NexusExceptionClass &exception){
         return (1);
     }
 
@@ -1181,10 +921,8 @@ NexusFileDirectory  *current_entry;
 
 //---------------------------------------------------------------------------
 
-int NexusBoxClass::GetDatumSlab (char *index, unsigned long *get_data, int *start_dims, int *size_dims)
-{
-	try
-    {
+int NexusBoxClass::GetDatumSlab (char *index, unsigned long *get_data, int *start_dims, int *size_dims){
+	try{
         if (read_scheme == ENTIRE_CONTENTS)
 			throw (new NexusExceptionClass ((char *)"Error in method NexusBoxClass::GetDatumSlab!", (char *)"File must be in INDEX_ONLY mode!"));
 
@@ -1192,23 +930,18 @@ int NexusBoxClass::GetDatumSlab (char *index, unsigned long *get_data, int *star
 
         return (0);
 	}
-    catch (NexusExceptionClass &exception)
-    {
-/*#ifdef WIN32
-    	MessageBox (NULL, (LPCTSTR)exception.getErrorString(),(LPCTSTR)"Error!", MB_OK | MB_ICONINFORMATION);
-#endif*/
+    catch (NexusExceptionClass &exception){
         return (1);
     }
 }
 
 //---------------------------------------------------------------------------
 
-int NexusBoxClass::GetDatum (char *index, long *get_data)
-{
-NexusFileDirectory  *current_entry;
+int NexusBoxClass::GetDatum (char *index, long *get_data){
+    
+    NexusFileDirectory  *current_entry;
 
-	try
-    {
+	try{
         if (read_scheme != ENTIRE_CONTENTS)
 			throw (new NexusExceptionClass ((char *)"Error in method NexusBoxClass::GetDatum!", (char *)"File must be in ENTIRE_CONTENTS mode!"));
 
@@ -1224,11 +957,7 @@ NexusFileDirectory  *current_entry;
 
         return (0);
 	}
-    catch (NexusExceptionClass &exception)
-    {
-/*#ifdef WIN32
-    	MessageBox (NULL, (LPCTSTR)exception.getErrorString(),(LPCTSTR)"Error!", MB_OK | MB_ICONINFORMATION);
-#endif*/
+    catch (NexusExceptionClass &exception){
         return (1);
     }
 
@@ -1236,8 +965,7 @@ NexusFileDirectory  *current_entry;
 
 //---------------------------------------------------------------------------
 
-int NexusBoxClass::GetDatumSlab (char *index, long *get_data, int *start_dims, int *size_dims)
-{
+int NexusBoxClass::GetDatumSlab (char *index, long *get_data, int *start_dims, int *size_dims){
 	try
     {
         if (read_scheme == ENTIRE_CONTENTS)
@@ -1247,23 +975,18 @@ int NexusBoxClass::GetDatumSlab (char *index, long *get_data, int *start_dims, i
 
         return (0);
 	}
-    catch (NexusExceptionClass &exception)
-    {
-/*#ifdef WIN32
-    	MessageBox (NULL, (LPCTSTR)exception.getErrorString(),(LPCTSTR)"Error!", MB_OK | MB_ICONINFORMATION);
-#endif*/
+    catch (NexusExceptionClass &exception){
         return (1);
     }
 }
 
 //---------------------------------------------------------------------------
 
-int NexusBoxClass::GetDatum (char *index, float *get_data)
-{
-NexusFileDirectory  *current_entry;
+int NexusBoxClass::GetDatum (char *index, float *get_data){
+    
+    NexusFileDirectory  *current_entry;
 
-	try
-    {
+	try{
         if (read_scheme != ENTIRE_CONTENTS)
 			throw (new NexusExceptionClass ((char *)"Error in method NexusBoxClass::GetDatum!", (char *)"File must be in ENTIRE_CONTENTS mode!"));
 
@@ -1279,11 +1002,7 @@ NexusFileDirectory  *current_entry;
 
         return (0);
 	}
-    catch (NexusExceptionClass &exception)
-    {
-/*#ifdef WIN32
-    	MessageBox (NULL, (LPCTSTR)exception.getErrorString(),(LPCTSTR)"Error!", MB_OK | MB_ICONINFORMATION);
-#endif*/
+    catch (NexusExceptionClass &exception){
         return (1);
     }
 
@@ -1291,10 +1010,8 @@ NexusFileDirectory  *current_entry;
 
 //---------------------------------------------------------------------------
 
-int NexusBoxClass::GetDatumSlab (char *index, float *get_data, int *start_dims, int *size_dims)
-{
-	try
-    {
+int NexusBoxClass::GetDatumSlab (char *index, float *get_data, int *start_dims, int *size_dims){
+	try{
         if (read_scheme == ENTIRE_CONTENTS)
 			throw (new NexusExceptionClass ((char *)"Error in method NexusBoxClass::GetDatumSlab!", (char *)"File must be in INDEX_ONLY mode!"));
 
@@ -1302,23 +1019,18 @@ int NexusBoxClass::GetDatumSlab (char *index, float *get_data, int *start_dims, 
 
         return (0);
 	}
-    catch (NexusExceptionClass &exception)
-    {
-/*#ifdef WIN32
-    	MessageBox (NULL, (LPCTSTR)exception.getErrorString(),(LPCTSTR)"Error!", MB_OK | MB_ICONINFORMATION);
-#endif*/
+    catch (NexusExceptionClass &exception){
         return (1);
     }
 }
 
 //---------------------------------------------------------------------------
 
-int NexusBoxClass::GetDatum (char *index, double *get_data)
-{
-NexusFileDirectory  *current_entry;
+int NexusBoxClass::GetDatum (char *index, double *get_data){
+    
+    NexusFileDirectory  *current_entry;
 
-	try
-    {
+	try{
         if (read_scheme != ENTIRE_CONTENTS)
 			throw (new NexusExceptionClass ((char *)"Error in method NexusBoxClass::GetDatum!", (char *)"File must be in ENTIRE_CONTENTS mode!"));
 
@@ -1334,11 +1046,7 @@ NexusFileDirectory  *current_entry;
 
         return (0);
 	}
-    catch (NexusExceptionClass &exception)
-    {
-/*#ifdef WIN32
-    	MessageBox (NULL, (LPCTSTR)exception.getErrorString(),(LPCTSTR)"Error!", MB_OK | MB_ICONINFORMATION);
-#endif*/
+    catch (NexusExceptionClass &exception){
         return (1);
     }
 
@@ -1346,8 +1054,7 @@ NexusFileDirectory  *current_entry;
 
 //---------------------------------------------------------------------------
 
-int NexusBoxClass::GetDatumSlab (char *index, double *get_data, int *start_dims, int *size_dims)
-{
+int NexusBoxClass::GetDatumSlab (char *index, double *get_data, int *start_dims, int *size_dims){
 	try
     {
         if (read_scheme == ENTIRE_CONTENTS)
@@ -1357,23 +1064,17 @@ int NexusBoxClass::GetDatumSlab (char *index, double *get_data, int *start_dims,
 
         return (0);
 	}
-    catch (NexusExceptionClass &exception)
-    {
-/*#ifdef WIN32
-    	MessageBox (NULL, (LPCTSTR)exception.getErrorString(),(LPCTSTR)"Error!", MB_OK | MB_ICONINFORMATION);
-#endif*/
+    catch (NexusExceptionClass &exception){
         return (1);
     }
 }
 
 //---------------------------------------------------------------------------
 
-int NexusBoxClass::GetDatum (char *index, void *get_data)
-{
-NexusFileDirectory  *current_entry;
+int NexusBoxClass::GetDatum (char *index, void *get_data){
+    NexusFileDirectory  *current_entry;
 
-	try
-    {
+	try{
         if (read_scheme != ENTIRE_CONTENTS)
 			throw (new NexusExceptionClass ((char *)"Error in method NexusBoxClass::GetDatumSlab!", (char *)"File must be in ENTIRE_CONTENTS mode!"));
 
@@ -1389,11 +1090,7 @@ NexusFileDirectory  *current_entry;
 
         return (0);
 	}
-    catch (NexusExceptionClass &exception)
-    {
-/*#ifdef WIN32
-    	MessageBox (NULL, (LPCTSTR)exception.getErrorString(),(LPCTSTR)"Error!", MB_OK | MB_ICONINFORMATION);
-#endif*/
+    catch (NexusExceptionClass &exception){
         return (1);
     }
 
@@ -1401,8 +1098,7 @@ NexusFileDirectory  *current_entry;
 
 //---------------------------------------------------------------------------
 
-int NexusBoxClass::GetDatumSlab (char *index, void *get_data, int *start_dims, int *size_dims)
-{
+int NexusBoxClass::GetDatumSlab (char *index, void *get_data, int *start_dims, int *size_dims){
 	try
     {
         if (read_scheme == ENTIRE_CONTENTS)
@@ -1412,25 +1108,20 @@ int NexusBoxClass::GetDatumSlab (char *index, void *get_data, int *start_dims, i
 
         return (0);
 	}
-    catch (NexusExceptionClass &exception)
-    {
-/*#ifdef WIN32
-    	MessageBox (NULL, (LPCTSTR)exception.getErrorString(),(LPCTSTR)"Error!", MB_OK | MB_ICONINFORMATION);
-#endif*/
+    catch (NexusExceptionClass &exception){
         return (1);
     }
 }
 
 //---------------------------------------------------------------------------
 
-int NexusBoxClass::CreateGroup (char *index, char *group_name, char *group_type)
-{
-NexusFileDirectory  *current_entry;
-NexusGroup          *new_group;
-char                temp_index_entry[256];
+int NexusBoxClass::CreateGroup (char *index, char *group_name, char *group_type){
 
-	try
-    {
+    NexusFileDirectory  *current_entry;
+    NexusGroup          *new_group;
+    char                temp_index_entry[256];
+
+	try{
 	    current_entry = directory->FindByIndex (index);
 
         new_group = new NexusGroup (group_name, group_type);
@@ -1459,11 +1150,7 @@ char                temp_index_entry[256];
 
         return (0);
 	}
-    catch (NexusExceptionClass &exception)
-    {
-/*#ifdef WIN32
-    	MessageBox (NULL, (LPCTSTR)exception.getErrorString(),(LPCTSTR)"Error!", MB_OK | MB_ICONINFORMATION);
-#endif*/
+    catch (NexusExceptionClass &exception){
         return (1);
     }
 
@@ -1471,14 +1158,13 @@ char                temp_index_entry[256];
 
 //---------------------------------------------------------------------------
 
-int NexusBoxClass::CreateField (char *index, char *field_name, int rank, int *dims, int type, void *data)
-{
-NexusFileDirectory  *current_entry;
-NexusField          *new_field;
-char                temp_index_entry[256];
+int NexusBoxClass::CreateField (char *index, char *field_name, int rank, int *dims, int type, void *data){
 
-	try
-    {
+    NexusFileDirectory  *current_entry;
+    NexusField          *new_field;
+    char                temp_index_entry[256];
+
+	try{
 	    current_entry = directory->FindByIndex (index);
 
         new_field = new NexusField ();
@@ -1496,11 +1182,7 @@ char                temp_index_entry[256];
 
         return (0);
 	}
-    catch (NexusExceptionClass &exception)
-    {
-/*#ifdef WIN32
-    	MessageBox (NULL, (LPCTSTR)exception.getErrorString(),(LPCTSTR)"Error!", MB_OK | MB_ICONINFORMATION);
-#endif*/
+    catch (NexusExceptionClass &exception){
         return (1);
     }
 
@@ -1508,14 +1190,13 @@ char                temp_index_entry[256];
 
 //---------------------------------------------------------------------------
 
-int NexusBoxClass::CreateAttribute (char *index, char *attribute_name, int length, int type, void *data)
-{
-NexusFileDirectory  *current_entry;
-NexusAttribute      *new_attribute;
-char                temp_index_entry[256];
+int NexusBoxClass::CreateAttribute (char *index, char *attribute_name, int length, int type, void *data){
 
-	try
-    {
+    NexusFileDirectory  *current_entry;
+    NexusAttribute      *new_attribute;
+    char                temp_index_entry[256];
+
+	try{
 	    current_entry = directory->FindByIndex (index);
 
         new_attribute = new NexusAttribute ();
@@ -1533,11 +1214,7 @@ char                temp_index_entry[256];
 
         return (0);
 	}
-    catch (NexusExceptionClass &exception)
-    {
-/*#ifdef WIN32
-    	MessageBox (NULL, (LPCTSTR)exception.getErrorString(),(LPCTSTR)"Error!", MB_OK | MB_ICONINFORMATION);
-#endif*/
+    catch (NexusExceptionClass &exception){
         return (1);
     }
 
@@ -1545,13 +1222,11 @@ char                temp_index_entry[256];
 
 //---------------------------------------------------------------------------
 #ifdef USECAPV
-int NexusBoxClass::ConnectPVs (void)
-{
-NexusFieldList  *current_field;
-NexusAttribList *current_attribute;
+int NexusBoxClass::ConnectPVs (void){
+    NexusFieldList  *current_field;
+    NexusAttribList *current_attribute;
 
-	try
-    {
+	try{
 	    current_field = pv_fields;
 
     	while (current_field != NULL)
@@ -1570,24 +1245,19 @@ NexusAttribList *current_attribute;
 
         return (0);
 	}
-    catch (NexusExceptionClass &exception)
-    {
-/*#ifdef WIN32
-    	MessageBox (NULL, (LPCTSTR)exception.getErrorString(),(LPCTSTR)"Error!", MB_OK | MB_ICONINFORMATION);
-#endif*/
+    catch (NexusExceptionClass &exception){
         return (1);
     }
 }
 #endif
+
 //---------------------------------------------------------------------------
 #ifdef USECAPV
-int NexusBoxClass::UpdatePVs (void)
-{
-NexusFieldList  *current_field;
-NexusAttribList *current_attribute;
+int NexusBoxClass::UpdatePVs (void){
+    NexusFieldList  *current_field;
+    NexusAttribList *current_attribute;
 
-	try
-    {
+	try{
 	    current_field = pv_fields;
 
     	while (current_field != NULL)
@@ -1606,24 +1276,19 @@ NexusAttribList *current_attribute;
 
         return (0);
     }
-    catch (NexusExceptionClass &exception)
-    {
-/*#ifdef WIN32
-    	MessageBox (NULL, (LPCTSTR)exception.getErrorString(),(LPCTSTR)"Error!", MB_OK | MB_ICONINFORMATION);
-#endif*/
+    catch (NexusExceptionClass &exception){
         return (1);
     }
 }
 #endif
+
 //---------------------------------------------------------------------------
 #ifdef USECAPV
-int NexusBoxClass::DisconnectPVs (void)
-{
-NexusFieldList  *current_field;
-NexusAttribList *current_attribute;
+int NexusBoxClass::DisconnectPVs (void){
+    NexusFieldList  *current_field;
+    NexusAttribList *current_attribute;
 
-    try
-    {
+    try{
 	    current_field = pv_fields;
 
     	while (current_field != NULL)
@@ -1642,24 +1307,19 @@ NexusAttribList *current_attribute;
 
         return (0);
     }
-	catch (NexusExceptionClass &exception)
-    {
-/*#ifdef WIN32
-    	MessageBox (NULL, (LPCTSTR)exception.getErrorString(),(LPCTSTR)"Error!", MB_OK | MB_ICONINFORMATION);
-#endif*/
+	catch (NexusExceptionClass &exception){
         return (1);
     }
 }
 #endif
+
 //---------------------------------------------------------------------------
 
-int NexusBoxClass::UpdateVars (void)
-{
-NexusFieldList  *current_field;
-NexusAttribList *current_attribute;
+int NexusBoxClass::UpdateVars (void){
+    NexusFieldList  *current_field;
+    NexusAttribList *current_attribute;
 
-	try
-    {
+	try{
     	current_field = var_fields;
 
 	    while (current_field != NULL)
@@ -1678,23 +1338,17 @@ NexusAttribList *current_attribute;
 
         return (0);
     }
-    catch (NexusExceptionClass &exception)
-    {
-/*#ifdef WIN32
-    	MessageBox (NULL, (LPCTSTR)exception.getErrorString(),(LPCTSTR)"Error!", MB_OK | MB_ICONINFORMATION);
-#endif*/
+    catch (NexusExceptionClass &exception){
         return (1);
     }
 }
 
 //---------------------------------------------------------------------------
 
-int NexusBoxClass::RegisterVar (char *name, int rank, int *dims, int data_type, void *address)
-{
-NexusVarAssoc  *current_var;
+int NexusBoxClass::RegisterVar (char *name, int rank, int *dims, int data_type, void *address){
+    NexusVarAssoc  *current_var;
 
-	try
-    {
+	try{
 	    current_var = var_associations;
 
     	while (current_var->next_in_list != NULL)
@@ -1706,23 +1360,17 @@ NexusVarAssoc  *current_var;
 
         return (0);
     }
-    catch (NexusExceptionClass &exception)
-    {
-/*#ifdef WIN32
-    	MessageBox (NULL, (LPCTSTR)exception.getErrorString(),(LPCTSTR)"Error!", MB_OK | MB_ICONINFORMATION);
-#endif*/
+    catch (NexusExceptionClass &exception){
         return (1);
     }
 }
 
 //---------------------------------------------------------------------------
 
-int NexusBoxClass::UpdateVarInfo (char *name, int *dims, void *address)
-{
-NexusVarAssoc  *current_var;
+int NexusBoxClass::UpdateVarInfo (char *name, int *dims, void *address){
+    NexusVarAssoc  *current_var;
 
-    try
-    {
+    try{
 	    current_var = var_associations;
 
     	while (stricmp (current_var->name, name))
@@ -1736,23 +1384,18 @@ NexusVarAssoc  *current_var;
 
         return (0);
     }
-    catch (NexusExceptionClass &exception)
-    {
-/*#ifdef WIN32
-    	MessageBox (NULL, (LPCTSTR)exception.getErrorString(),(LPCTSTR)"Error!", MB_OK | MB_ICONINFORMATION);
-#endif*/
+    catch (NexusExceptionClass &exception){
         return (1);
     }
 }
 
 //---------------------------------------------------------------------------
 
-int NexusBoxClass::UpdateVarInfo (char *name, int *dims, int type, void *address)
-{
-NexusVarAssoc  *current_var;
+int NexusBoxClass::UpdateVarInfo (char *name, int *dims, int type, void *address){
+    
+    NexusVarAssoc  *current_var;
 
-    try
-    {
+    try{
 	    current_var = var_associations;
 
     	while (stricmp (current_var->name, name))
@@ -1766,19 +1409,14 @@ NexusVarAssoc  *current_var;
 
         return (0);
     }
-    catch (NexusExceptionClass &exception)
-    {
-/*#ifdef WIN32
-    	MessageBox (NULL, (LPCTSTR)exception.getErrorString(),(LPCTSTR)"Error!", MB_OK | MB_ICONINFORMATION);
-#endif*/
+    catch (NexusExceptionClass &exception){
         return (1);
     }
 }
 
 //---------------------------------------------------------------------------
 
-int NexusBoxClass::CreateTemplate (char *path_name, char *file_name)
-{
+int NexusBoxClass::CreateTemplate (char *path_name, char *file_name){
     read_scheme = INDEX_ONLY;
 
     ReadAll (path_name, file_name);
@@ -1788,8 +1426,7 @@ int NexusBoxClass::CreateTemplate (char *path_name, char *file_name)
 
 //---------------------------------------------------------------------------
 
-int NexusBoxClass::ChangeFile (char *path_name, char *file_name)
-{
+int NexusBoxClass::ChangeFile (char *path_name, char *file_name){
 	if (data_path_name != NULL)
 		free (data_path_name);
    	data_path_name = (char *) malloc (sizeof (char) * (strlen (path_name) + 1));
@@ -1805,8 +1442,7 @@ int NexusBoxClass::ChangeFile (char *path_name, char *file_name)
 
 //---------------------------------------------------------------------------
 
-int NexusBoxClass::SetFileMode (int file_mode)
-{
+int NexusBoxClass::SetFileMode (int file_mode){
     this->file_mode = file_mode;
 
     return (0);
@@ -1814,17 +1450,15 @@ int NexusBoxClass::SetFileMode (int file_mode)
 
 //---------------------------------------------------------------------------
 
-int NexusBoxClass::GetFileMode (void)
-{
+int NexusBoxClass::GetFileMode (void){
     return (file_mode);
 }
 
 //---------------------------------------------------------------------------
 
-int NexusBoxClass::ReadAll (char *path_name, char *file_name)
-{
-	try
-	{
+int NexusBoxClass::ReadAll (char *path_name, char *file_name){
+	
+    try{
  		if (data_path_name != NULL)
 			free (data_path_name);
 		data_path_name = (char *) malloc (sizeof (char) * (strlen (path_name) + 1));
@@ -1849,35 +1483,33 @@ int NexusBoxClass::ReadAll (char *path_name, char *file_name)
 
 		return (0);
 	}
-	catch (...)
-	{
+	catch (...){
 		return (1);
 	}
 }
 
 //---------------------------------------------------------------------------
 
-int NexusBoxClass::WriteAll (char *path_name, char *file_name)
-{
-NexusGroup  *current_group;
+int NexusBoxClass::WriteAll (char *path_name, char *file_name){
 
-	try
-	{
+    NexusGroup  *current_group;
+
+	try{
 	    if (read_scheme != ENTIRE_CONTENTS)
 			throw (new NexusExceptionClass ((char *)"Error in method NexusBoxClass::WriteAll!", (char *)"Filesystem in INDEX_ONLY mode--can not write file!"));
 
-        switch (file_mode)
-        {
-            case HDF4_MODE: OpenFile (NXACC_CREATE4, path_name, file_name, &file_handle); break;
-            case HDF5_MODE: OpenFile (NXACC_CREATE5, path_name, file_name, &file_handle); break;
-            case XML_MODE: OpenFile (NXACC_CREATEXML, path_name, file_name, &file_handle); break;
+        switch (file_mode){
+
+            case HDF4_MODE : OpenFile (NXACC_CREATE4,   path_name, file_name, &file_handle); break;
+            case HDF5_MODE : OpenFile (NXACC_CREATE5,   path_name, file_name, &file_handle); break;
+            case XML_MODE  : OpenFile (NXACC_CREATEXML, path_name, file_name, &file_handle); break;
+
             default : OpenFile (NXACC_CREATE4, path_name, file_name, &file_handle); break;
         }
 
 	    current_group = tree_top->SubGroup ();
 
-		while (current_group != NULL)
-		{
+		while (current_group != NULL){
 			current_group->WriteGroup (file_handle, compression_scheme);
 
 			current_group = current_group->NextGroup ();
@@ -1887,44 +1519,38 @@ NexusGroup  *current_group;
 
 		return (0);
 	}
-	catch (...)
-	{
+	catch (...){
 		return (1);
     }
 }
 
 //---------------------------------------------------------------------------
 
-void NexusBoxClass::CompressionScheme (int new_scheme)
-{
+void NexusBoxClass::CompressionScheme (int new_scheme){
     compression_scheme = new_scheme;
 }
 
 //---------------------------------------------------------------------------
 
-int NexusBoxClass::CompressionScheme (void)
-{
+int NexusBoxClass::CompressionScheme (void){
     return (compression_scheme);
 }
 
 //---------------------------------------------------------------------------
 
-void NexusBoxClass::SetReadScheme (int new_scheme)
-{
+void NexusBoxClass::SetReadScheme (int new_scheme){
     read_scheme = new_scheme;
 }
 
 //---------------------------------------------------------------------------
 
-int NexusBoxClass::GetReadScheme (void)
-{
+int NexusBoxClass::GetReadScheme (void){
     return (read_scheme);
 }
 
 //---------------------------------------------------------------------------
 
-NexusBoxClass::~NexusBoxClass (void)
-{
+NexusBoxClass::~NexusBoxClass (void){
     //Deleting the top of the tree deletes the entire tree recursively...
     if (tree_top != NULL)
         delete (tree_top);
@@ -1962,14 +1588,14 @@ NexusBoxClass::~NexusBoxClass (void)
 //Private Methods
 //---------------------------------------------------------------------------
 
-void NexusBoxClass::GenerateTagList (char *unparsed_template)
-{
-char            start_delimiters[5],
-                end_delimiters[5],
-                newline_delimiter[5],
-                *tag_start;
-int             num_chars,
-                tag_num;
+void NexusBoxClass::GenerateTagList (char *unparsed_template){
+
+    char            start_delimiters[5],
+                    end_delimiters[5],
+                    newline_delimiter[5],
+                    *tag_start;
+    int             num_chars,
+                    tag_num;
 
     strcpy (start_delimiters, "<[{;");
     strcpy (end_delimiters, ">]}");
@@ -1979,12 +1605,10 @@ int             num_chars,
 
     tag_start = unparsed_template;
     tag_start = strpbrk (tag_start, start_delimiters);
-    while (tag_start != NULL)
-    {
+    while (tag_start != NULL){
         if (tag_start[0] == ';')
             tag_start = strpbrk (tag_start, newline_delimiter);
-        else
-        {
+        else{
             num_chars = strcspn (tag_start, end_delimiters);
             tag_list[tag_num] = (char *) malloc (num_chars + 2);
             if (tag_list[tag_num] == NULL)
@@ -2003,9 +1627,9 @@ int             num_chars,
 
 //---------------------------------------------------------------------------
 
-void NexusBoxClass::DestroyTagList (void)
-{
-int     tag_num;
+void NexusBoxClass::DestroyTagList (void){
+    
+    int     tag_num;
 
     tag_num = 0;
     while (tag_list[tag_num] != NULL)
@@ -2018,10 +1642,10 @@ int     tag_num;
 
 //---------------------------------------------------------------------------
 
-void NexusBoxClass::DeleteDataStructures (void)
-{
-char        *group_type,
-            *group_name;
+void NexusBoxClass::DeleteDataStructures (void){
+
+    char        *group_type,
+                *group_name;
 
 #ifdef USECAPV
 	DisconnectPVs ();
@@ -2052,7 +1676,7 @@ char        *group_type,
         delete (var_attribs);
 	var_attribs = NULL;
 
-//Recreate top of list.
+    //Recreate top of list.
     group_type = (char *) malloc (strlen ("TreeTop") + 1);
     if (group_type == NULL)
 		throw (new NexusExceptionClass ((char *)"Error in method NexusBoxClass::DeleteDataStructures!", (char *)"Memory allocation error!"));
@@ -2073,12 +1697,14 @@ char        *group_type,
 
 //---------------------------------------------------------------------------
 
-void NexusBoxClass::GetGroupInfo (char *group_type, char *group_name, int tag_index)
-{
-char        group_seperator[5],
-            end_delimiter[5],
-            *tag_start;
-int         num_chars;
+void NexusBoxClass::GetGroupInfo (char *group_type, 
+                                  char *group_name, 
+                                  int tag_index){
+
+    char        group_seperator[5],
+                end_delimiter[5],
+                *tag_start;
+    int         num_chars;
 
     strcpy (group_seperator, ":");
     strcpy (end_delimiter, ">");
@@ -2097,13 +1723,17 @@ int         num_chars;
 
 //---------------------------------------------------------------------------
 
-void NexusBoxClass::GetFieldInfo (char *field_name, char *field_location, char *field_value,
-                                    char *field_type, int tag_index)
-{
-char        field_seperator[5],
-            end_delimiter[5],
-            *tag_start;
-int         num_chars;
+void NexusBoxClass::GetFieldInfo (char *field_name, 
+                                  char *field_location, 
+                                  char *field_value,
+                                  char *field_type, 
+                                  int tag_index){
+
+    char        field_seperator[5],
+                end_delimiter[5],
+                *tag_start;
+
+    int         num_chars;
 
     strcpy (field_seperator, ",");
     strcpy (end_delimiter, "]");
@@ -2135,12 +1765,17 @@ int         num_chars;
 
 //---------------------------------------------------------------------------
 
-void NexusBoxClass::GetAttributeInfo (char *attrib_name, char *attrib_location, char *attrib_value, char *attrib_type, int tag_index)
-{
-char        attrib_seperator[5],
-            end_delimiter[5],
-            *tag_start;
-int         num_chars;
+void NexusBoxClass::GetAttributeInfo (char *attrib_name, 
+                                      char *attrib_location, 
+                                      char *attrib_value, 
+                                      char *attrib_type, 
+                                      int tag_index){
+
+    char        attrib_seperator[5],
+                end_delimiter[5],
+                *tag_start;
+    
+    int         num_chars;
 
     strcpy (attrib_seperator, ",");
     strcpy (end_delimiter, "}");
@@ -2172,59 +1807,55 @@ int         num_chars;
 
 //---------------------------------------------------------------------------
 
-NexusGroup *NexusBoxClass::ParseTags (NexusGroup *parent_group, int *tag_index)
-{
-NexusGroup      *group_list = NULL,
-                *current_group = NULL,
-                *new_group = NULL;
-NexusField      *new_field = NULL;
-NexusAttribute  *new_attrib = NULL;
-NexusVarAssoc   *var_association;
-char            group_delimiter[5],
-                field_delimiter[5],
-                attribute_delimiter[5],
+NexusGroup *NexusBoxClass::ParseTags (NexusGroup *parent_group, 
+                                             int *tag_index){
 
-                group_type[50],
-                group_name[50],
+    NexusGroup      *group_list = NULL,
+                    *current_group = NULL,
+                    *new_group = NULL;
 
-                field_name[50],
-                field_location[50],
-                field_value[50],
-                field_type[50],
+    NexusField      *new_field = NULL;
 
-                attrib_name[50],
-                attrib_location[50],
-                attrib_value[50],
-                attrib_type[50],
+    NexusAttribute  *new_attrib = NULL;
 
-                *temp_chr;
+    NexusVarAssoc   *var_association;
+    
+    char            group_delimiter[5],
+                    field_delimiter[5],
+                    attribute_delimiter[5],
+                    group_type[50],
+                    group_name[50],
+                    field_name[50],
+                    field_location[50],
+                    field_value[50],
+                    field_type[50],
+                    attrib_name[50],
+                    attrib_location[50],
+                    attrib_value[50],
+                    attrib_type[50],
+                    *temp_chr;
 
     strcpy (group_delimiter, "<");
     strcpy (field_delimiter, "[");
     strcpy (attribute_delimiter, "{");
 
-    while (stricmp (tag_list[*tag_index], "<EndTemplate>"))
-    {
-        switch (tag_list[*tag_index][0])
-        {
+    while (stricmp (tag_list[*tag_index], "<EndTemplate>")){
+        switch (tag_list[*tag_index][0]){
             case '<' : {
                 GetGroupInfo (group_type, group_name, *tag_index);
 
-                if (stricmp (group_name, "end"))
-                {
+                if (stricmp (group_name, "end")){
                     new_group = new NexusGroup (group_name, group_type);
                     if (new_group == NULL)
 						throw (new NexusExceptionClass ((char *)"Error in method NexusBoxClass::ParseTags!", (char *)"Could not create object NexusGroup!"));
                     strcat (index_entry, INDEX_SEPERATOR_STR);
                     strcat (index_entry, group_name);
 
-                    if (group_list == NULL)
-                    {
+                    if (group_list == NULL){
                         group_list = new_group;
                         current_group = group_list;
                     }
-                    else
-                    {
+                    else{
                         current_group->AddToGroupList (current_group, new_group);
                         current_group = current_group->NextGroup ();
                     }
@@ -2234,8 +1865,7 @@ char            group_delimiter[5],
                     *tag_index = *tag_index + 1;
                     current_group->AddSubgroupList (ParseTags (current_group, tag_index));
                 }
-                else
-                {
+                else{
                     *tag_index = *tag_index + 1;
 
                     temp_chr = strrchr (index_entry, INDEX_SEPERATOR_CHR);
@@ -2244,32 +1874,27 @@ char            group_delimiter[5],
 
                     return (group_list);
                 }
-
-                break;
-            }
+            }; break;
 
             case '[' : {
                 GetFieldInfo (field_name, field_location, field_value, field_type, *tag_index);
 
-//If CONST
-                if (!stricmp (field_location, "const"))
-                {
+                //If CONST
+                if (!stricmp (field_location, "const")){
                     new_field = new NexusField ();
                     if (new_field == NULL)
 						throw (new NexusExceptionClass ((char *)"Error in method NexusBoxClass::ParseTags!", (char *)"Could not create object NexusField!"));
                     new_field->PutConstInfo (field_name, field_type, field_value);
                 }
 
-//If VAR
-                if (!stricmp (field_location, "var"))
-                {
+                //If VAR
+                if (!stricmp (field_location, "var")){
                     var_association = FindVarAssociation (field_value);
                     new_field = new NexusField ();
                     if (new_field == NULL)
 						throw (new NexusExceptionClass ((char *)"Error in method NexusBoxClass::ParseTags!", (char *)"Could not create object NexusField!"));
                     new_field->PutVarInfo (field_name, var_association->rank, var_association->dims, var_association->data_type, var_association->address);
-                    if (var_fields == NULL)
-                    {
+                    if (var_fields == NULL){
                         var_fields = new NexusFieldList ();
                         if (var_fields == NULL)
 							throw (new NexusExceptionClass ((char *)"Error in method NexusBoxClass::ParseTags!", (char *)"Could not create object NexusFieldList!"));
@@ -2281,16 +1906,14 @@ char            group_delimiter[5],
                         AddToFieldList (var_fields, new_field, var_association);
                 }
 
-//If PV
-#ifdef USECAPV
-                if (!stricmp (field_location, "pv"))
-                {
+                //If PV
+                #ifdef USECAPV
+                if (!stricmp (field_location, "pv")){
                     new_field = new NexusField ();
                     if (new_field == NULL)
 						throw (new NexusExceptionClass ((char *)"Error in method NexusBoxClass::ParseTags!", (char *)"Could not create object NexusField!"));
                     new_field->PutPVInfo (field_name, field_type, field_value);
-                    if (pv_fields == NULL)
-                    {
+                    if (pv_fields == NULL){
                         pv_fields = new NexusFieldList ();
                         if (pv_fields == NULL)
 							throw (new NexusExceptionClass ((char *)"Error in method NexusBoxClass::ParseTags!", (char *)"Could not create object NexusFieldList!"));
@@ -2300,7 +1923,8 @@ char            group_delimiter[5],
                     else
                         AddToFieldList (pv_fields, new_field);
                 }
-#endif
+                #endif
+
                 parent_group->AddToFieldList (new_field);
 
                 strcat (index_entry, INDEX_SEPERATOR_STR);
@@ -2310,28 +1934,25 @@ char            group_delimiter[5],
 
                 *tag_index = *tag_index + 1;
 
-                while (tag_list[*tag_index][0] == '{')
-                {
+                while (tag_list[*tag_index][0] == '{'){
                     GetAttributeInfo (attrib_name, attrib_location, attrib_value, attrib_type, *tag_index);
 
-//If CONST
-                    if (!stricmp (attrib_location, "const"))
-                    {
+                    //If CONST
+                    if (!stricmp (attrib_location, "const")){
                         new_attrib = new NexusAttribute ();
 	                    if (new_attrib == NULL)
 							throw (new NexusExceptionClass ((char *)"Error in method NexusBoxClass::ParseTags!", (char *)"Could not create object NexusAttribute!"));
                         new_attrib->PutConstInfo (attrib_name, attrib_type, attrib_value);
                     }
-//If VAR
-                    if (!stricmp (attrib_location, "var"))
-                    {
+                
+                    //If VAR
+                    if (!stricmp (attrib_location, "var")){
                         var_association = FindVarAssociation (attrib_value);
                         new_attrib = new NexusAttribute ();
 	                    if (new_attrib == NULL)
 							throw (new NexusExceptionClass ((char *)"Error in method NexusBoxClass::ParseTags!", (char *)"Could not create object NexusAttribute!"));
                         new_attrib->PutVarInfo (attrib_name, var_association->dims[0], var_association->data_type, var_association->address);
-	                    if (var_attribs == NULL)
-    	                {
+	                    if (var_attribs == NULL){
         	                var_attribs = new NexusAttribList ();
             	            if (var_attribs == NULL)
 								throw (new NexusExceptionClass ((char *)"Error in method NexusBoxClass::ParseTags!", (char *)"Could not create object NexusAttributeList!"));
@@ -2342,16 +1963,16 @@ char            group_delimiter[5],
                 	    else
                     	    AddToAttribList (var_attribs, new_attrib, var_association);
                     }
-//If PV
-#ifdef USECAPV
+
+                    //If PV
+                    #ifdef USECAPV
                     if (!stricmp (attrib_location, "pv"))
                     {
                         new_attrib = new NexusAttribute ();
 	                    if (new_attrib == NULL)
 							throw (new NexusExceptionClass ((char *)"Error in method NexusBoxClass::ParseTags!", (char *)"Could not create object NexusAttribute!"));
                         new_attrib->PutPVInfo (attrib_name, attrib_type, attrib_value);
-	                    if (pv_attribs == NULL)
-    	                {
+	                    if (pv_attribs == NULL){
         	                pv_attribs = new NexusAttribList ();
             	            if (pv_attribs == NULL)
 								throw (new NexusExceptionClass ((char *)"Error in method NexusBoxClass::ParseTags!", (char *)"Could not create object NexusAttributeList!"));
@@ -2360,8 +1981,8 @@ char            group_delimiter[5],
         	            }
             	        else
                 	        AddToAttribList (pv_attribs, new_attrib);
-                    	}
-#endif
+                    }
+                    #endif
 
                     new_field->AddToAttributeList (new_attrib);
 
@@ -2378,11 +1999,11 @@ char            group_delimiter[5],
 
                 temp_chr = strrchr (index_entry, INDEX_SEPERATOR_CHR);
 				temp_chr[0] = '\0';
+            }; break;
 
-                break;
-            }
-
-            default : *tag_index = *tag_index + 1;
+            default : {
+                *tag_index = *tag_index + 1;
+            }; break;
 
         }
     }
@@ -2393,39 +2014,42 @@ char            group_delimiter[5],
 
 //---------------------------------------------------------------------------
 
-NexusGroup *NexusBoxClass::ParseHDFFile (NexusGroup *parent_group)
-{
-char            name[256],
-                type[256];
-char            group_name[256],
-                group_type[256],
-                attrib_name[256],
-                *temp_chr;
-int            rank,
-                dimensions[10],
-                data_type,
-                size,
-                malloc_size,
-                loop,
-                length;
-NexusGroup      *new_group = NULL,
-                *group_list = NULL,
-                *current_group = NULL;
-NexusField      *new_field;
-NexusAttribute  *new_attrib;
-void            *temp_data;
+NexusGroup *NexusBoxClass::ParseHDFFile (NexusGroup *parent_group){
 
-    while (GetNextEntry (name, type, &data_type, file_handle))
-    {
+    char            name[256],
+                    type[256];
+
+    char            group_name[256],
+                    group_type[256],
+                    attrib_name[256],
+                    *temp_chr;
+
+    int             rank,
+                    dimensions[10],
+                    data_type,
+                    size,
+                    malloc_size,
+                    loop,
+                    length;
+
+    NexusGroup      *new_group     = NULL,
+                    *group_list    = NULL,
+                    *current_group = NULL;
+
+    NexusField      *new_field;
+
+    NexusAttribute  *new_attrib;
+
+    void            *temp_data;
+
+    while (GetNextEntry (name, type, &data_type, file_handle)){
 
         strcpy (group_name, name);
         strcpy (group_type, type);
 
-        if (stricmp (group_type, "SDS"))
-        {
-            if (stricmp (group_type, "CDF0.0") && stricmp (group_type, "df"))
-            {
-            //it's a group
+        if (stricmp (group_type, "SDS")){
+            if (stricmp (group_type, "CDF0.0") && stricmp (group_type, "df")){
+                //it's a group
                 new_group = new NexusGroup (group_name, group_type);
                 if (new_group == NULL)
 					throw (new NexusExceptionClass ((char *)"Error in method NexusBoxClass::ParseHDFFile!", (char *)"Could not create object NexusGroup!"));
@@ -2433,13 +2057,11 @@ void            *temp_data;
                 strcat (index_entry, INDEX_SEPERATOR_STR);
                 strcat (index_entry, group_name);
 
-                if (group_list == NULL)
-                {
+                if (group_list == NULL){
                     group_list = new_group;
                     current_group = group_list;
                 }
-                else
-                {
+                else{
                     current_group->AddToGroupList (current_group, new_group);
                     current_group = current_group->NextGroup ();
                 }
@@ -2457,8 +2079,7 @@ void            *temp_data;
 					temp_chr[0] = '\0';
             }
         }
-        else
-        {
+        else{
             OpenData (group_name, file_handle);
             GetDataInfo (&rank, dimensions, &data_type, file_handle);
 
@@ -2466,23 +2087,21 @@ void            *temp_data;
             if (new_field == NULL)
 				throw (new NexusExceptionClass ((char *)"Error in method NexusBoxClass::ParseHDFFile!", (char *)"Could not create object NexusField!"));
 
-            if (read_scheme == ENTIRE_CONTENTS)
-            {
+            if (read_scheme == ENTIRE_CONTENTS){
                 size = 1;
                 for (loop=0;loop<rank;loop++)
                     size = size * dimensions[loop];
 
-                switch (data_type)
-                {
-                    case NX_CHAR : malloc_size = ((sizeof (char) * size) + 1); break;
-                    case NX_UINT8 :;
-                    case NX_INT8 : malloc_size = sizeof (char) * size; break;
-                    case NX_UINT16 :;
-                    case NX_INT16 : malloc_size = sizeof (short) * size; break;
-                    case NX_UINT32 :;
-                    case NX_INT32 : malloc_size = sizeof (long) * size; break;
-                    case NX_FLOAT32 : malloc_size = sizeof (float) * size; break;
-                    case NX_FLOAT64 : malloc_size = sizeof (double) * size; break;
+                switch (data_type){
+                    case NX_CHAR    : malloc_size = ((sizeof (char) * size) + 1); break;
+                    case NX_UINT8   :                                           ; break; 
+                    case NX_INT8    : malloc_size = sizeof (char) * size        ; break;
+                    case NX_UINT16  :                                           ; break;
+                    case NX_INT16   : malloc_size = sizeof (short) * size       ; break;
+                    case NX_UINT32  :                                           ; break;
+                    case NX_INT32   : malloc_size = sizeof (long) * size        ; break;
+                    case NX_FLOAT32 : malloc_size = sizeof (float) * size       ; break;
+                    case NX_FLOAT64 : malloc_size = sizeof (double) * size      ; break;
                 }
 
                 temp_data = malloc (malloc_size);
@@ -2505,25 +2124,44 @@ void            *temp_data;
 
 		    directory->AddToList (new NexusFileDirectory (index_entry, (NexusField *) new_field));
 
-            while (GetNextAttrib (name, &length, &data_type, file_handle))
-            {
+            while (GetNextAttrib (name, &length, &data_type, file_handle)){
                 strcpy (attrib_name, name);
 
-                switch (data_type)
-                {
-                    case NX_CHAR : {
-                                malloc_size = sizeof (char);
-                                length++;
-                                break;
-                            }
-                    case NX_UINT8 :;
-                    case NX_INT8 : malloc_size = sizeof (char); break;
-                    case NX_UINT16 :;
-                    case NX_INT16 : malloc_size = sizeof (short); break;
-                    case NX_UINT32 :;
-                    case NX_INT32 : malloc_size = sizeof (long); break;
-                    case NX_FLOAT32 : malloc_size = sizeof (float); break;
-                    case NX_FLOAT64 : malloc_size = sizeof (double); break;
+                switch (data_type){
+
+                    case NX_CHAR  :{
+                        malloc_size = sizeof (char);
+                        length++;
+                    }; break; 
+
+                    case NX_UINT8 :{
+                    }; break;
+
+                    case NX_INT8  :{ 
+                        malloc_size = sizeof (char);
+                    }; break;
+
+                    case NX_UINT16 :{
+                    }; break;
+
+                    case NX_INT16  :{ 
+                        malloc_size = sizeof (short);
+                    }; break;
+
+                    case NX_UINT32 :{
+                    }; break;
+
+                    case NX_INT32  :{ 
+                        malloc_size = sizeof (long);
+                    }; break;
+
+                    case NX_FLOAT32:{
+                        malloc_size = sizeof (float);
+                    }; break;
+
+                    case NX_FLOAT64:{
+                        malloc_size = sizeof (double);
+                    }; break;
                 }
 
                 temp_data = malloc (malloc_size * length);
@@ -2564,9 +2202,10 @@ void            *temp_data;
 
 //---------------------------------------------------------------------------
 
-void NexusBoxClass::AddToFieldList (NexusFieldList *parent_field, NexusField *new_field)
-{
-NexusFieldList  *current_field;
+void NexusBoxClass::AddToFieldList (NexusFieldList *parent_field, 
+                                    NexusField *new_field){
+
+    NexusFieldList  *current_field;
 
     current_field = parent_field;
 
@@ -2583,9 +2222,11 @@ NexusFieldList  *current_field;
 
 //---------------------------------------------------------------------------
 
-void NexusBoxClass::AddToFieldList (NexusFieldList *parent_field, NexusField *new_field, NexusVarAssoc *var_info)
-{
-NexusFieldList  *current_field;
+void NexusBoxClass::AddToFieldList (NexusFieldList *parent_field, 
+                                    NexusField *new_field, 
+                                    NexusVarAssoc *var_info){
+    
+    NexusFieldList  *current_field;
 
     current_field = parent_field;
 
@@ -2603,9 +2244,10 @@ NexusFieldList  *current_field;
 
 //---------------------------------------------------------------------------
 
-void NexusBoxClass::AddToAttribList (NexusAttribList *parent_attrib, NexusAttribute *new_attrib)
-{
-NexusAttribList  *current_attribute;
+void NexusBoxClass::AddToAttribList (NexusAttribList *parent_attrib, 
+                                     NexusAttribute *new_attrib){
+    
+    NexusAttribList  *current_attribute;
 
     current_attribute = parent_attrib;
 
@@ -2623,9 +2265,11 @@ NexusAttribList  *current_attribute;
 //---------------------------------------------------------------------------
 
 
-void NexusBoxClass::AddToAttribList (NexusAttribList *parent_attrib, NexusAttribute *new_attrib, NexusVarAssoc *var_info)
-{
-NexusAttribList  *current_attribute;
+void NexusBoxClass::AddToAttribList (NexusAttribList *parent_attrib, 
+                                     NexusAttribute *new_attrib, 
+                                     NexusVarAssoc *var_info){
+    
+    NexusAttribList  *current_attribute;
 
     current_attribute = parent_attrib;
 
@@ -2643,14 +2287,13 @@ NexusAttribList  *current_attribute;
 
 //---------------------------------------------------------------------------
 
-NexusVarAssoc *NexusBoxClass::FindVarAssociation (char *var_name)
-{
-NexusVarAssoc   *current_var;
+NexusVarAssoc *NexusBoxClass::FindVarAssociation (char *var_name){
+    
+    NexusVarAssoc   *current_var;
 
     current_var = var_associations;
 
-    while (stricmp (current_var->name, var_name))
-    {
+    while (stricmp (current_var->name, var_name)){
         current_var = (NexusVarAssoc *) current_var->NextInList ();
         if (current_var == NULL)
 			throw (new NexusExceptionClass ((char *)"Error in method NexusBoxClass::FindVarAssociation!", (char *)"Could not find variable association!"));
@@ -2662,14 +2305,20 @@ NexusVarAssoc   *current_var;
 
 //---------------------------------------------------------------------------
 
-void NexusBoxClass::GetDataFromIndex (char *index, void *get_data, int *start_dims, int *length_dims)
-{
-char	group_name[256],
-		*field_name;
-int		start_index,
-        num_chars;
-NexusGroup	*current_group;
-NexusField	*current_field;
+void NexusBoxClass::GetDataFromIndex (char *index, 
+                                      void *get_data, 
+                                       int *start_dims, 
+                                       int *length_dims){
+
+    char	group_name[256],
+            *field_name;
+
+    int		start_index,
+            num_chars;
+
+    NexusGroup	*current_group;
+
+    NexusField	*current_field;
 
 	OpenFile (NXACC_READ, data_path_name, data_file_name, &file_handle);
 
@@ -2679,8 +2328,7 @@ NexusField	*current_field;
     field_name = strrchr (index, INDEX_SEPERATOR_CHR);
     field_name++;	//advance beyond the INDEX_SEPERATOR
 
-    while (stricmp (&index[start_index], field_name))
-    {
+    while (stricmp (&index[start_index], field_name)){
 	    current_group = current_group->SubGroup ();
 
 	    num_chars = strcspn (&index[start_index], INDEX_SEPERATOR_STR);
@@ -2688,8 +2336,7 @@ NexusField	*current_field;
 	    group_name[num_chars] = '\0';
     	start_index = start_index + num_chars + 1;
 
-        while (stricmp (current_group->name, group_name))
-        {
+        while (stricmp (current_group->name, group_name)){
         	current_group = current_group->NextGroup ();
             if (current_group == NULL)
 		    	throw (new NexusExceptionClass ((char *)"Could not find requested index!"));
@@ -2700,8 +2347,7 @@ NexusField	*current_field;
 
     current_field = current_group->FieldList ();
 
-    while (stricmp (current_field->name, field_name))
-    {
+    while (stricmp (current_field->name, field_name)){
        	current_field = current_field->NextField ();
         if (current_field == NULL)
 	    	throw (new NexusExceptionClass ((char *)"Could not find requested index!"));
@@ -2716,5 +2362,3 @@ NexusField	*current_field;
 }
 
 //---------------------------------------------------------------------------
-
-

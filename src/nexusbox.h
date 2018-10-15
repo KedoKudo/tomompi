@@ -47,8 +47,28 @@ public:
                     data_type;
     void            *address;
 
-    NexusVarAssoc (void);
-    NexusVarAssoc (char *new_name, int new_rank, int *new_dims, int new_data_type, void *new_address);
+    NexusVarAssoc (void):
+        name(NULL),
+        address(NULL){next_in_list = NULL;};
+
+    NexusVarAssoc (char *new_name, 
+                   int new_rank, 
+                   int *new_dims, 
+                   int new_data_type, 
+                   void *new_address):
+        rank(new_rank),
+        data_type(new_data_type),
+        address(new_address){
+            next_in_list = NULL;
+
+            name = (char *) malloc ((strlen (new_name) * sizeof (char)) + 1);
+            if (name == NULL)
+                return;
+            strcpy (name, new_name);
+
+            for (int loop=0;loop<rank;loop++)
+                dims[loop] = new_dims[loop];
+    };
 
     void UpdateVarInfo (int *new_dims, void *new_address);
     void UpdateVarInfo (int *new_dims, int type, void *new_address);
@@ -64,7 +84,9 @@ public:
     NexusField          *nexus_field;
     NexusVarAssoc       *var_info;
 
-    NexusFieldList (void);
+    NexusFieldList (void):
+        nexus_field(NULL),
+        var_info(NULL){next_in_list = NULL;};
 
     void UpdateFromAssoc (void);
 
@@ -79,7 +101,8 @@ public:
     NexusAttribute      *nexus_attribute;
     NexusVarAssoc       *var_info;
 
-    NexusAttribList (void);
+    NexusAttribList (void):
+        nexus_attribute(NULL){next_in_list = NULL;};
 
     void UpdateFromAssoc (void);
 
@@ -97,14 +120,62 @@ public:
 
     char				*directory_entry;
 
-    NexusFileDirectory (char *entry);
-    NexusFileDirectory (char *entry, NexusGroup *group);
-    NexusFileDirectory (char *entry, NexusField *field);
-    NexusFileDirectory (char *entry, NexusAttribute *attribute);
+    NexusFileDirectory (char *entry):
+        nexus_group(NULL),
+	    nexus_field(NULL),
+        nexus_attribute(NULL){
+        
+        next_in_list = NULL;
+
+        directory_entry = (char *) malloc (sizeof(char)*strlen(entry)+1);
+        strcpy (directory_entry, entry);
+
+    };
+
+    NexusFileDirectory (char *entry, NexusGroup *group):
+        nexus_group(group),
+        nexus_field(NULL),
+        nexus_attribute(NULL){
+        
+        next_in_list = NULL;
+
+        directory_entry = (char *) malloc (sizeof(char)*strlen(entry)+1);
+        strcpy (directory_entry, entry);
+    };
+
+    NexusFileDirectory (char *entry, NexusField *field):
+        nexus_group(NULL),
+        nexus_field(field),
+        nexus_attribute(NULL){
+        
+        next_in_list = NULL;
+
+        directory_entry = (char *) malloc (sizeof(char)*strlen(entry)+1);
+        strcpy (directory_entry, entry);
+    };
+
+    NexusFileDirectory (char *entry, NexusAttribute *attribute):
+        nexus_group(NULL),
+        nexus_field(NULL),
+        nexus_attribute(attribute){
+        
+        next_in_list = NULL;
+
+        directory_entry = (char *) malloc (sizeof(char)*strlen(entry)+1);
+        strcpy (directory_entry, entry);
+    };
 
     NexusFileDirectory *FindByIndex (char *index);
 
-    ~NexusFileDirectory (void);
+    ~NexusFileDirectory (void){
+        if (directory_entry != NULL)
+            free (directory_entry);
+
+	    if (next_in_list != NULL){
+    	    delete ((NexusFileDirectory *) next_in_list);
+		    next_in_list = NULL;
+	    }
+    };
 };
 
 //---------------------------------------------------------------------------
@@ -116,7 +187,7 @@ class NexusBoxClass : private NexusAPI
 #endif
 {
 public:
-    NexusBoxClass (void);
+    NexusBoxClass (void){InitFileSystem ();};
 
     void InitFileSystem ();
     void ResetFileSystem ();
