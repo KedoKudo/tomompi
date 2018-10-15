@@ -1,10 +1,11 @@
 #include "errorlogclass.h"
 
 
-void errorlogclass::setErrorFileLocation (const char *file_path, const char *file_name)
-{
+void errorlogclass::setErrorFileLocation (const char *file_path, 
+                                          const char *file_name){
     strcpy (error_file_path, file_path);
-    if (error_file_path[strlen (error_file_path)-1] != '/')
+
+    if (error_file_path[strlen (error_file_path)-1] != '/') 
         strcat (error_file_path, "/");
 
     strcpy (error_file_name, file_name);
@@ -14,12 +15,11 @@ void errorlogclass::setErrorFileLocation (const char *file_path, const char *fil
 
 //__________________________________________________________________________
 
-void errorlogclass::addError (const char *error_str, const char *error_location)
-{
-char    output[1024];
+void errorlogclass::addError (const char *error_str, 
+                              const char *error_location){
+    char    output[1024];
 
-    if (error_file == NULL)
-    {
+    if (error_file == NULL){
         error_file = new ofstream ();
         if (!strcmp (error_file_name, "none"))
             error_file->open (error_file_location);
@@ -34,12 +34,10 @@ char    output[1024];
 }
 //__________________________________________________________________________
 
-void errorlogclass::addAutoResolution (const char *resolution_str)
-{
-char    output[1024];
+void errorlogclass::addAutoResolution (const char *resolution_str){
+    char    output[1024];
 
-    if (error_file == NULL)
-    {
+    if (error_file == NULL){
         error_file = new ofstream ();
         if (!strcmp (error_file_name, "none"))
             error_file->open (error_file_location);
@@ -55,10 +53,8 @@ char    output[1024];
 
 //__________________________________________________________________________
 
-void errorlogclass::close (void)
-{
-    if (error_file != NULL)
-    {
+void errorlogclass::close (void){
+    if (error_file != NULL){
         error_file->close ();
         delete (error_file);
         error_file = NULL;

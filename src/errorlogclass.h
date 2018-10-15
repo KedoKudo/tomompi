@@ -17,10 +17,7 @@ char        error_file_name[256],
 ofstream    *error_file;
 
 public:
-	errorlogclass():
-    error_file(NULL){
-        strcpy (error_file_name, "none");
-    };
+	errorlogclass(): error_file(NULL){ strcpy (error_file_name, "none");};
 
     void setErrorFileLocation (const char *file_path, const char *file_name);
     void addError (const char *error_str, const char *error_location);
@@ -28,8 +25,7 @@ public:
     void close (void);
 
 	virtual ~errorlogclass(){
-         if (error_file != NULL)
-         {
+         if (error_file != NULL){
              error_file->close ();
              delete (error_file);
          }
