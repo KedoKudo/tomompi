@@ -1,15 +1,5 @@
 #include "errorlogclass.h"
 
-//__________________________________________________________________________
-
-errorlogclass::errorlogclass()
-{
-    strcpy (error_file_name, "none");
-
-    error_file = NULL;
-}
-
-//__________________________________________________________________________
 
 void errorlogclass::setErrorFileLocation (const char *file_path, const char *file_name)
 {
@@ -74,16 +64,3 @@ void errorlogclass::close (void)
         error_file = NULL;
     }
 }
-
-//__________________________________________________________________________
-
-errorlogclass::~errorlogclass()
-{
-    if (error_file != NULL)
-    {
-        error_file->close ();
-        delete (error_file);
-    }
-}
-
-//__________________________________________________________________________
