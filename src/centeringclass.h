@@ -39,7 +39,7 @@ public:
 		wtemp(NULL), 
 		mean_vect(NULL),
 		low_pass_sino_lines_data(NULL), 
-    mean_sino_line_data(NULL){}
+    	mean_sino_line_data(NULL){};
 
 	void init (ReconAlgorithm *recon_algorithm);
 
