@@ -27,24 +27,24 @@ typedef struct {
     *sinogram_calc_numbers;
 
   unsigned short int  *short_sinogram,
-    *short_white_field_sino,
-    *int_scale_buffer;
+                      *short_white_field_sino,
+                      *int_scale_buffer;
   float		*sinograms,
-    *reconstructions,
-    *sino_mpi_buffer,
-    *sino_calc_buffer,
-    *recon_mpi_buffer,
-    *recon_calc_buffer,
-    *shifted_recon,
-    *shifted_sinogram,    
-    *dark_field_sino_ave,
-    *float_white_field_sino,
-    *debug_post_centering_sinogram,
-    *debug_post_ring_sinogram,
-    *debug_post_centering_sinogram_mpi_buffer,
-    *debug_post_centering_sinogram_calc_buffer,
-    *debug_post_ring_sinogram_mpi_buffer,
-    *debug_post_ring_sinogram_calc_buffer;
+          *reconstructions,
+          *sino_mpi_buffer,
+          *sino_calc_buffer,
+          *recon_mpi_buffer,
+          *recon_calc_buffer,
+          *shifted_recon,
+          *shifted_sinogram,    
+          *dark_field_sino_ave,
+          *float_white_field_sino,
+          *debug_post_centering_sinogram,
+          *debug_post_ring_sinogram,
+          *debug_post_centering_sinogram_mpi_buffer,
+          *debug_post_centering_sinogram_calc_buffer,
+          *debug_post_ring_sinogram_mpi_buffer,
+          *debug_post_ring_sinogram_calc_buffer;
 
   // buffers for boundary padding
   float *sinograms_boundary_padding;
@@ -63,29 +63,32 @@ typedef struct {
 
 //_____________________________________________________________________________________
 
-int			        processing_slice_timer = 0,
-  total_processing_slice_timer = 0,
-  MPI_requests_timer = 0,
-  MPI_sinogram_timer = 0,
-  single_MPI_sinogram_timer = 0,
-  write_reconstruction_timer = 0,
-  num_reconstructions_processed,
-  delay_time = 0;
-NexusBoxClass   	*recon_file;
-INFO_RECORD		    information;
-long int		    image_size;
-bool			    recon_thread_running;
+int processing_slice_timer       = 0,
+    total_processing_slice_timer = 0,
+    MPI_requests_timer           = 0,
+    MPI_sinogram_timer           = 0,
+    single_MPI_sinogram_timer    = 0,
+    write_reconstruction_timer   = 0,
+    delay_time                   = 0,
+    num_reconstructions_processed;
+
+NexusBoxClass *recon_file;
+
+INFO_RECORD information;
+
+long int  image_size;
+
+bool  recon_thread_running;
 
 ReconAlgorithm      *recon_algorithm;
 CenteringClass	    centering_processor;
 
-char                log_file_name[256],
-  error_file_name[256];
+char  log_file_name  [256],
+      error_file_name[256];
 
 //_____________________________________________________________________________________
 
-void ClientAcknowledgements (void)
-{
+void ClientAcknowledgements (void){
   LogFileClass *acknowledge_file;
 
   acknowledge_file = new LogFileClass ("./", "client_acknowledge.txt");
@@ -297,20 +300,28 @@ void ClientAcknowledgements (void)
 
 //_____________________________________________________________________________________
 
-void FirstContact (void)
-{
+void FirstContact (void){
   MPI_Status		status;
+
   char			msg[256];
-  int             rank,
-    type,
-    dims[2],
-    temp;
+
+  int       rank,
+            type,
+            dims[2],
+            temp;
+
   int				power,
-    size;
+            size;
+
   bool			still_smaller;
 
-
-  MPI_Recv (&recon_info_record, sizeof (recon_info_record), MPI_BYTE, MPI_ANY_SOURCE, 0, MPI_COMM_WORLD, &status);
+  MPI_Recv (&recon_info_record, 
+            sizeof (recon_info_record), 
+            MPI_BYTE, 
+            MPI_ANY_SOURCE, 
+            0, 
+            MPI_COMM_WORLD, 
+            &status);
 
   log_file = new LogFileClass (recon_info_record.log_path, log_file_name);
 
@@ -323,78 +334,77 @@ void FirstContact (void)
 
   information.sinogram_size = recon_info_record.sinogram_xdim*recon_info_record.sinogram_ydim;
   information.short_sinogram = (unsigned short int *) malloc (sizeof(unsigned short int)*information.sinogram_size);
-  if (information.short_sinogram == NULL)
-    {
-      sprintf (msg, "Could not alocate memory for information.short_sinogram.");
-      error_log->addError (msg, "FirstContact ()");
-    }
+  if (information.short_sinogram == NULL){
+    sprintf (msg, "Could not alocate memory for information.short_sinogram.");
+    error_log->addError (msg, "FirstContact ()");
+  }
 
   information.short_white_field_sino = (unsigned short int *) malloc (sizeof(unsigned short int)*recon_info_record.white_size);
-  if (information.short_white_field_sino == NULL)
-    {
-      sprintf (msg, "Could not alocate memory for information.short_white_field_sino.");
-      error_log->addError (msg, "FirstContact ()");
-    }
+  if (information.short_white_field_sino == NULL){
+    sprintf (msg, "Could not alocate memory for information.short_white_field_sino.");
+    error_log->addError (msg, "FirstContact ()");
+  }
 
   information.float_white_field_sino = (float *) malloc (sizeof (float)*recon_info_record.sinogram_xdim);
-  if (information.float_white_field_sino == NULL)
-    {
-      sprintf (msg, "Could not alocate memory for information.float_white_field_sino.");
-      error_log->addError (msg, "FirstContact ()");
-    }
+  if (information.float_white_field_sino == NULL){
+    sprintf (msg, "Could not alocate memory for information.float_white_field_sino.");
+    error_log->addError (msg, "FirstContact ()");
+  }
 
   information.dark_field_sino_ave = (float *) malloc (sizeof(float)*recon_info_record.dark_size);
-  if (information.dark_field_sino_ave == NULL)
-    {
-      sprintf (msg, "Could not alocate memory for information.dark_field_sino_ave.");
-      error_log->addError (msg, "FirstContact ()");
-    }
+  if (information.dark_field_sino_ave == NULL){
+    sprintf (msg, "Could not alocate memory for information.dark_field_sino_ave.");
+    error_log->addError (msg, "FirstContact ()");
+  }
 
   sinogram_data_set = (char *) malloc (recon_info_record.sinogram_set_size);
-  if (sinogram_data_set == NULL)
-    {
-      sprintf (msg, "Could not alocate memory for sinogram_data_set.");
-      error_log->addError (msg, "FirstContact ()");
-    }
+  if (sinogram_data_set == NULL){
+    sprintf (msg, "Could not alocate memory for sinogram_data_set.");
+    error_log->addError (msg, "FirstContact ()");
+  }
 
   recon_info_record.theta_list = (float *) malloc (sizeof(float)*recon_info_record.theta_list_size);
-  if (recon_info_record.theta_list == NULL)
-    {
-      sprintf (msg, "Could not alocate memory for recon_info_record.theta_list.");
-      error_log->addError (msg, "FirstContact ()");
-    }
-  MPI_Recv (recon_info_record.theta_list, recon_info_record.theta_list_size, MPI_FLOAT, recon_info_record.mayor_id, 0, MPI_COMM_WORLD, &status);
+  if (recon_info_record.theta_list == NULL){
+    sprintf (msg, "Could not alocate memory for recon_info_record.theta_list.");
+    error_log->addError (msg, "FirstContact ()");
+  }
+
+  MPI_Recv (recon_info_record.theta_list, 
+            recon_info_record.theta_list_size, 
+            MPI_FLOAT, 
+            recon_info_record.mayor_id, 
+            0, 
+            MPI_COMM_WORLD, 
+            &status);
 
   sprintf (msg, "First contact recieved!  The server is process %d", recon_info_record.mayor_id);
   log_file->Message (msg);
 
-  switch (recon_info_record.debug)
-    {
-    case 0 : sprintf (msg, "Debug Type: None"); break;
-    case 1 : sprintf (msg, "Debug Type: White Field"); break;
-    case 2 : sprintf (msg, "Debug Type: Dark Field"); break;
-    case 3 : sprintf (msg, "Debug Type: Pre-Normalization"); break;
-    case 4 : sprintf (msg, "Debug Type: Post-Normalization"); break;
-    case 5 : sprintf (msg, "Debug Type: Post-Centering"); break;
-    case 6 : sprintf (msg, "Debug Type: Post-Ring Removal"); break;
-    case 7 : sprintf (msg, "Debug Type: Mark Suspicious"); break;
-    case 8 : sprintf (msg, "Debug Type: Full"); break;
-    case 9 : sprintf (msg, "Debug Type: No Output"); break;
-    case 10 : sprintf (msg, "Debug Type: No Reconstruction"); break;
-    default : sprintf (msg, "Debug Type: Unknown"); break;
-    }
+  switch (recon_info_record.debug){
+    case 0  : sprintf (msg, "Debug Type: None");               break;
+    case 1  : sprintf (msg, "Debug Type: White Field");        break;
+    case 2  : sprintf (msg, "Debug Type: Dark Field");         break;
+    case 3  : sprintf (msg, "Debug Type: Pre-Normalization");  break;
+    case 4  : sprintf (msg, "Debug Type: Post-Normalization"); break;
+    case 5  : sprintf (msg, "Debug Type: Post-Centering");     break;
+    case 6  : sprintf (msg, "Debug Type: Post-Ring Removal");  break;
+    case 7  : sprintf (msg, "Debug Type: Mark Suspicious");    break;
+    case 8  : sprintf (msg, "Debug Type: Full");               break;
+    case 9  : sprintf (msg, "Debug Type: No Output");          break;
+    case 10 : sprintf (msg, "Debug Type: No Reconstruction");  break;
+    default : sprintf (msg, "Debug Type: Unknown");            break;
+  }
   log_file->Message (msg);
 
-  switch (recon_info_record.filter)
-    {
-    case FILTER_NONE : log_file->Message ("Filter: None");
+  switch (recon_info_record.filter){
+    case FILTER_NONE        : log_file->Message ("Filter: None");
     case FILTER_SHEPP_LOGAN : log_file->Message ("Filter: Shepp/Logan");
-    case FILTER_HANN : log_file->Message ("Filter: Hann");
-    case FILTER_HAMMING : log_file->Message ("Filter: Hamming");
-    case FILTER_RAMP : log_file->Message ("Filter: Ramp");
-    case FILTER_FBP : log_file->Message ("Filter: FBP");
-    default : log_file->Message ("Filter: unknown");
-    }
+    case FILTER_HANN        : log_file->Message ("Filter: Hann");
+    case FILTER_HAMMING     : log_file->Message ("Filter: Hamming");
+    case FILTER_RAMP        : log_file->Message ("Filter: Ramp");
+    case FILTER_FBP         : log_file->Message ("Filter: FBP");
+    default                 : log_file->Message ("Filter: unknown");
+  }
 
   sprintf (msg, "%s%d", "Theta list size: ", recon_info_record.theta_list_size);
   log_file->Message(msg);
@@ -405,41 +415,35 @@ void FirstContact (void)
   still_smaller = true;
   power = 0;
   while (still_smaller)
-    if (recon_info_record.sinogram_xdim > pow (2, power))
-      {
-	power++;
-	still_smaller = true;
-      }
+    if (recon_info_record.sinogram_xdim > pow (2, power)){
+	    power++;
+	    still_smaller = true;
+    }
     else
       still_smaller = false;
 
-  if (recon_info_record.sinogram_xdim == pow (2, power))
-    {
-
+  if (recon_info_record.sinogram_xdim == pow (2, power)){
       // it seems that reconstruction_ydim and reconstruction_xdim are assumed to be equal here. Y. Pan. 6/20/2011
+    information.sinogram_adjusted_xdim = recon_info_record.sinogram_xdim;
 
-      information.sinogram_adjusted_xdim = recon_info_record.sinogram_xdim;
+    information.sinogram_adjusted_size = information.sinogram_adjusted_xdim * recon_info_record.sinogram_ydim;
+    information.reconstruction_size = recon_info_record.reconstruction_xdim*recon_info_record.reconstruction_ydim;
 
-      information.sinogram_adjusted_size = information.sinogram_adjusted_xdim * recon_info_record.sinogram_ydim;
-      information.reconstruction_size = recon_info_record.reconstruction_xdim*recon_info_record.reconstruction_ydim;
+    sprintf (msg, "Sinograms are a power of 2!");
+    log_file->Message (msg);
+  }
+  else{
+    size = (int) pow (2, power);
+    information.sinogram_adjusted_xdim = size;
 
-      sprintf (msg, "Sinograms are a power of 2!");
-      log_file->Message (msg);
-    }
-  else
-    {
+    information.sinogram_adjusted_size = information.sinogram_adjusted_xdim * recon_info_record.sinogram_ydim;
+    recon_info_record.reconstruction_xdim = size;
+    recon_info_record.reconstruction_ydim = size;
+    information.reconstruction_size = recon_info_record.reconstruction_xdim*recon_info_record.reconstruction_ydim;
 
-      size = (int) pow (2, power);
-      information.sinogram_adjusted_xdim = size;
-
-      information.sinogram_adjusted_size = information.sinogram_adjusted_xdim * recon_info_record.sinogram_ydim;
-      recon_info_record.reconstruction_xdim = size;
-      recon_info_record.reconstruction_ydim = size;
-      information.reconstruction_size = recon_info_record.reconstruction_xdim*recon_info_record.reconstruction_ydim;
-
-      sprintf (msg, "Sinograms are not a power of 2.  They will be increased to %d", information.sinogram_adjusted_xdim);
-      log_file->Message (msg);
-    }
+    sprintf (msg, "Sinograms are not a power of 2.  They will be increased to %d", information.sinogram_adjusted_xdim);
+    log_file->Message (msg);
+  }
 
   sprintf (msg, "White field size: %d dark_field_size: %d", recon_info_record.white_size, recon_info_record.dark_size);
   log_file->Message (msg);
@@ -452,27 +456,20 @@ void FirstContact (void)
 
   if (recon_info_record.centering == 1)
     if (recon_info_record.use_fixed_shift == 1)
-      if (recon_info_record.use_slices_file == 1)
-	{
-
-	  sprintf (msg, "I will be centering with fixed shifts from %f -> %f.", recon_info_record.start_fixed_shift, recon_info_record.end_fixed_shift);
-
-	  log_file->Message(msg);
-	}
-      else
-	{
-
-	  sprintf (msg, "I will be centering with a fixed shift of %f.", recon_info_record.fixed_shift_value);
-
-	  log_file->Message(msg);
-	}
+      if (recon_info_record.use_slices_file == 1){
+        sprintf (msg, "I will be centering with fixed shifts from %f -> %f.", recon_info_record.start_fixed_shift, recon_info_record.end_fixed_shift);
+    	  log_file->Message(msg);
+      }
+      else{
+	      sprintf (msg, "I will be centering with a fixed shift of %f.", recon_info_record.fixed_shift_value);
+        log_file->Message(msg);
+	    }
     else
       log_file->Message("I will be attempting to auto-center.");
   else
     log_file->Message("I will not be auto-centering.");
 
-  switch (recon_info_record.file_format)
-    {
+  switch (recon_info_record.file_format){
     case HDF4 : {
       log_file->Message ("File format: HDF4");
       recon_file->SetFileMode (HDF4_MODE);
@@ -492,51 +489,47 @@ void FirstContact (void)
       recon_file->SetFileMode (HDF5_MODE);
       break;
     }
-    }
+  }
 
-  if (recon_info_record.use_ring_removal)
-    {
-      sprintf (msg, "Ring removal is: ON");
-      log_file->Message(msg);
-      sprintf (msg, "Ring removal coefficient is: %f", recon_info_record.ring_removal_coeff);
-      log_file->Message(msg);
-    }
-  else
-    {
-      sprintf (msg, "Ring removal is: OFF");
-      log_file->Message(msg);
-    }
+  if (recon_info_record.use_ring_removal){
+    sprintf (msg, "Ring removal is: ON");
+    log_file->Message(msg);
+    sprintf (msg, "Ring removal coefficient is: %f", recon_info_record.ring_removal_coeff);
+    log_file->Message(msg);
+  }
+  else{
+    sprintf (msg, "Ring removal is: OFF");
+    log_file->Message(msg);
+  }
 
   if (recon_info_record.average_white_fields)
     log_file->Message("Averaging white fields: ON");
   else
     log_file->Message("Averaging white fields: OFF");
 
-  switch (recon_info_record.compression_type)
-    {
-    case NX_COMP_NONE : log_file->Message ("Compression type: NONE"); break;
-    case NX_COMP_LZW : log_file->Message ("Compression type: LZW"); break;
-    case NX_COMP_RLE : log_file->Message ("Compression type: RLE"); break;
-    case NX_COMP_HUF : log_file->Message ("Compression type: HUF"); break;
-    default : log_file->Message ("Compression type: unknown--this may be a problem!"); break;
+  switch (recon_info_record.compression_type){
+    case NX_COMP_NONE : log_file->Message ("Compression type: NONE");                            break;
+    case NX_COMP_LZW  : log_file->Message ("Compression type: LZW");                             break;
+    case NX_COMP_RLE  : log_file->Message ("Compression type: RLE");                             break;
+    case NX_COMP_HUF  : log_file->Message ("Compression type: HUF");                             break;
+    default           : log_file->Message ("Compression type: unknown--this may be a problem!"); break;
     }
   recon_file->CompressionScheme (recon_info_record.compression_type);
 
   //if we're rescaling the data, we need an int buffer to scale to...
-  if (recon_info_record.rescale_to_int)
-    {
-      information.int_scale_buffer = (unsigned short int *) malloc (sizeof (unsigned short int) * recon_info_record.reconstruction_ydim * recon_info_record.reconstruction_ydim);
-      if (information.int_scale_buffer == NULL)
-        {
-	  sprintf (msg, "Could not alocate memory for int_scale_buffer.");
-	  error_log->addError (msg, "FirstContact ()");
-        }
+  if (recon_info_record.rescale_to_int){
+    information.int_scale_buffer = (unsigned short int *) malloc (sizeof (unsigned short int) * recon_info_record.reconstruction_ydim * recon_info_record.reconstruction_ydim);
+    if (information.int_scale_buffer == NULL){
+      sprintf (msg, "Could not alocate memory for int_scale_buffer.");
+      error_log->addError (msg, "FirstContact ()");
     }
+  }
 
   if (recon_info_record.rescale_to_int)
     type = NX_UINT16;
   else
     type = NX_FLOAT32;
+  
   rank = 2;
   dims[0] = recon_info_record.reconstruction_ydim;
   dims[1] = recon_info_record.reconstruction_xdim;
@@ -552,8 +545,7 @@ void FirstContact (void)
 
 //_____________________________________________________________________________________
 
-void WriteBinaryData (void *data, int slice, char *prefix, int xdim, int ydim, int type)
-{
+void WriteBinaryData (void *data, int slice, char *prefix, int xdim, int ydim, int type){
   char    		file_name[256];
   ofstream		output_file;
   int				datum_size;
@@ -562,15 +554,14 @@ void WriteBinaryData (void *data, int slice, char *prefix, int xdim, int ydim, i
 
   output_file.open (file_name);
 
-  switch (type)
-    {
-    case NX_INT8 :;
+  switch (type){
+    case NX_INT8  :;
     case NX_UINT8 : datum_size = 1; break;
 
-    case NX_INT16 :;
+    case NX_INT16  :;
     case NX_UINT16 : datum_size = 2; break;
 
-    case NX_INT32 :;
+    case NX_INT32  :;
     case NX_UINT32 : datum_size = 4; break;
 
     case NX_FLOAT32 : datum_size = 4; break;
@@ -588,8 +579,7 @@ void WriteBinaryData (void *data, int slice, char *prefix, int xdim, int ydim, i
 
 //_____________________________________________________________________________________
 
-void WriteHDFData (void *data, int slice, char *prefix, int xdim, int ydim, int type)
-{
+void WriteHDFData (void *data, int slice, char *prefix, int xdim, int ydim, int type){
   char    file_name[256];
   int     dims[2];
   float   *temp;
@@ -603,19 +593,17 @@ void WriteHDFData (void *data, int slice, char *prefix, int xdim, int ydim, int 
   strcpy (file_name, prefix);
   strcat (file_name, "_");
   strcat (file_name, recon_info_record.base_name);
-  switch (recon_info_record.file_format)
-    {
+  switch (recon_info_record.file_format){
     case HDF4 : sprintf (file_name, "%s_%05d.hdf", file_name, slice); break;
-    case HDF5 :	sprintf (file_name, "%s_%05d.h5", file_name, slice); break;
-    }
+    case HDF5 :	sprintf (file_name, "%s_%05d.h5", file_name, slice);  break;
+  }
 
   recon_file->WriteAll (recon_info_record.reconstruction_path, file_name);
 }
 
 //_____________________________________________________________________________________
 
-void WriteData (void *data, int slice, char *prefix, int xdim, int ydim, int type)
-{
+void WriteData (void *data, int slice, char *prefix, int xdim, int ydim, int type){
   if (recon_info_record.file_format == BIN)
     WriteBinaryData (data, slice, prefix, xdim, ydim, type);
   else
@@ -623,8 +611,7 @@ void WriteData (void *data, int slice, char *prefix, int xdim, int ydim, int typ
 }
 
 //_____________________________________________________________________________________
-void WriteBinaryReconstruction (void *reconstruction, int slice, float shift)
-{
+void WriteBinaryReconstruction (void *reconstruction, int slice, float shift){
   char    		file_name[256];
   ofstream		output_file;
   int				datum_size;
@@ -633,9 +620,7 @@ void WriteBinaryReconstruction (void *reconstruction, int slice, float shift)
     sprintf (file_name, "%srec_%s_%05d.bin", recon_info_record.reconstruction_path, recon_info_record.base_name, slice);
   }
   else{
-
     sprintf (file_name, "%srec_%s_%05d_%f.bin", recon_info_record.reconstruction_path, recon_info_record.base_name, slice, shift);
-
   }
 
   output_file.open (file_name);
@@ -648,80 +633,73 @@ void WriteBinaryReconstruction (void *reconstruction, int slice, float shift)
 }
 
 //_____________________________________________________________________________________
-void WriteHDFReconstruction (void *reconstruction, int slice, float shift)
-{
+void WriteHDFReconstruction (void *reconstruction, int slice, float shift){
   char    file_name[256];
   int     dims[2];
   float   *temp,
-    source_range,
-    scale_factor;
+          source_range,
+          scale_factor;
   int		r,
-    destination_range;
+        destination_range;
 
   temp = (float *) reconstruction;
 
-  if (recon_info_record.compression_type != NX_COMP_NONE)
-    {
-      r = recon_info_record.reconstruction_xdim/2;
-      sprintf (msg, "Radius: %d", r);
-      log_file->Message (msg);
+  if (recon_info_record.compression_type != NX_COMP_NONE){
+    r = recon_info_record.reconstruction_xdim/2;
+    sprintf (msg, "Radius: %d", r);
+    log_file->Message (msg);
 
-      int count = 0;
-      for (int loop=-r;loop<r;loop++)
-	for (int loop2=-r;loop2<r;loop2++)
-	  if ((loop*loop+loop2*loop2) > r*r)
-	    {
-	      count++;
-	      temp[(loop+r)*recon_info_record.reconstruction_xdim+(loop2+r)] = 0.0;
-	    }
-    }
+    int count = 0;
+    for (int loop=-r;loop<r;loop++)
+      for (int loop2=-r;loop2<r;loop2++)
+        if ((loop*loop+loop2*loop2) > r*r){
+          count++;
+          temp[(loop+r)*recon_info_record.reconstruction_xdim+(loop2+r)] = 0.0;
+        }
+  }
 
-  if (recon_info_record.rescale_to_int)
-    {
-      destination_range = 65535;
-      source_range = recon_info_record.scale_data_range_max - recon_info_record.scale_data_range_min;
+  if (recon_info_record.rescale_to_int){
+    destination_range = 65535;
+    source_range = recon_info_record.scale_data_range_max - recon_info_record.scale_data_range_min;
 
-      sprintf (msg, "dest range: %d, source range: %f", destination_range, source_range);
-      log_file->Message (msg);
+    sprintf (msg, "dest range: %d, source range: %f", destination_range, source_range);
+    log_file->Message (msg);
 
-      for (int loop=0;loop<recon_info_record.reconstruction_ydim;loop++)
-	for (int loop2=0;loop2<recon_info_record.reconstruction_xdim;loop2++)
-	  {
-	    if (temp[loop*recon_info_record.reconstruction_xdim+loop2] > recon_info_record.scale_data_range_max)
-	      temp[loop*recon_info_record.reconstruction_xdim+loop2] = recon_info_record.scale_data_range_max;
-	    if (temp[loop*recon_info_record.reconstruction_xdim+loop2] < recon_info_record.scale_data_range_min)
-	      temp[loop*recon_info_record.reconstruction_xdim+loop2] = recon_info_record.scale_data_range_min;
-	    scale_factor = (temp[loop*recon_info_record.reconstruction_xdim+loop2] - data_range_min) / source_range;
-	    information.int_scale_buffer[loop*recon_info_record.reconstruction_xdim+loop2] = (unsigned short int) floor (scale_factor * destination_range);
-	  }
+    for (int loop=0;loop<recon_info_record.reconstruction_ydim;loop++)
+      for (int loop2=0;loop2<recon_info_record.reconstruction_xdim;loop2++){
 
-      dims[0] = recon_info_record.reconstruction_ydim;
-      dims[1] = recon_info_record.reconstruction_xdim;
-      recon_file->UpdateVarInfo ("Image", dims, information.int_scale_buffer);
-    }
-  else
-    {
-      dims[0] = recon_info_record.reconstruction_ydim;
-      dims[1] = recon_info_record.reconstruction_xdim;
-      recon_file->UpdateVarInfo ("Image", dims, reconstruction);
-    }
+        if (temp[loop*recon_info_record.reconstruction_xdim+loop2] > recon_info_record.scale_data_range_max)
+          temp[loop*recon_info_record.reconstruction_xdim+loop2] = recon_info_record.scale_data_range_max;
+
+        if (temp[loop*recon_info_record.reconstruction_xdim+loop2] < recon_info_record.scale_data_range_min)
+          temp[loop*recon_info_record.reconstruction_xdim+loop2] = recon_info_record.scale_data_range_min;
+
+        scale_factor = (temp[loop*recon_info_record.reconstruction_xdim+loop2] - data_range_min) / source_range;
+        information.int_scale_buffer[loop*recon_info_record.reconstruction_xdim+loop2] = (unsigned short int) floor (scale_factor * destination_range);
+      }
+
+    dims[0] = recon_info_record.reconstruction_ydim;
+    dims[1] = recon_info_record.reconstruction_xdim;
+    recon_file->UpdateVarInfo ("Image", dims, information.int_scale_buffer);
+  }
+  else{
+    dims[0] = recon_info_record.reconstruction_ydim;
+    dims[1] = recon_info_record.reconstruction_xdim;
+    recon_file->UpdateVarInfo ("Image", dims, reconstruction);
+  }
 
   recon_file->UpdateVars ();
 
   if (!recon_info_record.use_slices_file)
-    switch (recon_info_record.file_format)
-      {
+    switch (recon_info_record.file_format){
       case HDF4 : sprintf (file_name, "rec_%s_%05d.hdf", recon_info_record.base_name, slice); break;
-      case HDF5 :	sprintf (file_name, "rec_%s_%05d.h5", recon_info_record.base_name, slice); break;
-      }
+      case HDF5 :	sprintf (file_name, "rec_%s_%05d.h5", recon_info_record.base_name, slice);  break;
+    }
   else
-    switch (recon_info_record.file_format)
-      {
-
+    switch (recon_info_record.file_format){
       case HDF4 : sprintf (file_name, "rec_%s_%05d_%f.hdf", recon_info_record.base_name, slice, shift); break;
-      case HDF5 :	sprintf (file_name, "rec_%s_%05d_%f.h5", recon_info_record.base_name, slice, shift); break;
-
-      }
+      case HDF5 :	sprintf (file_name, "rec_%s_%05d_%f.h5", recon_info_record.base_name, slice, shift);  break;
+    }
 
   recon_file->WriteAll (recon_info_record.reconstruction_path, file_name);
 
@@ -729,8 +707,7 @@ void WriteHDFReconstruction (void *reconstruction, int slice, float shift)
 
 //_____________________________________________________________________________________
 
-void WriteReconstruction (void *reconstruction, int slice, float shift)
-{
+void WriteReconstruction (void *reconstruction, int slice, float shift){
   sprintf (msg, "WriteReconstruction--slice: %d, shift: %f", slice, shift);
 
   log_file->Message (msg);
@@ -751,18 +728,21 @@ void WriteReconstruction (void *reconstruction, int slice, float shift)
 
 //_____________________________________________________________________________________
 
-void Normalize (unsigned short int *short_sino, unsigned short int *short_white_field_sino, float *dark_field_sino_ave, float *norm_sino)
-{
-  int             frame_interval,
-    frame_number,
-    white_dark_number,
-    loop,
-    loop2,
-    pad_size,
-    front_pad_size,
-    back_pad_size;
-  float           temp,
-    *float_white_field_sino;
+void Normalize (unsigned short int *short_sino, 
+                unsigned short int *short_white_field_sino, 
+                float *dark_field_sino_ave, 
+                float *norm_sino){
+  int frame_interval,
+      frame_number,
+      white_dark_number,
+      loop,
+      loop2,
+      pad_size,
+      front_pad_size,
+      back_pad_size;
+
+  float temp,
+       *float_white_field_sino;
 
   float_white_field_sino = information.float_white_field_sino;
 
@@ -770,15 +750,14 @@ void Normalize (unsigned short int *short_sino, unsigned short int *short_white_
   front_pad_size = pad_size / 2;
   back_pad_size = pad_size - front_pad_size;
 
-  if (recon_info_record.average_white_fields)
-    {
-      for (loop=0;loop<recon_info_record.sinogram_xdim;loop++)
-	float_white_field_sino[loop] = 0;
+  if (recon_info_record.average_white_fields){
+    for (loop=0;loop<recon_info_record.sinogram_xdim;loop++)
+      float_white_field_sino[loop] = 0;
 
-      for (loop=0;loop<recon_info_record.num_white_fields;loop++)
-	for (loop2=0;loop2<recon_info_record.sinogram_xdim;loop2++)
-	  float_white_field_sino[loop2] = float_white_field_sino[loop2] + (((float) short_white_field_sino[(loop*recon_info_record.sinogram_xdim)+loop2]) / recon_info_record.num_white_fields);
-    }
+    for (loop=0;loop<recon_info_record.num_white_fields;loop++)
+      for (loop2=0;loop2<recon_info_record.sinogram_xdim;loop2++)
+        float_white_field_sino[loop2] = float_white_field_sino[loop2] + (((float) short_white_field_sino[(loop*recon_info_record.sinogram_xdim)+loop2]) / recon_info_record.num_white_fields);
+  }
   else
     for (loop=0;loop<recon_info_record.sinogram_xdim;loop++)
       float_white_field_sino[loop] = (float) short_white_field_sino[loop];
@@ -786,101 +765,92 @@ void Normalize (unsigned short int *short_sino, unsigned short int *short_white_
   frame_interval = 0;
   frame_number = 0;
   white_dark_number = 0;
-  while (frame_number < recon_info_record.sinogram_ydim)
-    {
-      if (!recon_info_record.average_white_fields)
-	if (frame_interval == recon_info_record.whitedark_interval)
-	  {
-	    frame_interval = 0;
-	    white_dark_number++;
-	    for (loop=0;loop<recon_info_record.sinogram_xdim;loop++)
-	      float_white_field_sino[loop] = (float) short_white_field_sino[white_dark_number*recon_info_record.sinogram_xdim+loop];
-	  }
+  while (frame_number < recon_info_record.sinogram_ydim){
+    if (!recon_info_record.average_white_fields)
+	    if (frame_interval == recon_info_record.whitedark_interval){
+        frame_interval = 0;
+        white_dark_number++;
+        for (loop=0;loop<recon_info_record.sinogram_xdim;loop++)
+          float_white_field_sino[loop] = (float) short_white_field_sino[white_dark_number*recon_info_record.sinogram_xdim+loop];
+	    }
 
-      //if sinogram is smaller than a power of 2, pad front with results of first real sinogram pixel
-      temp = float_white_field_sino[0] - dark_field_sino_ave[0];
-      if (temp != 0)
-	temp = ((float) short_sino[frame_number*recon_info_record.sinogram_xdim] - dark_field_sino_ave[0]) / temp;
-      else
-	temp = 1e-3;
-      for (loop=0;loop<front_pad_size;loop++)
-	norm_sino[frame_number*information.sinogram_adjusted_xdim+loop] = temp;
+    //if sinogram is smaller than a power of 2, pad front with results of first real sinogram pixel
+    temp = float_white_field_sino[0] - dark_field_sino_ave[0];
+    if (temp != 0)
+	    temp = ((float) short_sino[frame_number*recon_info_record.sinogram_xdim] - dark_field_sino_ave[0]) / temp;
+    else
+	    temp = 1e-3;
 
-      for (loop=front_pad_size;loop<front_pad_size+recon_info_record.sinogram_xdim;loop++)
-	{
-	  temp = float_white_field_sino[(loop-front_pad_size)] - dark_field_sino_ave[(loop-front_pad_size)];
+    for (loop=0;loop<front_pad_size;loop++)
+	    norm_sino[frame_number*information.sinogram_adjusted_xdim+loop] = temp;
+
+    for (loop=front_pad_size;loop<front_pad_size+recon_info_record.sinogram_xdim;loop++){
+	    temp = float_white_field_sino[(loop-front_pad_size)] - dark_field_sino_ave[(loop-front_pad_size)];
 
 	  if (temp != 0)
 	    norm_sino[frame_number*information.sinogram_adjusted_xdim+loop] = ((float) short_sino[frame_number*recon_info_record.sinogram_xdim+(loop-front_pad_size)] - dark_field_sino_ave[(loop-front_pad_size)]) / temp;
 	  else
 	    norm_sino[frame_number*information.sinogram_adjusted_xdim+loop] = 1e-3;
-	}
+	  }
 
-      //if sinogram is smaller than a power of 2, pad back with results of last real sinogram pixel
-      temp = float_white_field_sino[(recon_info_record.sinogram_xdim-1)] - dark_field_sino_ave[recon_info_record.sinogram_xdim-1];
-      if (temp != 0)
-	temp = ((float) short_sino[frame_number*recon_info_record.sinogram_xdim+(recon_info_record.sinogram_xdim-1)] - dark_field_sino_ave[recon_info_record.sinogram_xdim-1]) / temp;
-      else
-	temp = 1e-3;
-      for (loop=front_pad_size+recon_info_record.sinogram_xdim;loop<information.sinogram_adjusted_xdim;loop++)
-	norm_sino[frame_number*information.sinogram_adjusted_xdim+loop] = temp;
+    //if sinogram is smaller than a power of 2, pad back with results of last real sinogram pixel
+    temp = float_white_field_sino[(recon_info_record.sinogram_xdim-1)] - dark_field_sino_ave[recon_info_record.sinogram_xdim-1];
+    if (temp != 0)
+      temp = ((float) short_sino[frame_number*recon_info_record.sinogram_xdim+(recon_info_record.sinogram_xdim-1)] - dark_field_sino_ave[recon_info_record.sinogram_xdim-1]) / temp;
+    else
+      temp = 1e-3;
+    for (loop=front_pad_size+recon_info_record.sinogram_xdim;loop<information.sinogram_adjusted_xdim;loop++)
+      norm_sino[frame_number*information.sinogram_adjusted_xdim+loop] = temp;
 
-      frame_interval++;
-      frame_number++;
-    }
+    frame_interval++;
+    frame_number++;
+  }
 
 }
 
 //---------------------------------------------------------------------------
 // from CenteringClass::LogProj
-void LogProj(float *data, int xdim, int ydim) 
-{ 
+void LogProj(float *data, int xdim, int ydim) { 
   int     i, k; 
   float   mean, max; 
   
   for (i=0;i<ydim;i++) {
-	
     max = data[i*xdim]; 
     for (k=0;k<xdim;k++) {
       if (data[i*xdim+k] > max) 
-	max = data[i*xdim+k]; 
+	      max = data[i*xdim+k]; 
     }
 
     for (k=0;k<xdim;k++) { 
       if (data[i*xdim+k] <= 0.0) 
-	data[i*xdim+k] = 1.0; // this is really only to check if is == 0 
- 
-      data[i*xdim+k] = log (max/data[i*xdim+k]); 
+	      data[i*xdim+k] = 1.0; // this is really only to check if is == 0 
+        data[i*xdim+k] = log (max/data[i*xdim+k]); 
     } 
   } 
 } 
  
 
-void LogSinogram (float *data, int xdim, int ydim)
-{
+void LogSinogram (float *data, int xdim, int ydim){
   int     i, k;
 
   for (i=0;i<ydim;i++){
     for (k=0;k<xdim;k++){
-	
       if (data[i*xdim+k] > 0)
-	data[i*xdim+k] = -1 * log (data[i*xdim+k]);
+	      data[i*xdim+k] = -1 * log (data[i*xdim+k]);
       else
-	data[i*xdim+k] = 0;
-      
+	      data[i*xdim+k] = 0;
     }
   }
 }
 
 //_____________________________________________________________________________________
 
-int ReconstructSinograms (void)
-{
+int ReconstructSinograms (void){
   int			return_val;
 
-  float                shift[2];
+  float   shift[2];
 
-  float       *recon_buffer;
+  float  *recon_buffer;
 
   return_val = 0;
 
@@ -894,42 +864,36 @@ int ReconstructSinograms (void)
 
   // These data assignment codes may be useful for the future use of centering_processor.FindCenter (which is not used
   // in the current framework - recon_info_record.centering is always true). Yongsheng Pan, 7/6/2011
-  if ( recon_info_record.recon_algorithm == RECONSTRUCTION_GRIDREC_DELAY_ONLY 
-       || recon_info_record.recon_algorithm == RECONSTRUCTION_GRIDREC ) { // GridRec
+  if ( recon_info_record.recon_algorithm == RECONSTRUCTION_GRIDREC_DELAY_ONLY || recon_info_record.recon_algorithm == RECONSTRUCTION_GRIDREC ) { // GridRec
 
     for (int loop=0;loop<=recon_algorithm->numberOfSinogramsNeeded()-1;loop++){
-    
-      if(recon_info_record.gridrec_padding == GRIDREC_PADDING_HALF || 
-	 recon_info_record.gridrec_padding == GRIDREC_PADDING_BOUNDARY ){
+      if(recon_info_record.gridrec_padding == GRIDREC_PADDING_HALF || recon_info_record.gridrec_padding == GRIDREC_PADDING_BOUNDARY ){
+          for( int j = 0; j < recon_info_record.sinogram_ydim; j++ ){
+            memcpy( &information.sinograms_boundary_padding[ loop * information.sinogram_adjusted_size * 2 + j * information.sinogram_adjusted_xdim * 2 + information.sinogram_adjusted_xdim / 2 ],
+                    &information.sino_calc_buffer[ loop * information.sinogram_adjusted_size + j * information.sinogram_adjusted_xdim ], 
+                    sizeof(float) * information.sinogram_adjusted_xdim 
+            );
+          }
 
-  	for( int j = 0; j < recon_info_record.sinogram_ydim; j++ ){
-  	  memcpy( &information.sinograms_boundary_padding[ loop * information.sinogram_adjusted_size * 2 + j * information.sinogram_adjusted_xdim * 2 + information.sinogram_adjusted_xdim / 2 ],
-  		  &information.sino_calc_buffer[ loop * information.sinogram_adjusted_size + j * information.sinogram_adjusted_xdim ], 
-  		  sizeof(float) * information.sinogram_adjusted_xdim );
-  	}
-
-  	log_file->Message("Sinogram processed for GridRec using half boundary padding!"); 
+      log_file->Message("Sinogram processed for GridRec using half boundary padding!"); 
       }
       else if(recon_info_record.gridrec_padding == GRIDREC_PADDING_ONE_AND_HALF){
-
-  	for( int j = 0; j < recon_info_record.sinogram_ydim; j++ ){
-  	  memcpy( &information.sinograms_boundary_padding[ loop * information.sinogram_adjusted_size * 4 + j * information.sinogram_adjusted_xdim * 4 + information.sinogram_adjusted_xdim * 3 / 2 ],
-  		  &information.sino_calc_buffer[ loop * information.sinogram_adjusted_size + j * information.sinogram_adjusted_xdim ], 
-  		  sizeof(float) * information.sinogram_adjusted_xdim );
-  	}
-
-  	log_file->Message("Sinogram processed for GridRec using one and half boundary padding!"); 
+        for( int j = 0; j < recon_info_record.sinogram_ydim; j++ ){
+          memcpy( &information.sinograms_boundary_padding[ loop * information.sinogram_adjusted_size * 4 + j * information.sinogram_adjusted_xdim * 4 + information.sinogram_adjusted_xdim * 3 / 2 ],
+                  &information.sino_calc_buffer[ loop * information.sinogram_adjusted_size + j * information.sinogram_adjusted_xdim ], 
+                  sizeof(float) * information.sinogram_adjusted_xdim 
+          );
+        }
+        log_file->Message("Sinogram processed for GridRec using one and half boundary padding!"); 
       }
       else{
-  	log_file->Message("Sinogram processed for GridRec using no boundary padding!"); 
+        log_file->Message("Sinogram processed for GridRec using no boundary padding!"); 
       }
     }
   }
 
   if (recon_info_record.centering){
-
     if (recon_info_record.use_fixed_shift){
-	
       shift[0] = recon_info_record.fixed_shift_value;
       shift[1] = recon_info_record.fixed_shift_value;
 
@@ -942,17 +906,29 @@ int ReconstructSinograms (void)
     }
     else{
       // It seems these codes are not used because recon_info_record.use_fixed_shift is always true in the current framework
-      if(recon_info_record.gridrec_padding == GRIDREC_PADDING_HALF ||
-	 recon_info_record.gridrec_padding == GRIDREC_PADDING_BOUNDARY ){
-
-	centering_processor.FindCenter (information.sinograms_boundary_padding, &information.sinograms_boundary_padding[information.sinogram_adjusted_size * 2], &shift[0], &shift[1], recon_info_record.ring_removal_coeff);
-
+      if(recon_info_record.gridrec_padding == GRIDREC_PADDING_HALF ||recon_info_record.gridrec_padding == GRIDREC_PADDING_BOUNDARY ){
+	      centering_processor.FindCenter (information.sinograms_boundary_padding, 
+                                       &information.sinograms_boundary_padding[information.sinogram_adjusted_size * 2], 
+                                       &shift[0], 
+                                       &shift[1], 
+                                       recon_info_record.ring_removal_coeff
+        );
       } 
       else if(recon_info_record.gridrec_padding == GRIDREC_PADDING_ONE_AND_HALF){
-	centering_processor.FindCenter (information.sinograms_boundary_padding, &information.sinograms_boundary_padding[information.sinogram_adjusted_size * 4], &shift[0], &shift[1], recon_info_record.ring_removal_coeff);
+	      centering_processor.FindCenter (information.sinograms_boundary_padding, 
+                                       &information.sinograms_boundary_padding[information.sinogram_adjusted_size * 4], 
+                                       &shift[0], 
+                                       &shift[1], 
+                                       recon_info_record.ring_removal_coeff
+        );
       }
       else{
-	centering_processor.FindCenter (information.sino_calc_buffer, &information.sino_calc_buffer[information.sinogram_adjusted_size], &shift[0], &shift[1], recon_info_record.ring_removal_coeff);
+	      centering_processor.FindCenter (information.sino_calc_buffer, 
+                                       &information.sino_calc_buffer[information.sinogram_adjusted_size], 
+                                       &shift[0], 
+                                       &shift[1], 
+                                       recon_info_record.ring_removal_coeff
+        );
       }
 
       // char msg[256]; 
@@ -962,28 +938,38 @@ int ReconstructSinograms (void)
     }
   }
   else{
-    
     shift[0] = 0;
     shift[1] = 0;
 
-    if(recon_info_record.gridrec_padding == GRIDREC_PADDING_HALF ||
-       recon_info_record.gridrec_padding == GRIDREC_PADDING_BOUNDARY ){
-      LogProj(information.sinograms_boundary_padding, information.sinogram_adjusted_xdim * 2,  
-	      recon_info_record.sinogram_ydim);
+    if(recon_info_record.gridrec_padding == GRIDREC_PADDING_HALF || recon_info_record.gridrec_padding == GRIDREC_PADDING_BOUNDARY ){
+      LogProj(information.sinograms_boundary_padding, 
+              information.sinogram_adjusted_xdim * 2,  
+	            recon_info_record.sinogram_ydim
+      );
       LogProj (&information.sinograms_boundary_padding[information.sinogram_adjusted_size * 2],
-	       information.sinogram_adjusted_xdim * 2, recon_info_record.sinogram_ydim);
+	              information.sinogram_adjusted_xdim * 2, 
+                recon_info_record.sinogram_ydim
+      );
     }
     else if( recon_info_record.gridrec_padding == GRIDREC_PADDING_ONE_AND_HALF){
-      LogProj(information.sinograms_boundary_padding, information.sinogram_adjusted_xdim * 4,  
-	      recon_info_record.sinogram_ydim);
+      LogProj(information.sinograms_boundary_padding, 
+              information.sinogram_adjusted_xdim * 4,  
+	            recon_info_record.sinogram_ydim
+      );
       LogProj(&information.sinograms_boundary_padding[information.sinogram_adjusted_size * 4],
-	      information.sinogram_adjusted_xdim * 4, recon_info_record.sinogram_ydim);
+	             information.sinogram_adjusted_xdim * 4, 
+               recon_info_record.sinogram_ydim
+      );
     }
     else{
-      LogProj(information.sino_calc_buffer, information.sinogram_adjusted_xdim, 
-	      recon_info_record.sinogram_ydim);
+      LogProj(information.sino_calc_buffer, 
+              information.sinogram_adjusted_xdim, 
+	            recon_info_record.sinogram_ydim
+      );
       LogProj(&information.sino_calc_buffer[information.sinogram_adjusted_size],
-	      information.sinogram_adjusted_xdim, recon_info_record.sinogram_ydim);
+	             information.sinogram_adjusted_xdim, 
+               recon_info_record.sinogram_ydim
+      );
     }
 
     char msg[256]; 
@@ -996,136 +982,121 @@ int ReconstructSinograms (void)
   }
 
   for (int loop=0;loop<=recon_algorithm->numberOfSinogramsNeeded()-1;loop++){
-    
     if (recon_info_record.centering){
-
-      if ( (recon_info_record.recon_algorithm != RECONSTRUCTION_GRIDREC_DELAY_ONLY 
-	   && recon_info_record.recon_algorithm != RECONSTRUCTION_GRIDREC)
-      	   ||  (recon_info_record.recon_algorithm == RECONSTRUCTION_GRIDREC 
-		&& recon_info_record.gridrec_padding == GRIDREC_PADDING_NONE) ) { 
-
-      	centering_processor.OffCenterCorrSingleManual (&information.sino_calc_buffer[loop*information.sinogram_adjusted_size], (int)shift[loop]);
-
-	log_file->Message("centering_processor.OffCenterCorrSingleManual performed for sino_calc_buffer");      
+      if (   (recon_info_record.recon_algorithm != RECONSTRUCTION_GRIDREC_DELAY_ONLY && recon_info_record.recon_algorithm != RECONSTRUCTION_GRIDREC)
+      	  || (recon_info_record.recon_algorithm == RECONSTRUCTION_GRIDREC            && recon_info_record.gridrec_padding == GRIDREC_PADDING_NONE) 
+      ){ 
+        centering_processor.OffCenterCorrSingleManual (&information.sino_calc_buffer[loop*information.sinogram_adjusted_size], (int)shift[loop]);
+        log_file->Message("centering_processor.OffCenterCorrSingleManual performed for sino_calc_buffer");      
       }
       else{
+	      // Perform centering_processor.OffCenterCorrSingleManual() explicitly for boundary padding
+	      LogProj(&information.sino_calc_buffer[loop * information.sinogram_adjusted_size],
+		             information.sinogram_adjusted_xdim, 
+                 recon_info_record.sinogram_ydim
+        );
 
-	// Perform centering_processor.OffCenterCorrSingleManual() explicitly for boundary padding
-	LogProj(&information.sino_calc_buffer[loop * information.sinogram_adjusted_size],
-		information.sinogram_adjusted_xdim, recon_info_record.sinogram_ydim);
-
-	for( int j = 0; j < recon_info_record.sinogram_ydim; j++ ){
-	  for( int k = 0; k < information.sinogram_adjusted_xdim; k++ ){
-	    information.shifted_recon[j * information.sinogram_adjusted_xdim+ k] = 0.0f;
-	  }
-	}
-
-	for( int j = 0; j < recon_info_record.sinogram_ydim; j++ ){
-	  for( int k = 0; k < information.sinogram_adjusted_xdim; k++ ){
-
-	    float kk = k - shift[loop]; 
-	    int nkk = (int)floor(kk);
-
-	    float fInterpPixel = 0.0f;
-	    float fInterpWeight = 0.0f;
-
-	    if( recon_info_record.gridrec_padding == GRIDREC_PADDING_BOUNDARY ){
-
-	      if( nkk >= 0 && nkk < information.sinogram_adjusted_xdim ){
-		fInterpPixel += information.sino_calc_buffer[loop * information.sinogram_adjusted_size + j * information.sinogram_adjusted_xdim + nkk ] * (nkk + 1 - kk);
-
+	      for( int j = 0; j < recon_info_record.sinogram_ydim; j++ ){
+	        for( int k = 0; k < information.sinogram_adjusted_xdim; k++ ){
+	          information.shifted_recon[j * information.sinogram_adjusted_xdim+ k] = 0.0f;
+	        }
 	      }
-	      else if( nkk < 0 ){
-		fInterpPixel += information.sino_calc_buffer[loop * information.sinogram_adjusted_size + j * information.sinogram_adjusted_xdim ] * (nkk + 1 - kk);
 
-	      }
-	      else if( nkk > information.sinogram_adjusted_xdim  ){
-		fInterpPixel += information.sino_calc_buffer[loop * information.sinogram_adjusted_size + j * information.sinogram_adjusted_xdim + information.sinogram_adjusted_xdim - 1 ] * (nkk + 1 - kk);
+	      for( int j = 0; j < recon_info_record.sinogram_ydim; j++ ){
+	        for( int k = 0; k < information.sinogram_adjusted_xdim; k++ ){
+            float kk = k - shift[loop]; 
+	          int nkk = (int)floor(kk);
 
-	      }
+	          float fInterpPixel = 0.0f;
+	          float fInterpWeight = 0.0f;
 	    
-	      // 
-	      if( nkk + 1 >= 0 && nkk + 1 < information.sinogram_adjusted_xdim ){
-		fInterpPixel += information.sino_calc_buffer[loop * information.sinogram_adjusted_size + j * information.sinogram_adjusted_xdim + nkk + 1] * (kk - nkk);
+            if( recon_info_record.gridrec_padding == GRIDREC_PADDING_BOUNDARY ){
+	            if( nkk >= 0 && nkk < information.sinogram_adjusted_xdim ){
+		            fInterpPixel += information.sino_calc_buffer[loop * information.sinogram_adjusted_size + j * information.sinogram_adjusted_xdim + nkk ] * (nkk + 1 - kk);
+	            }
+	            else if( nkk < 0 ){
+		            fInterpPixel += information.sino_calc_buffer[loop * information.sinogram_adjusted_size + j * information.sinogram_adjusted_xdim ] * (nkk + 1 - kk);
+	            }
+	            else if( nkk > information.sinogram_adjusted_xdim  ){
+		            fInterpPixel += information.sino_calc_buffer[loop * information.sinogram_adjusted_size + j * information.sinogram_adjusted_xdim + information.sinogram_adjusted_xdim - 1 ] * (nkk + 1 - kk);
+	            }
 
-	      }
-	      else if( nkk + 1 < 0 ){
-		fInterpPixel += information.sino_calc_buffer[loop * information.sinogram_adjusted_size + j * information.sinogram_adjusted_xdim ] * (kk - nkk);
+	            if( nkk + 1 >= 0 && nkk + 1 < information.sinogram_adjusted_xdim ){
+		            fInterpPixel += information.sino_calc_buffer[loop * information.sinogram_adjusted_size + j * information.sinogram_adjusted_xdim + nkk + 1] * (kk - nkk);
+              }
+	            else if( nkk + 1 < 0 ){
+		            fInterpPixel += information.sino_calc_buffer[loop * information.sinogram_adjusted_size + j * information.sinogram_adjusted_xdim ] * (kk - nkk);
+              }
+	            else if( nkk + 1 > information.sinogram_adjusted_xdim ){
+		            fInterpPixel += information.sino_calc_buffer[loop * information.sinogram_adjusted_size + j * information.sinogram_adjusted_xdim + information.sinogram_adjusted_xdim - 1] * (kk - nkk);
+              }
+	          }
+	          else { // no boundary padding
+	            if( nkk >= 0 && nkk < information.sinogram_adjusted_xdim ){
+		            fInterpPixel += information.sino_calc_buffer[loop * information.sinogram_adjusted_size + j * information.sinogram_adjusted_xdim + nkk ] * (nkk + 1 - kk);
+		            fInterpWeight = nkk + 1 - kk;
+	            }
 
-	      }
-	      else if( nkk + 1 > information.sinogram_adjusted_xdim ){
-		fInterpPixel += information.sino_calc_buffer[loop * information.sinogram_adjusted_size + j * information.sinogram_adjusted_xdim + information.sinogram_adjusted_xdim - 1] * (kk - nkk);
+	            // 
+	            if( nkk + 1 >= 0 && nkk + 1 < information.sinogram_adjusted_xdim ){
+		            fInterpPixel += information.sino_calc_buffer[loop * information.sinogram_adjusted_size + j * information.sinogram_adjusted_xdim + nkk + 1] * (kk - nkk);
+		            fInterpWeight += kk - nkk;
+              }
 
-	      }
-	    }
-	    else { // no boundary padding
-
-	      if( nkk >= 0 && nkk < information.sinogram_adjusted_xdim ){
-		fInterpPixel += information.sino_calc_buffer[loop * information.sinogram_adjusted_size + j * information.sinogram_adjusted_xdim + nkk ] * (nkk + 1 - kk);
-
-		fInterpWeight = nkk + 1 - kk;
-	      }
-	    
-	      // 
-	      if( nkk + 1 >= 0 && nkk + 1 < information.sinogram_adjusted_xdim ){
-		fInterpPixel += information.sino_calc_buffer[loop * information.sinogram_adjusted_size + j * information.sinogram_adjusted_xdim + nkk + 1] * (kk - nkk);
-
-		fInterpWeight += kk - nkk;
-	      }
-
-	      if( fInterpWeight < 1e-5 ){
-		  fInterpPixel = 0.0f;
-	      }
-	      else{
-		fInterpPixel /= fInterpWeight;
-	      }
-
-	    }
+	            if( fInterpWeight < 1e-5 )
+		            fInterpPixel = 0.0f;
+	            else
+		            fInterpPixel /= fInterpWeight;
+            
+	          }
 	  
-	    information.shifted_sinogram[ j * information.sinogram_adjusted_xdim + k ] = fInterpPixel;
-	  
-	  }
-	}
+	          information.shifted_sinogram[ j * information.sinogram_adjusted_xdim + k ] = fInterpPixel;
+	        }
+	      }
 
-	memcpy(&information.sino_calc_buffer[loop * information.sinogram_adjusted_size], 
-	       information.shifted_sinogram, 
-	       sizeof(float) * information.sinogram_adjusted_size);
+	      memcpy(&information.sino_calc_buffer[loop * information.sinogram_adjusted_size], 
+	              information.shifted_sinogram, 
+	              sizeof(float) * information.sinogram_adjusted_size
+        );
 
-
-	log_file->Message("Local OffCenterCorrSingleManual performed for sino_calc_buffer");      
-
+	      log_file->Message("Local OffCenterCorrSingleManual performed for sino_calc_buffer");      
       }
       
-      if (((recon_info_record.debug == DEBUG_FULL) || (recon_info_record.debug == DEBUG_POSTCENTERING) || (recon_info_record.debug == DEBUG_POSTRING)) && (recon_info_record.debug != DEBUG_NO_OUTPUT)) {
-
-	memcpy( &information.debug_post_centering_sinogram_calc_buffer[loop*information.sinogram_adjusted_size],
-		&information.sino_calc_buffer[ loop * information.sinogram_adjusted_size],
-		sizeof(float) * information.sinogram_adjusted_size );
+      if ((   (recon_info_record.debug == DEBUG_FULL) 
+           || (recon_info_record.debug == DEBUG_POSTCENTERING) 
+           || (recon_info_record.debug == DEBUG_POSTRING)
+          ) && (recon_info_record.debug != DEBUG_NO_OUTPUT)){
+	      memcpy( &information.debug_post_centering_sinogram_calc_buffer[loop*information.sinogram_adjusted_size],
+		            &information.sino_calc_buffer[ loop * information.sinogram_adjusted_size],
+		            sizeof(float) * information.sinogram_adjusted_size 
+        );
       }
 
       if (recon_info_record.use_ring_removal){
-	    
-	log_file->Message("Removing rings!");
 
-	if ( (recon_info_record.recon_algorithm != RECONSTRUCTION_GRIDREC_DELAY_ONLY 
-	      && recon_info_record.recon_algorithm != RECONSTRUCTION_GRIDREC)
-	     || ( recon_info_record.recon_algorithm == RECONSTRUCTION_GRIDREC 
-		  && recon_info_record.gridrec_padding == GRIDREC_PADDING_NONE ) ) { 
+	      log_file->Message("Removing rings!");
 
-	  centering_processor.RingCorrectionSingle (&information.sino_calc_buffer[loop*information.sinogram_adjusted_size], recon_info_record.ring_removal_coeff);
-	  log_file->Message("centering_processor.RingCorrectionSingle performed for sino_calc_buffer"); 
-	}
-	else{  // use local version
+	      if (   (recon_info_record.recon_algorithm != RECONSTRUCTION_GRIDREC_DELAY_ONLY && recon_info_record.recon_algorithm != RECONSTRUCTION_GRIDREC)
+	          || ( recon_info_record.recon_algorithm == RECONSTRUCTION_GRIDREC           && recon_info_record.gridrec_padding == GRIDREC_PADDING_NONE  ) 
+           ){ 
+          centering_processor.RingCorrectionSingle (&information.sino_calc_buffer[loop*information.sinogram_adjusted_size], 
+                                                    recon_info_record.ring_removal_coeff
+          );
+	        log_file->Message("centering_processor.RingCorrectionSingle performed for sino_calc_buffer"); 
+	      }
+	      else{  // use local version
+	        RingCorrectionSingle (&information.sino_calc_buffer[loop*information.sinogram_adjusted_size], 
+                                recon_info_record.ring_removal_coeff
+          );
+	        log_file->Message("Local RingCorrectionSingle performed for sino_calc_buffer");      
+	      }
 
-	  RingCorrectionSingle (&information.sino_calc_buffer[loop*information.sinogram_adjusted_size], recon_info_record.ring_removal_coeff);
-	  log_file->Message("Local RingCorrectionSingle performed for sino_calc_buffer");      
-	}
-
-	if (((recon_info_record.debug == DEBUG_FULL) || (recon_info_record.debug == DEBUG_POSTCENTERING) || (recon_info_record.debug == DEBUG_POSTRING)) && (recon_info_record.debug != DEBUG_NO_OUTPUT)){
-
-	  memcpy (&information.debug_post_ring_sinogram_calc_buffer[loop*information.sinogram_adjusted_size], &information.sino_calc_buffer[loop*information.sinogram_adjusted_size], sizeof(float)*information.sinogram_adjusted_size);
-	  
-	}
+	      if (((recon_info_record.debug == DEBUG_FULL) || (recon_info_record.debug == DEBUG_POSTCENTERING) || (recon_info_record.debug == DEBUG_POSTRING)) && (recon_info_record.debug != DEBUG_NO_OUTPUT)){
+	        memcpy (&information.debug_post_ring_sinogram_calc_buffer[loop*information.sinogram_adjusted_size], 
+                  &information.sino_calc_buffer[loop*information.sinogram_adjusted_size], 
+                  sizeof(float)*information.sinogram_adjusted_size
+          );
+	      }
       }
     }
 
@@ -1134,123 +1105,122 @@ int ReconstructSinograms (void)
     log_file->Message(msg);
 
     // data transfer (again) centering and ring removal
-    if ( recon_info_record.recon_algorithm == RECONSTRUCTION_GRIDREC_DELAY_ONLY 
-	 || recon_info_record.recon_algorithm == RECONSTRUCTION_GRIDREC ) { 
+    if ( recon_info_record.recon_algorithm == RECONSTRUCTION_GRIDREC_DELAY_ONLY || recon_info_record.recon_algorithm == RECONSTRUCTION_GRIDREC ) { 
+      if(recon_info_record.gridrec_padding == GRIDREC_PADDING_HALF || recon_info_record.gridrec_padding == GRIDREC_PADDING_BOUNDARY ){
+	      
+        for( int j = 0; j < recon_info_record.sinogram_ydim; j++ ){
 
-      if(recon_info_record.gridrec_padding == GRIDREC_PADDING_HALF || 
-	 recon_info_record.gridrec_padding == GRIDREC_PADDING_BOUNDARY ){
+	        memcpy( &information.sinograms_boundary_padding[ loop * information.sinogram_adjusted_size * 2 + j * information.sinogram_adjusted_xdim * 2 + information.sinogram_adjusted_xdim / 2 ],
+		              &information.sino_calc_buffer[ loop * information.sinogram_adjusted_size + j * information.sinogram_adjusted_xdim ], 
+		              sizeof(float) * information.sinogram_adjusted_xdim 
+          );
 
-	for( int j = 0; j < recon_info_record.sinogram_ydim; j++ ){
-	  memcpy( &information.sinograms_boundary_padding[ loop * information.sinogram_adjusted_size * 2 + j * information.sinogram_adjusted_xdim * 2 + information.sinogram_adjusted_xdim / 2 ],
-		  &information.sino_calc_buffer[ loop * information.sinogram_adjusted_size + j * information.sinogram_adjusted_xdim ], 
-		  sizeof(float) * information.sinogram_adjusted_xdim );
+	        for( int k = 0; k < information.sinogram_adjusted_xdim /2; k++ ){
+	          information.sinograms_boundary_padding[ loop * information.sinogram_adjusted_size * 2 + j * information.sinogram_adjusted_xdim * 2 + k ] = information.sinograms_boundary_padding[ loop * information.sinogram_adjusted_size * 2 + j * information.sinogram_adjusted_xdim * 2 + information.sinogram_adjusted_xdim / 2 ];
+          }
 
-	  for( int k = 0; k < information.sinogram_adjusted_xdim /2; k++ ){
-	    information.sinograms_boundary_padding[ loop * information.sinogram_adjusted_size * 2 + j * information.sinogram_adjusted_xdim * 2 + k ] = information.sinograms_boundary_padding[ loop * information.sinogram_adjusted_size * 2 + j * information.sinogram_adjusted_xdim * 2 + information.sinogram_adjusted_xdim / 2 ];
+	        for( int k = 0; k < information.sinogram_adjusted_xdim /2; k++ ){
+	          information.sinograms_boundary_padding[ loop * information.sinogram_adjusted_size * 2 + j * information.sinogram_adjusted_xdim * 2 + information.sinogram_adjusted_xdim / 2 + information.sinogram_adjusted_xdim + k ] = information.sinograms_boundary_padding[ loop * information.sinogram_adjusted_size * 2 + j * information.sinogram_adjusted_xdim * 2 + information.sinogram_adjusted_xdim / 2 + information.sinogram_adjusted_xdim - 1];
+          }
 
-	  }
-
-	  for( int k = 0; k < information.sinogram_adjusted_xdim /2; k++ ){
-	    information.sinograms_boundary_padding[ loop * information.sinogram_adjusted_size * 2 + j * information.sinogram_adjusted_xdim * 2 + information.sinogram_adjusted_xdim / 2 + information.sinogram_adjusted_xdim + k ] = information.sinograms_boundary_padding[ loop * information.sinogram_adjusted_size * 2 + j * information.sinogram_adjusted_xdim * 2 + information.sinogram_adjusted_xdim / 2 + information.sinogram_adjusted_xdim - 1];
-
-	  }
-
-	}
-
-	log_file->Message("Sinogram processed for GridRec using half boundary padding!"); 
+	      }
+  
+        log_file->Message("Sinogram processed for GridRec using half boundary padding!"); 
       }
       else if(recon_info_record.gridrec_padding == GRIDREC_PADDING_ONE_AND_HALF){
+	
+        for( int j = 0; j < recon_info_record.sinogram_ydim; j++ ){
+	        memcpy( &information.sinograms_boundary_padding[ loop * information.sinogram_adjusted_size * 4 + j * information.sinogram_adjusted_xdim * 4 + information.sinogram_adjusted_xdim * 3 / 2 ],
+		              &information.sino_calc_buffer[ loop * information.sinogram_adjusted_size + j * information.sinogram_adjusted_xdim ], 
+		              sizeof(float) * information.sinogram_adjusted_xdim 
+          );
 
-	for( int j = 0; j < recon_info_record.sinogram_ydim; j++ ){
-	  memcpy( &information.sinograms_boundary_padding[ loop * information.sinogram_adjusted_size * 4 + j * information.sinogram_adjusted_xdim * 4 + information.sinogram_adjusted_xdim * 3 / 2 ],
-		  &information.sino_calc_buffer[ loop * information.sinogram_adjusted_size + j * information.sinogram_adjusted_xdim ], 
-		  sizeof(float) * information.sinogram_adjusted_xdim );
+	        for( int k = 0; k < information.sinogram_adjusted_xdim * 3/2; k++ ){
+	        information.sinograms_boundary_padding[ loop * information.sinogram_adjusted_size * 4 + j * information.sinogram_adjusted_xdim * 4 + k ] = information.sinograms_boundary_padding[ loop * information.sinogram_adjusted_size * 4 + j * information.sinogram_adjusted_xdim * 4 + information.sinogram_adjusted_xdim * 3 / 2 ];
+          }
 
-	  for( int k = 0; k < information.sinogram_adjusted_xdim * 3/2; k++ ){
-	    information.sinograms_boundary_padding[ loop * information.sinogram_adjusted_size * 4 + j * information.sinogram_adjusted_xdim * 4 + k ] = information.sinograms_boundary_padding[ loop * information.sinogram_adjusted_size * 4 + j * information.sinogram_adjusted_xdim * 4 + information.sinogram_adjusted_xdim * 3 / 2 ];
+	        for( int k = 0; k < information.sinogram_adjusted_xdim *3/2; k++ ){
+	          information.sinograms_boundary_padding[ loop * information.sinogram_adjusted_size * 4 + j * information.sinogram_adjusted_xdim * 4 + information.sinogram_adjusted_xdim * 3/ 2 + information.sinogram_adjusted_xdim + k ] = information.sinograms_boundary_padding[ loop * information.sinogram_adjusted_size * 4 + j * information.sinogram_adjusted_xdim * 4 + information.sinogram_adjusted_xdim * 3 / 2 + information.sinogram_adjusted_xdim - 1];
+	        }
+        }
 
-	  }
-
-	  for( int k = 0; k < information.sinogram_adjusted_xdim *3/2; k++ ){
-	    information.sinograms_boundary_padding[ loop * information.sinogram_adjusted_size * 4 + j * information.sinogram_adjusted_xdim * 4 + information.sinogram_adjusted_xdim * 3/ 2 + information.sinogram_adjusted_xdim + k ] = information.sinograms_boundary_padding[ loop * information.sinogram_adjusted_size * 4 + j * information.sinogram_adjusted_xdim * 4 + information.sinogram_adjusted_xdim * 3 / 2 + information.sinogram_adjusted_xdim - 1];
-
-	  }
-
-	}
-
-	log_file->Message("Sinogram processed for GridRec using one and half boundary padding!"); 
+	      log_file->Message("Sinogram processed for GridRec using one and half boundary padding!"); 
       }
       else{
-	log_file->Message("Sinogram processed for GridRec using no boundary padding!"); 
+	      log_file->Message("Sinogram processed for GridRec using no boundary padding!"); 
       }
 
     }
 
-    if ( recon_info_record.recon_algorithm == RECONSTRUCTION_GRIDREC_DELAY_ONLY 
-	 || recon_info_record.recon_algorithm == RECONSTRUCTION_GRIDREC ) { // GridRec
+    if ( recon_info_record.recon_algorithm == RECONSTRUCTION_GRIDREC_DELAY_ONLY || recon_info_record.recon_algorithm == RECONSTRUCTION_GRIDREC ) { // GridRec
       	
-      if(recon_info_record.gridrec_padding == GRIDREC_PADDING_HALF || 
-	 recon_info_record.gridrec_padding == GRIDREC_PADDING_BOUNDARY ){
-	recon_algorithm->setSinoAndReconBuffers(loop+1, &information.sinograms_boundary_padding[loop*information.sinogram_adjusted_size * 2], &information.reconstructions_boundary_padding[loop*information.reconstruction_size * 4]);
-
+      if(recon_info_record.gridrec_padding == GRIDREC_PADDING_HALF || recon_info_record.gridrec_padding == GRIDREC_PADDING_BOUNDARY ){
+	      recon_algorithm->setSinoAndReconBuffers(loop+1, 
+                                                &information.sinograms_boundary_padding[loop*information.sinogram_adjusted_size * 2], 
+                                                &information.reconstructions_boundary_padding[loop*information.reconstruction_size * 4]
+        );
       }
       else if(recon_info_record.gridrec_padding == GRIDREC_PADDING_ONE_AND_HALF){
-	recon_algorithm->setSinoAndReconBuffers(loop+1, &information.sinograms_boundary_padding[loop*information.sinogram_adjusted_size * 4], &information.reconstructions_boundary_padding[loop*information.reconstruction_size * 16]);
-
+	      recon_algorithm->setSinoAndReconBuffers(loop+1, 
+                                                &information.sinograms_boundary_padding[loop*information.sinogram_adjusted_size * 4], 
+                                                &information.reconstructions_boundary_padding[loop*information.reconstruction_size * 16]
+        );
       }
       else{
-	recon_algorithm->setSinoAndReconBuffers(loop+1, &information.sino_calc_buffer[loop*information.sinogram_adjusted_size], &information.recon_calc_buffer[loop*information.reconstruction_size]);
-
+	      recon_algorithm->setSinoAndReconBuffers(loop+1, 
+                                                &information.sino_calc_buffer[loop*information.sinogram_adjusted_size], 
+                                                &information.recon_calc_buffer[loop*information.reconstruction_size]
+        );
       }
     }
     else{ // FBP
-      recon_algorithm->setSinoAndReconBuffers(loop+1, &information.sino_calc_buffer[loop*information.sinogram_adjusted_size], &information.recon_calc_buffer[loop*information.reconstruction_size]);
+      recon_algorithm->setSinoAndReconBuffers(loop+1, 
+                                              &information.sino_calc_buffer[loop*information.sinogram_adjusted_size], 
+                                              &information.recon_calc_buffer[loop*information.reconstruction_size]
+      );
     }
   }
 
   recon_algorithm->reconstruct ();
 
-  if ( recon_info_record.recon_algorithm == RECONSTRUCTION_GRIDREC_DELAY_ONLY 
-       || recon_info_record.recon_algorithm == RECONSTRUCTION_GRIDREC ) {
-
-    if(recon_info_record.gridrec_padding == GRIDREC_PADDING_HALF || 
-       recon_info_record.gridrec_padding == GRIDREC_PADDING_BOUNDARY ){
-
+  if ( recon_info_record.recon_algorithm == RECONSTRUCTION_GRIDREC_DELAY_ONLY || recon_info_record.recon_algorithm == RECONSTRUCTION_GRIDREC ) {
+    if(recon_info_record.gridrec_padding == GRIDREC_PADDING_HALF || recon_info_record.gridrec_padding == GRIDREC_PADDING_BOUNDARY ){
       for (int loop=0;loop<=recon_algorithm->numberOfSinogramsNeeded()-1;loop++){
-	for (int j=0;j<recon_info_record.reconstruction_ydim;j++){
-	      
-	  // assume reconstruction_xdim = reconstruction_ydim here. Y. Pan 6/20/2011
-	  if (shift[loop] >= 0){
-	    memcpy(  &information.recon_calc_buffer[information.reconstruction_size*loop + j * recon_info_record.reconstruction_xdim ],
-		     &information.reconstructions_boundary_padding[ loop * information.reconstruction_size * 4 + ( j + recon_info_record.reconstruction_xdim / 2 ) * recon_info_record.reconstruction_xdim * 2 + recon_info_record.reconstruction_xdim / 2 ], 
-		     sizeof(float) * (recon_info_record.reconstruction_xdim ) ); 
-	  }
-	  else{
-	    memcpy(  &information.recon_calc_buffer[information.reconstruction_size*loop + j * recon_info_record.reconstruction_xdim],
-		     &information.reconstructions_boundary_padding[ loop * information.reconstruction_size * 4 + ( j + recon_info_record.reconstruction_xdim / 2 ) * recon_info_record.reconstruction_xdim * 2 + recon_info_record.reconstruction_xdim / 2 ], 
-	    	     sizeof(float) * (recon_info_record.reconstruction_xdim) ); 
-
-	  }
-	}
+        for (int j=0;j<recon_info_record.reconstruction_ydim;j++){
+          // assume reconstruction_xdim = reconstruction_ydim here. Y. Pan 6/20/2011
+	        if (shift[loop] >= 0){
+	          memcpy(&information.recon_calc_buffer[information.reconstruction_size*loop + j * recon_info_record.reconstruction_xdim ],
+		               &information.reconstructions_boundary_padding[ loop * information.reconstruction_size * 4 + ( j + recon_info_record.reconstruction_xdim / 2 ) * recon_info_record.reconstruction_xdim * 2 + recon_info_record.reconstruction_xdim / 2 ], 
+		               sizeof(float) * (recon_info_record.reconstruction_xdim) 
+            ); 
+	        }
+	        else{
+	          memcpy(&information.recon_calc_buffer[information.reconstruction_size*loop + j * recon_info_record.reconstruction_xdim],
+		               &information.reconstructions_boundary_padding[ loop * information.reconstruction_size * 4 + ( j + recon_info_record.reconstruction_xdim / 2 ) * recon_info_record.reconstruction_xdim * 2 + recon_info_record.reconstruction_xdim / 2 ], 
+	    	           sizeof(float) * (recon_info_record.reconstruction_xdim) 
+            ); 
+	        }
+	      }
       }
     }
 
     if(recon_info_record.gridrec_padding == GRIDREC_PADDING_ONE_AND_HALF){
       for (int loop=0;loop<=recon_algorithm->numberOfSinogramsNeeded()-1;loop++){
-	for (int j=0;j<recon_info_record.reconstruction_ydim;j++){
-	
-	  if (shift[loop] >= 0){
-	    memcpy(  &information.recon_calc_buffer[information.reconstruction_size*loop + j * recon_info_record.reconstruction_xdim ],
-		     &information.reconstructions_boundary_padding[ loop * information.reconstruction_size * 16 + ( j + recon_info_record.reconstruction_xdim * 3 / 2 ) * recon_info_record.reconstruction_xdim * 4 + recon_info_record.reconstruction_xdim * 3 / 2 + (int)round(shift[loop]) ], 
-		     sizeof(float) * (recon_info_record.reconstruction_xdim - (int)round(shift[loop]) ) ); 
-	  }
-	  else{
+	      for (int j=0;j<recon_info_record.reconstruction_ydim;j++){
 
-	    memcpy(  &information.recon_calc_buffer[information.reconstruction_size*loop + j * recon_info_record.reconstruction_xdim + abs( (int)round(shift[loop])) ],
-		     &information.reconstructions_boundary_padding[ loop * information.reconstruction_size * 16 + ( j + recon_info_record.reconstruction_xdim * 3 / 2 ) * recon_info_record.reconstruction_xdim * 4 + recon_info_record.reconstruction_xdim * 3 / 2 ], 
-		     sizeof(float) * (recon_info_record.reconstruction_xdim - abs( (int)round(shift[loop]) ) ) ); 
-	  }
-	}
+	        if (shift[loop] >= 0){
+	          memcpy(&information.recon_calc_buffer[information.reconstruction_size*loop + j * recon_info_record.reconstruction_xdim ],
+		               &information.reconstructions_boundary_padding[ loop * information.reconstruction_size * 16 + ( j + recon_info_record.reconstruction_xdim * 3 / 2 ) * recon_info_record.reconstruction_xdim * 4 + recon_info_record.reconstruction_xdim * 3 / 2 + (int)round(shift[loop]) ], 
+		               sizeof(float) * (recon_info_record.reconstruction_xdim - (int)round(shift[loop]) ) 
+            ); 
+	        }
+	        else{
+	          memcpy(&information.recon_calc_buffer[information.reconstruction_size*loop + j * recon_info_record.reconstruction_xdim + abs( (int)round(shift[loop])) ],
+		               &information.reconstructions_boundary_padding[ loop * information.reconstruction_size * 16 + ( j + recon_info_record.reconstruction_xdim * 3 / 2 ) * recon_info_record.reconstruction_xdim * 4 + recon_info_record.reconstruction_xdim * 3 / 2 ], 
+		               sizeof(float) * (recon_info_record.reconstruction_xdim - abs( (int)round(shift[loop]) ) ) 
+            ); 
+	        }
+	      }
       }
     }
   }
@@ -1266,32 +1236,37 @@ int ReconstructSinograms (void)
     for (int loop=0;loop<=recon_algorithm->numberOfSinogramsNeeded()-1;loop++){
       recon_buffer = &information.recon_calc_buffer[information.reconstruction_size*loop];
       if (shift[loop] >= 0){
-  	for (int j=0;j<recon_info_record.reconstruction_ydim;j++)
-  	  memcpy (&information.shifted_recon[j*recon_info_record.reconstruction_xdim], 
-		  (void *) &recon_buffer[(j*recon_info_record.reconstruction_xdim)+ (int)round(shift[loop]) ], 
-		  sizeof(float)*(recon_info_record.reconstruction_xdim- (int)round(shift[loop]) ));
+  	    for (int j=0;j<recon_info_record.reconstruction_ydim;j++)
+  	      memcpy (           &information.shifted_recon[j*recon_info_record.reconstruction_xdim], 
+		                (void *) &recon_buffer[(j*recon_info_record.reconstruction_xdim)+ (int)round(shift[loop]) ], 
+		                sizeof(float)*(recon_info_record.reconstruction_xdim- (int)round(shift[loop]) )
+          );
       }
-      else  {
-  	for (int j=0;j<recon_info_record.reconstruction_ydim;j++)
-  	  memcpy (&information.shifted_recon[(j*recon_info_record.reconstruction_xdim)+abs ((int)round(shift[loop]))], (void *) &recon_buffer[j*recon_info_record.reconstruction_xdim], sizeof(float)*(recon_info_record.reconstruction_xdim-abs ((int)round(shift[loop]) )));
+      else {
+  	    for (int j=0;j<recon_info_record.reconstruction_ydim;j++)
+  	      memcpy (           &information.shifted_recon[(j*recon_info_record.reconstruction_xdim)+abs ((int)round(shift[loop]))], 
+                    (void *) &recon_buffer[j*recon_info_record.reconstruction_xdim], 
+                    sizeof(float)*(recon_info_record.reconstruction_xdim-abs ((int)round(shift[loop]) ))
+          );
       }
 
-      memcpy ((void *) recon_buffer, information.shifted_recon, sizeof(float)*information.reconstruction_size);
+      memcpy ((void *) recon_buffer, 
+              information.shifted_recon, 
+              sizeof(float)*information.reconstruction_size
+      );
     }
   }
 
   // thresholding
   for (int loop=0;loop<=recon_algorithm->numberOfSinogramsNeeded()-1;loop++){
-    
     recon_buffer = &information.recon_calc_buffer[information.reconstruction_size*loop];
-
     for (int loopy=0;loopy<recon_info_record.reconstruction_ydim;loopy++){
       for (int loopx=0;loopx<recon_info_record.reconstruction_xdim;loopx++){
-	  
-	if (recon_buffer[loopy*recon_info_record.reconstruction_xdim+loopx] > data_range_max)
-	  data_range_max = recon_buffer[loopy*recon_info_record.reconstruction_xdim+loopx];
-	if (recon_buffer[loopy*recon_info_record.reconstruction_xdim+loopx] < data_range_min)
-	  data_range_min = recon_buffer[loopy*recon_info_record.reconstruction_xdim+loopx];
+
+      	if (recon_buffer[loopy*recon_info_record.reconstruction_xdim+loopx] > data_range_max)
+	        data_range_max = recon_buffer[loopy*recon_info_record.reconstruction_xdim+loopx];
+	      if (recon_buffer[loopy*recon_info_record.reconstruction_xdim+loopx] < data_range_min)
+	        data_range_min = recon_buffer[loopy*recon_info_record.reconstruction_xdim+loopx];
       }
     }
   }
@@ -1309,8 +1284,7 @@ int ReconstructSinograms (void)
 
 //_____________________________________________________________________________________
 
-void *ReconstructionThread (void *)
-{
+void *ReconstructionThread (void *){
   ReconstructSinograms ();
   recon_thread_running = false;
 
@@ -1319,8 +1293,7 @@ void *ReconstructionThread (void *)
 
 //_____________________________________________________________________________________
 
-void MPISendSinogramRequest (int number_to_request, int process_id)
-{
+void MPISendSinogramRequest (int number_to_request, int process_id){
   int				send_command;
 
   log_file->StartTimer (MPI_requests_timer);
@@ -1337,8 +1310,7 @@ void MPISendSinogramRequest (int number_to_request, int process_id)
 }
 
 //_____________________________________________________________________________________
-void MPIRecieveNewSinogram (int *sinogram_number, float *sinogram_shift, float *sinogram_buffer)
-{
+void MPIRecieveNewSinogram (int *sinogram_number, float *sinogram_shift, float *sinogram_buffer){
   MPI_Status		    status;
   char			    msg[256];
   unsigned short int  white_field_max;
@@ -1393,8 +1365,7 @@ void MPIRecieveNewSinogram (int *sinogram_number, float *sinogram_shift, float *
 
 //_____________________________________________________________________________________
 
-void MPISendClientExiting (int process_id)
-{
+void MPISendClientExiting (int process_id){
   int				send_command;
 
   MPI_Send (&my_id, 1, MPI_INT, recon_info_record.mayor_id, 0, MPI_COMM_WORLD);
@@ -1409,8 +1380,7 @@ void MPISendClientExiting (int process_id)
 
 //_____________________________________________________________________________________
 
-int MPIRecieveCommand (int process_id)
-{
+int MPIRecieveCommand (int process_id){
   int				recieve_command;
   MPI_Status		status;
 
@@ -1421,12 +1391,9 @@ int MPIRecieveCommand (int process_id)
 
 //_____________________________________________________________________________________
 
-void InitFBP (void)
-{
-
+void InitFBP (void){
   //Twice the required space is allocated for buffering purposes
-  switch (recon_info_record.recon_algorithm)
-    {
+  switch (recon_info_record.recon_algorithm){
     case RECONSTRUCTION_FBP_DELAY_ONLY : 
       recon_algorithm = new FBP (); 
       break;
@@ -1442,39 +1409,37 @@ void InitFBP (void)
     default : 
       recon_algorithm = new OptimizedFBP (); 
       break;
-    }
+  }
 
   information.sinogram_numbers = (int *) malloc (sizeof(int)*recon_algorithm->numberOfSinogramsNeeded()*2);
-  if (information.sinogram_numbers == NULL)
-    {
-      sprintf (msg, "Could not alocate memory for information.sinogram_numbers.");
-      error_log->addError (msg, "InitFBP ()");
-    }
+  if (information.sinogram_numbers == NULL){
+    sprintf (msg, "Could not alocate memory for information.sinogram_numbers.");
+    error_log->addError (msg, "InitFBP ()");
+  }
+
   for (int loop=0;loop<recon_algorithm->numberOfSinogramsNeeded()*2;loop++)
     information.sinogram_numbers[loop] = -123;
 
   information.sinogram_shifts = (float *) malloc (sizeof(float)*recon_algorithm->numberOfSinogramsNeeded()*2);
-  if (information.sinogram_shifts == NULL)
-    {
-      sprintf (msg, "Could not alocate memory for information.sinogram_shifts.");
-      error_log->addError (msg, "InitFBP ()");
-    }
+  if (information.sinogram_shifts == NULL){
+    sprintf (msg, "Could not alocate memory for information.sinogram_shifts.");
+    error_log->addError (msg, "InitFBP ()");
+  }
+
   for (int loop=0;loop<recon_algorithm->numberOfSinogramsNeeded()*2;loop++)
     information.sinogram_shifts[loop] = 0.0f;
 
   information.sinograms = (float *) malloc (sizeof(float)*information.sinogram_adjusted_size*(recon_algorithm->numberOfSinogramsNeeded()*2));
-  if (information.sinograms == NULL)
-    {
-      sprintf (msg, "Could not alocate memory for information.sinograms.");
-      error_log->addError (msg, "InitFBP ()");
-    }
+  if (information.sinograms == NULL){
+    sprintf (msg, "Could not alocate memory for information.sinograms.");
+    error_log->addError (msg, "InitFBP ()");
+  }
 
   information.reconstructions = (float *) malloc (sizeof(float)*information.reconstruction_size*(recon_algorithm->numberOfSinogramsNeeded()*2));
-  if (information.reconstructions == NULL)
-    {
-      sprintf (msg, "Could not alocate memory for information.reconstructions.");
-      error_log->addError (msg, "InitFBP ()");
-    }
+  if (information.reconstructions == NULL){
+    sprintf (msg, "Could not alocate memory for information.reconstructions.");
+    error_log->addError (msg, "InitFBP ()");
+  }
 
   information.sinogram_mpi_numbers = information.sinogram_numbers;
   information.sinogram_calc_numbers = &information.sinogram_numbers[recon_algorithm->numberOfSinogramsNeeded()];
@@ -1488,28 +1453,26 @@ void InitFBP (void)
   information.recon_mpi_buffer = information.reconstructions;
   information.recon_calc_buffer = &information.reconstructions[information.reconstruction_size*recon_algorithm->numberOfSinogramsNeeded()];
 
-  if (((recon_info_record.debug == DEBUG_FULL) || (recon_info_record.debug == DEBUG_POSTCENTERING) || (recon_info_record.debug == DEBUG_POSTRING)) && (recon_info_record.debug != DEBUG_NO_OUTPUT))
-    {
-      information.debug_post_centering_sinogram = (float *) malloc (sizeof(float)*information.sinogram_adjusted_size*(recon_algorithm->numberOfSinogramsNeeded()*2));
-      if (information.debug_post_centering_sinogram == NULL)
-        {
-	  sprintf (msg, "Could not alocate memory for information.debug_post_centering_sinogram.");
-	  error_log->addError (msg, "InitFBP ()");
-        }
-
-      information.debug_post_ring_sinogram = (float *) malloc (sizeof(float)*information.sinogram_adjusted_size*(recon_algorithm->numberOfSinogramsNeeded()*2));
-      if (information.debug_post_ring_sinogram == NULL)
-        {
-	  sprintf (msg, "Could not alocate memory for information.debug_post_ring_sinogram.");
-	  error_log->addError (msg, "InitFBP ()");
-        }
-
-      information.debug_post_centering_sinogram_mpi_buffer = information.debug_post_centering_sinogram;
-      information.debug_post_centering_sinogram_calc_buffer = &information.debug_post_centering_sinogram[information.sinogram_adjusted_size*recon_algorithm->numberOfSinogramsNeeded()];
-
-      information.debug_post_ring_sinogram_mpi_buffer = information.debug_post_ring_sinogram;
-      information.debug_post_ring_sinogram_calc_buffer = &information.debug_post_ring_sinogram[information.sinogram_adjusted_size*recon_algorithm->numberOfSinogramsNeeded()];
+  if (((recon_info_record.debug == DEBUG_FULL) || (recon_info_record.debug == DEBUG_POSTCENTERING) || (recon_info_record.debug == DEBUG_POSTRING)) && (recon_info_record.debug != DEBUG_NO_OUTPUT)){
+    
+    information.debug_post_centering_sinogram = (float *) malloc (sizeof(float)*information.sinogram_adjusted_size*(recon_algorithm->numberOfSinogramsNeeded()*2));
+    if (information.debug_post_centering_sinogram == NULL){
+	    sprintf (msg, "Could not alocate memory for information.debug_post_centering_sinogram.");
+	    error_log->addError (msg, "InitFBP ()");
     }
+
+    information.debug_post_ring_sinogram = (float *) malloc (sizeof(float)*information.sinogram_adjusted_size*(recon_algorithm->numberOfSinogramsNeeded()*2));
+    if (information.debug_post_ring_sinogram == NULL){
+	    sprintf (msg, "Could not alocate memory for information.debug_post_ring_sinogram.");
+	    error_log->addError (msg, "InitFBP ()");
+    }
+
+    information.debug_post_centering_sinogram_mpi_buffer = information.debug_post_centering_sinogram;
+    information.debug_post_centering_sinogram_calc_buffer = &information.debug_post_centering_sinogram[information.sinogram_adjusted_size*recon_algorithm->numberOfSinogramsNeeded()];
+
+    information.debug_post_ring_sinogram_mpi_buffer = information.debug_post_ring_sinogram;
+    information.debug_post_ring_sinogram_calc_buffer = &information.debug_post_ring_sinogram[information.sinogram_adjusted_size*recon_algorithm->numberOfSinogramsNeeded()];
+  }
 
   recon_algorithm->setSinogramDimensions(information.sinogram_adjusted_xdim, recon_info_record.sinogram_ydim);
   recon_algorithm->setThetaList (recon_info_record.theta_list, recon_info_record.theta_list_size);
@@ -1523,44 +1486,41 @@ void InitFBP (void)
 
 //_____________________________________________________________________________________
 
-void InitGridrec (void)
-{
+void InitGridrec (void){
   int				loop;
 
   recon_algorithm = new GridRec ();
 
   information.sinogram_numbers = (int *) malloc (sizeof(int)*recon_algorithm->numberOfSinogramsNeeded()*2);
-  if (information.sinogram_numbers == NULL)
-    {
-      sprintf (msg, "Could not alocate memory for information.sinogram_numbers.");
-      error_log->addError (msg, "InitGridrec ()");
-    }
+  if (information.sinogram_numbers == NULL){
+    sprintf (msg, "Could not alocate memory for information.sinogram_numbers.");
+    error_log->addError (msg, "InitGridrec ()");
+  }
+
   for (loop=0;loop<recon_algorithm->numberOfSinogramsNeeded()*2;loop++)
     information.sinogram_numbers[loop] = -123;
 
   information.sinogram_shifts = (float *) malloc (sizeof(float)*recon_algorithm->numberOfSinogramsNeeded()*2);
-  if (information.sinogram_shifts == NULL)
-    {
-      sprintf (msg, "Could not alocate memory for information.sinogram_shifts.");
-      error_log->addError (msg, "InitGridrec ()");
-    }
+  if (information.sinogram_shifts == NULL){
+    sprintf (msg, "Could not alocate memory for information.sinogram_shifts.");
+    error_log->addError (msg, "InitGridrec ()");
+  }
+
   for (int loop=0;loop<recon_algorithm->numberOfSinogramsNeeded()*2;loop++)
     information.sinogram_shifts[loop] = 0.0f;
 
   //Double the required space for buffering purposes
   information.sinograms = (float *) malloc (sizeof(float)*information.sinogram_adjusted_size*(recon_algorithm->numberOfSinogramsNeeded()*2));
-  if (information.sinograms == NULL)
-    {
-      sprintf (msg, "Could not alocate memory for information.sinograms.");
-      error_log->addError (msg, "InitGridrec ()");
-    }
+  if (information.sinograms == NULL){
+    sprintf (msg, "Could not alocate memory for information.sinograms.");
+    error_log->addError (msg, "InitGridrec ()");
+  }
 
   information.reconstructions = (float *) malloc (sizeof(float)*information.reconstruction_size*(recon_algorithm->numberOfSinogramsNeeded()*2));
-  if (information.reconstructions == NULL)
-    {
-      sprintf (msg, "Could not alocate memory for information.reconstructions.");
-      error_log->addError (msg, "InitGridrec ()");
-    }
+  if (information.reconstructions == NULL){
+    sprintf (msg, "Could not alocate memory for information.reconstructions.");
+    error_log->addError (msg, "InitGridrec ()");
+  }
 
   information.sinogram_mpi_numbers = information.sinogram_numbers;
   information.sinogram_calc_numbers = &information.sinogram_numbers[recon_algorithm->numberOfSinogramsNeeded()];
@@ -1574,46 +1534,40 @@ void InitGridrec (void)
   information.recon_mpi_buffer = information.reconstructions;
   information.recon_calc_buffer = &information.reconstructions[information.reconstruction_size*recon_algorithm->numberOfSinogramsNeeded()];
 
-  if (((recon_info_record.debug == DEBUG_FULL) || (recon_info_record.debug == DEBUG_POSTCENTERING) || (recon_info_record.debug == DEBUG_POSTRING)) && (recon_info_record.debug != DEBUG_NO_OUTPUT))
-    {
-      information.debug_post_centering_sinogram = (float *) malloc (sizeof(float)*information.sinogram_adjusted_size*(recon_algorithm->numberOfSinogramsNeeded()*2));
-      if (information.debug_post_centering_sinogram == NULL)
-        {
-	  sprintf (msg, "Could not alocate memory for information.debug_post_centering_sinogram.");
-	  error_log->addError (msg, "InitGridrec ()");
-        }
-
-      information.debug_post_ring_sinogram = (float *) malloc (sizeof(float)*information.sinogram_adjusted_size*(recon_algorithm->numberOfSinogramsNeeded()*2));
-      if (information.debug_post_ring_sinogram == NULL)
-        {
-	  sprintf (msg, "Could not alocate memory for information.debug_post_ring_sinogram.");
-	  error_log->addError (msg, "InitGridrec ()");
-        }
-
-      information.debug_post_centering_sinogram_mpi_buffer = information.debug_post_centering_sinogram;
-      information.debug_post_centering_sinogram_calc_buffer = &information.debug_post_centering_sinogram[information.sinogram_adjusted_size*recon_algorithm->numberOfSinogramsNeeded()];
-
-      information.debug_post_ring_sinogram_mpi_buffer = information.debug_post_ring_sinogram;
-      information.debug_post_ring_sinogram_calc_buffer = &information.debug_post_ring_sinogram[information.sinogram_adjusted_size*recon_algorithm->numberOfSinogramsNeeded()];
+  if (((recon_info_record.debug == DEBUG_FULL) || (recon_info_record.debug == DEBUG_POSTCENTERING) || (recon_info_record.debug == DEBUG_POSTRING)) && (recon_info_record.debug != DEBUG_NO_OUTPUT)){
+    information.debug_post_centering_sinogram = (float *) malloc (sizeof(float)*information.sinogram_adjusted_size*(recon_algorithm->numberOfSinogramsNeeded()*2));
+    if (information.debug_post_centering_sinogram == NULL){
+      sprintf (msg, "Could not alocate memory for information.debug_post_centering_sinogram.");
+      error_log->addError (msg, "InitGridrec ()");
     }
 
+    information.debug_post_ring_sinogram = (float *) malloc (sizeof(float)*information.sinogram_adjusted_size*(recon_algorithm->numberOfSinogramsNeeded()*2));
+    if (information.debug_post_ring_sinogram == NULL){
+      sprintf (msg, "Could not alocate memory for information.debug_post_ring_sinogram.");
+      error_log->addError (msg, "InitGridrec ()");
+    }
+
+    information.debug_post_centering_sinogram_mpi_buffer = information.debug_post_centering_sinogram;
+    information.debug_post_centering_sinogram_calc_buffer = &information.debug_post_centering_sinogram[information.sinogram_adjusted_size*recon_algorithm->numberOfSinogramsNeeded()];
+
+    information.debug_post_ring_sinogram_mpi_buffer = information.debug_post_ring_sinogram;
+    information.debug_post_ring_sinogram_calc_buffer = &information.debug_post_ring_sinogram[information.sinogram_adjusted_size*recon_algorithm->numberOfSinogramsNeeded()];
+  }
+
   //Double the required space for 0.5 boundary padding
-  if(recon_info_record.gridrec_padding == GRIDREC_PADDING_HALF || 
-     recon_info_record.gridrec_padding == GRIDREC_PADDING_BOUNDARY ){
+  if(recon_info_record.gridrec_padding == GRIDREC_PADDING_HALF || recon_info_record.gridrec_padding == GRIDREC_PADDING_BOUNDARY ){
 
     information.sinograms_boundary_padding = (float *) malloc (sizeof(float)*information.sinogram_adjusted_size*(recon_algorithm->numberOfSinogramsNeeded()*2));
-    if (information.sinograms_boundary_padding == NULL)
-      {
-	sprintf (msg, "Could not alocate memory for information.sinograms_boundary_padding.");
-	error_log->addError (msg, "InitGridrec ()");
-      }
+    if (information.sinograms_boundary_padding == NULL){
+      sprintf (msg, "Could not alocate memory for information.sinograms_boundary_padding.");
+      error_log->addError (msg, "InitGridrec ()");
+    }
 
     information.reconstructions_boundary_padding = (float *) malloc (sizeof(float)*information.reconstruction_size*(recon_algorithm->numberOfSinogramsNeeded()*4));
-    if (information.reconstructions_boundary_padding == NULL)
-      {
-	sprintf (msg, "Could not alocate memory for information.reconstructions.");
-	error_log->addError (msg, "InitGridrec ()");
-      }
+    if (information.reconstructions_boundary_padding == NULL){
+      sprintf (msg, "Could not alocate memory for information.reconstructions.");
+      error_log->addError (msg, "InitGridrec ()");
+    }
   }
 
   //quadruple the required space for 1.5 boundary padding
@@ -1624,18 +1578,16 @@ void InitGridrec (void)
   if(recon_info_record.gridrec_padding == GRIDREC_PADDING_ONE_AND_HALF){
 
     information.sinograms_boundary_padding = (float *) malloc (sizeof(float)*information.sinogram_adjusted_size*(recon_algorithm->numberOfSinogramsNeeded()*4));
-    if (information.sinograms_boundary_padding == NULL)
-      {
+    if (information.sinograms_boundary_padding == NULL){
     	sprintf (msg, "Could not alocate memory for information.sinograms_boundary_padding.");
     	error_log->addError (msg, "InitGridrec ()");
-      }
+    }
 
     information.reconstructions_boundary_padding = (float *) malloc (sizeof(float)*information.reconstruction_size*(recon_algorithm->numberOfSinogramsNeeded()*16));
-    if (information.reconstructions_boundary_padding == NULL)
-      {
+    if (information.reconstructions_boundary_padding == NULL){
     	sprintf (msg, "Could not alocate memory for information.reconstructions_boundary_padding.");
     	error_log->addError (msg, "InitGridrec ()");
-      }
+    }
   }
 
   // used for ring correction of size information.sinogram_adjusted_size
@@ -1643,15 +1595,17 @@ void InitGridrec (void)
   information.low_pass_sino_lines_data = (float  *) malloc (sizeof(float)*information.sinogram_adjusted_xdim); 
   information.mean_sino_line_data = (float *) malloc (sizeof(float)*information.sinogram_adjusted_xdim); 
 
-  if(recon_info_record.gridrec_padding == GRIDREC_PADDING_HALF || 
-     recon_info_record.gridrec_padding == GRIDREC_PADDING_BOUNDARY ){
-    recon_algorithm->setSinogramDimensions(information.sinogram_adjusted_xdim * 2, recon_info_record.sinogram_ydim);
+  if(recon_info_record.gridrec_padding == GRIDREC_PADDING_HALF || recon_info_record.gridrec_padding == GRIDREC_PADDING_BOUNDARY ){
+    recon_algorithm->setSinogramDimensions(information.sinogram_adjusted_xdim * 2, 
+                                           recon_info_record.sinogram_ydim);
   }
   else if(recon_info_record.gridrec_padding == GRIDREC_PADDING_ONE_AND_HALF){
-    recon_algorithm->setSinogramDimensions(information.sinogram_adjusted_xdim * 4, recon_info_record.sinogram_ydim);
+    recon_algorithm->setSinogramDimensions(information.sinogram_adjusted_xdim * 4, 
+                                           recon_info_record.sinogram_ydim);
   }
   else{
-    recon_algorithm->setSinogramDimensions(information.sinogram_adjusted_xdim, recon_info_record.sinogram_ydim);
+    recon_algorithm->setSinogramDimensions(information.sinogram_adjusted_xdim, 
+                                           recon_info_record.sinogram_ydim);
   }
 
   recon_algorithm->setThetaList (recon_info_record.theta_list, recon_info_record.theta_list_size);
@@ -1665,30 +1619,27 @@ void InitGridrec (void)
 
 //_____________________________________________________________________________________
 
-void InitializeClient (void)
-{
+void InitializeClient (void){
   information.shifted_recon = (float *) malloc (sizeof (float)*information.reconstruction_size);
-  if (information.shifted_recon == NULL)
-    {
-      sprintf (msg, "Could not alocate memory for information.shifted_recon.");
-      error_log->addError (msg, "InitializeClient ()");
-    }
+  if (information.shifted_recon == NULL){
+    sprintf (msg, "Could not alocate memory for information.shifted_recon.");
+    error_log->addError (msg, "InitializeClient ()");
+  }
 
   information.shifted_sinogram = (float *) malloc (sizeof (float)*information.sinogram_adjusted_size);
-  if (information.shifted_sinogram == NULL)
-    {
-      sprintf (msg, "Could not alocate memory for information.shifted_sinogram.");
-      error_log->addError (msg, "InitializeClient ()");
-    }
+  if (information.shifted_sinogram == NULL){
+    sprintf (msg, "Could not alocate memory for information.shifted_sinogram.");
+    error_log->addError (msg, "InitializeClient ()");
+  }
 
-  switch (recon_info_record.recon_algorithm)
-    {
-    case RECONSTRUCTION_FBP_DELAY_ONLY : InitFBP(); break;
-    case RECONSTRUCTION_GRIDREC_DELAY_ONLY : InitGridrec(); break;
-    case RECONSTRUCTION_FBP_NO_OPTIMIZATION : InitFBP(); break;
-    case RECONSTRUCTION_FBP_OPTIMIZED : InitFBP(); break;
-    case RECONSTRUCTION_FBP_CYLINDER_ONLY : InitFBP(); break;
-    case RECONSTRUCTION_GRIDREC : InitGridrec (); break;
+  switch (recon_info_record.recon_algorithm){
+
+    case RECONSTRUCTION_FBP_DELAY_ONLY      : InitFBP();      break;
+    case RECONSTRUCTION_GRIDREC_DELAY_ONLY  : InitGridrec();  break;
+    case RECONSTRUCTION_FBP_NO_OPTIMIZATION : InitFBP();      break;
+    case RECONSTRUCTION_FBP_OPTIMIZED       : InitFBP();      break;
+    case RECONSTRUCTION_FBP_CYLINDER_ONLY   : InitFBP();      break;
+    case RECONSTRUCTION_GRIDREC             : InitGridrec (); break;
 
     default : break;
     }
@@ -1697,14 +1648,16 @@ void InitializeClient (void)
 
 //_____________________________________________________________________________________
 
-void ProcessingLoop (void)
-{
-  void    	    *ptr_temp_buffer;
-  int				mpi_command,
-    sinograms_recieved,
-    reconstructions_sent;
-  pthread_t  		reconstruction_thread_handle;
-  float			*saved_sinograms;
+void ProcessingLoop (void){
+  void  *ptr_temp_buffer;
+
+  int   mpi_command,
+        sinograms_recieved,
+        reconstructions_sent;
+
+  pthread_t   reconstruction_thread_handle;
+  
+  float   *saved_sinograms;
 
   //Alert server process we're ready for a sinogram
   //request num_buffers sinograms to get us going
@@ -1713,31 +1666,33 @@ void ProcessingLoop (void)
   saved_sinograms = NULL;
 
   sinograms_recieved = 0;
-  while(sinograms_recieved != recon_algorithm->numberOfSinogramsNeeded())
-    {
-      //This shoulde be the Sending_Sinogram command
-      mpi_command = MPIRecieveCommand (recon_info_record.mayor_id);
-      //If we recieve a stop here, we're not being sent anything...
-      if (mpi_command == STOP)
-	{
-	  log_file->Message("Recieved a stop command in ProcessingLoop location 1.");
-	  MPISendClientExiting (recon_info_record.mayor_id);
-	  return;
-	}
-      //We'll put the appropriate buffer
-      MPIRecieveNewSinogram (&information.sinogram_mpi_numbers[sinograms_recieved], &information.sinogram_mpi_shifts[sinograms_recieved], &information.sino_mpi_buffer[sinograms_recieved*information.sinogram_adjusted_size]);
+  while(sinograms_recieved != recon_algorithm->numberOfSinogramsNeeded()){
+    //This shoulde be the Sending_Sinogram command
+    mpi_command = MPIRecieveCommand (recon_info_record.mayor_id);
+    //If we recieve a stop here, we're not being sent anything...
 
-      sinograms_recieved++;
-    }
+    if (mpi_command == STOP){
+      log_file->Message("Recieved a stop command in ProcessingLoop location 1.");
+      MPISendClientExiting (recon_info_record.mayor_id);
+      return;
+	  }
+      
+    //We'll put the appropriate buffer
+    MPIRecieveNewSinogram (&information.sinogram_mpi_numbers[sinograms_recieved], 
+                           &information.sinogram_mpi_shifts[sinograms_recieved], 
+                           &information.sino_mpi_buffer[sinograms_recieved*information.sinogram_adjusted_size]
+    );
+
+    sinograms_recieved++;
+  }
 
   //this should be the start calculations commend...
   mpi_command = MPIRecieveCommand (recon_info_record.mayor_id);
-  if (mpi_command == STOP)
-    {
-      log_file->Message("Recieved a stop command in ProcessingLoop location 2.");
-      MPISendClientExiting (recon_info_record.mayor_id);
-      return;
-    }
+  if (mpi_command == STOP){
+    log_file->Message("Recieved a stop command in ProcessingLoop location 2.");
+    MPISendClientExiting (recon_info_record.mayor_id);
+    return;
+  }
 
   //Swap buffers...
   ptr_temp_buffer = (void *) information.sinogram_mpi_numbers;
@@ -1756,16 +1711,15 @@ void ProcessingLoop (void)
   information.recon_mpi_buffer = information.recon_calc_buffer;
   information.recon_calc_buffer = (float *) ptr_temp_buffer;
 
-  if (((recon_info_record.debug == DEBUG_FULL) || (recon_info_record.debug == DEBUG_POSTCENTERING) || (recon_info_record.debug == DEBUG_POSTRING)) && (recon_info_record.debug != DEBUG_NO_OUTPUT))
-    {
-      ptr_temp_buffer = (void *) information.debug_post_centering_sinogram_mpi_buffer;
-      information.debug_post_centering_sinogram_mpi_buffer = information.debug_post_centering_sinogram_calc_buffer;
-      information.debug_post_centering_sinogram_calc_buffer = (float *) ptr_temp_buffer;
+  if (((recon_info_record.debug == DEBUG_FULL) || (recon_info_record.debug == DEBUG_POSTCENTERING) || (recon_info_record.debug == DEBUG_POSTRING)) && (recon_info_record.debug != DEBUG_NO_OUTPUT)){
+    ptr_temp_buffer = (void *) information.debug_post_centering_sinogram_mpi_buffer;
+    information.debug_post_centering_sinogram_mpi_buffer = information.debug_post_centering_sinogram_calc_buffer;
+    information.debug_post_centering_sinogram_calc_buffer = (float *) ptr_temp_buffer;
 
-      ptr_temp_buffer = (void *) information.debug_post_ring_sinogram_mpi_buffer;
-      information.debug_post_ring_sinogram_mpi_buffer = information.debug_post_centering_sinogram_calc_buffer;
-      information.debug_post_ring_sinogram_calc_buffer = (float *) ptr_temp_buffer;
-    }
+    ptr_temp_buffer = (void *) information.debug_post_ring_sinogram_mpi_buffer;
+    information.debug_post_ring_sinogram_mpi_buffer = information.debug_post_centering_sinogram_calc_buffer;
+    information.debug_post_ring_sinogram_calc_buffer = (float *) ptr_temp_buffer;
+  }
 
   //Start processing
   log_file->Message("Starting reconstruction thread!");
@@ -1776,147 +1730,186 @@ void ProcessingLoop (void)
   MPISendSinogramRequest (recon_algorithm->numberOfSinogramsNeeded(), recon_info_record.mayor_id);
 
   sinograms_recieved = 0;
-  while(sinograms_recieved != recon_algorithm->numberOfSinogramsNeeded())
-    {
-      //This shoulde be the Sending_Sinogram command
-      mpi_command = MPIRecieveCommand (recon_info_record.mayor_id);
-      //If we recieve a stop here, we should have recieved 2 sinograms to reconstruct--but then should exit--we won't be sent any more
-      if (mpi_command != STOP)
-	{
-	  //We'll put the appropriate buffer
-	  MPIRecieveNewSinogram (&information.sinogram_mpi_numbers[sinograms_recieved], &information.sinogram_mpi_shifts[sinograms_recieved], &information.sino_mpi_buffer[sinograms_recieved*information.sinogram_adjusted_size]);
-	  sinograms_recieved++;
-	}
-      else
-	{
-	  log_file->Message("Recieved a stop command in ProcessingLoop location 3.");
-	  sinograms_recieved = recon_algorithm->numberOfSinogramsNeeded();
-	}
-    }
+  while(sinograms_recieved != recon_algorithm->numberOfSinogramsNeeded()){
+    //This shoulde be the Sending_Sinogram command
+    mpi_command = MPIRecieveCommand (recon_info_record.mayor_id);
+    //If we recieve a stop here, we should have recieved 2 sinograms to reconstruct--but then should exit--we won't be sent any more
+    if (mpi_command != STOP){
+      //We'll put the appropriate buffer
+      MPIRecieveNewSinogram (&information.sinogram_mpi_numbers[sinograms_recieved], &information.sinogram_mpi_shifts[sinograms_recieved], &information.sino_mpi_buffer[sinograms_recieved*information.sinogram_adjusted_size]);
+      sinograms_recieved++;
+	  }
+    else{
+      log_file->Message("Recieved a stop command in ProcessingLoop location 3.");
+      sinograms_recieved = recon_algorithm->numberOfSinogramsNeeded();
+	  }
+  }
 
   //if mpi_command == STOP, there will be no new command to kick off the loop...otherwise, recieve a new command to kick off the loop...
   if (mpi_command != STOP)
     mpi_command = MPIRecieveCommand (recon_info_record.mayor_id);
 
-  while (mpi_command != STOP)
-    {
-      if (mpi_command == SERVER__Sending_Sinogram)
-	{
-	  log_file->Message("Trying to recieve new sinograms");
+  while (mpi_command != STOP){
+      if (mpi_command == SERVER__Sending_Sinogram){
+	      log_file->Message("Trying to recieve new sinograms");
 
-	  sinograms_recieved = 0;
-	  while(sinograms_recieved != recon_algorithm->numberOfSinogramsNeeded())
-	    {
-	      //We'll put the appropriate buffer
-	      MPIRecieveNewSinogram (&information.sinogram_mpi_numbers[sinograms_recieved], &information.sinogram_mpi_shifts[sinograms_recieved], &information.sino_mpi_buffer[sinograms_recieved*information.sinogram_adjusted_size]);
-	      //This shoulde be the Sending_Sinogram command
-	      mpi_command = MPIRecieveCommand (recon_info_record.mayor_id);
+	      sinograms_recieved = 0;
+	      while(sinograms_recieved != recon_algorithm->numberOfSinogramsNeeded()){
 
-	      sinograms_recieved++;
+          //We'll put the appropriate buffer
+          MPIRecieveNewSinogram (&information.sinogram_mpi_numbers[sinograms_recieved], 
+                                 &information.sinogram_mpi_shifts[sinograms_recieved], 
+                                 &information.sino_mpi_buffer[sinograms_recieved*information.sinogram_adjusted_size]
+          );
+
+          //This shoulde be the Sending_Sinogram command
+          mpi_command = MPIRecieveCommand (recon_info_record.mayor_id);
+
+          sinograms_recieved++;
+	      }
+
+	      log_file->Message("Recieved all sinograms");
 	    }
 
-	  log_file->Message("Recieved all sinograms");
-	}
+      if (mpi_command == SERVER__Start_Calculations){
+	      if (recon_thread_running){
+	        pthread_join (reconstruction_thread_handle, NULL);
+	        recon_thread_running = false;
+	      }
 
-      if (mpi_command == SERVER__Start_Calculations)
-	{
-	  if (recon_thread_running)
-	    {
-	      pthread_join (reconstruction_thread_handle, NULL);
-	      recon_thread_running = false;
+        //Swap buffers...
+        ptr_temp_buffer = (void *) information.sinogram_mpi_numbers;
+        information.sinogram_mpi_numbers = information.sinogram_calc_numbers;
+        information.sinogram_calc_numbers = (int *) ptr_temp_buffer;
+
+        ptr_temp_buffer = (void *) information.sinogram_mpi_shifts;
+        information.sinogram_mpi_shifts = information.sinogram_calc_shifts;
+        information.sinogram_calc_shifts = (float *) ptr_temp_buffer;
+
+        ptr_temp_buffer = (void *) information.sino_mpi_buffer;
+        information.sino_mpi_buffer = information.sino_calc_buffer;
+        information.sino_calc_buffer = (float *) ptr_temp_buffer;
+
+        ptr_temp_buffer = (void *) information.recon_mpi_buffer;
+        information.recon_mpi_buffer = information.recon_calc_buffer;
+        information.recon_calc_buffer = (float *) ptr_temp_buffer;
+
+	      if (((recon_info_record.debug == DEBUG_FULL) || (recon_info_record.debug == DEBUG_POSTCENTERING) || (recon_info_record.debug == DEBUG_POSTRING)) && (recon_info_record.debug != DEBUG_NO_OUTPUT)){
+          ptr_temp_buffer = (void *) information.debug_post_centering_sinogram_mpi_buffer;
+          information.debug_post_centering_sinogram_mpi_buffer = information.debug_post_centering_sinogram_calc_buffer;
+          information.debug_post_centering_sinogram_calc_buffer = (float *) ptr_temp_buffer;
+
+          ptr_temp_buffer = (void *) information.debug_post_ring_sinogram_mpi_buffer;
+          information.debug_post_ring_sinogram_mpi_buffer = information.debug_post_centering_sinogram_calc_buffer;
+          information.debug_post_ring_sinogram_calc_buffer = (float *) ptr_temp_buffer;
+	      }
+
+        //Start processing
+        log_file->Message("Starting reconstruction thread!");
+        recon_thread_running = true;
+        pthread_create (&reconstruction_thread_handle, NULL, ReconstructionThread, NULL);
+
+	      reconstructions_sent = 0;
+	      while(reconstructions_sent != recon_algorithm->numberOfSinogramsNeeded()){
+	        WriteReconstruction (&information.recon_mpi_buffer[reconstructions_sent*information.reconstruction_size], 
+                                information.sinogram_mpi_numbers[reconstructions_sent], 
+                                information.sinogram_mpi_shifts[reconstructions_sent]
+          );
+
+	        if (((recon_info_record.debug == DEBUG_FULL) || (recon_info_record.debug == DEBUG_POSTCENTERING)) && (recon_info_record.debug != DEBUG_NO_OUTPUT))
+		        WriteData (&information.debug_post_centering_sinogram_mpi_buffer[reconstructions_sent*information.sinogram_adjusted_size], 
+                        information.sinogram_mpi_numbers[reconstructions_sent], "postcenter", 
+                        information.sinogram_adjusted_xdim, 
+                        recon_info_record.sinogram_ydim, 
+                        NX_FLOAT32
+            );
+
+	        if (((recon_info_record.debug == DEBUG_FULL) || (recon_info_record.debug == DEBUG_POSTRING)) && (recon_info_record.debug != DEBUG_NO_OUTPUT))
+		        WriteData (&information.debug_post_ring_sinogram_mpi_buffer[reconstructions_sent*information.sinogram_adjusted_size], 
+                        information.sinogram_mpi_numbers[reconstructions_sent], 
+                        "postring", 
+                        information.sinogram_adjusted_xdim,
+                        recon_info_record.sinogram_ydim, 
+                        NX_FLOAT32
+            );
+
+	        reconstructions_sent++;
+	      }
+
+	      //Request new sinogram
+	      MPISendSinogramRequest (recon_algorithm->numberOfSinogramsNeeded(), recon_info_record.mayor_id);
 	    }
-
-	  //Swap buffers...
-	  ptr_temp_buffer = (void *) information.sinogram_mpi_numbers;
-	  information.sinogram_mpi_numbers = information.sinogram_calc_numbers;
-	  information.sinogram_calc_numbers = (int *) ptr_temp_buffer;
-
-	  ptr_temp_buffer = (void *) information.sinogram_mpi_shifts;
-	  information.sinogram_mpi_shifts = information.sinogram_calc_shifts;
-	  information.sinogram_calc_shifts = (float *) ptr_temp_buffer;
-
-	  ptr_temp_buffer = (void *) information.sino_mpi_buffer;
-	  information.sino_mpi_buffer = information.sino_calc_buffer;
-	  information.sino_calc_buffer = (float *) ptr_temp_buffer;
-
-	  ptr_temp_buffer = (void *) information.recon_mpi_buffer;
-	  information.recon_mpi_buffer = information.recon_calc_buffer;
-	  information.recon_calc_buffer = (float *) ptr_temp_buffer;
-
-	  if (((recon_info_record.debug == DEBUG_FULL) || (recon_info_record.debug == DEBUG_POSTCENTERING) || (recon_info_record.debug == DEBUG_POSTRING)) && (recon_info_record.debug != DEBUG_NO_OUTPUT))
-	    {
-	      ptr_temp_buffer = (void *) information.debug_post_centering_sinogram_mpi_buffer;
-	      information.debug_post_centering_sinogram_mpi_buffer = information.debug_post_centering_sinogram_calc_buffer;
-	      information.debug_post_centering_sinogram_calc_buffer = (float *) ptr_temp_buffer;
-
-	      ptr_temp_buffer = (void *) information.debug_post_ring_sinogram_mpi_buffer;
-	      information.debug_post_ring_sinogram_mpi_buffer = information.debug_post_centering_sinogram_calc_buffer;
-	      information.debug_post_ring_sinogram_calc_buffer = (float *) ptr_temp_buffer;
-	    }
-
-	  //Start processing
-	  log_file->Message("Starting reconstruction thread!");
-	  recon_thread_running = true;
-	  pthread_create (&reconstruction_thread_handle, NULL, ReconstructionThread, NULL);
-
-	  reconstructions_sent = 0;
-	  while(reconstructions_sent != recon_algorithm->numberOfSinogramsNeeded())
-	    {
-	      WriteReconstruction (&information.recon_mpi_buffer[reconstructions_sent*information.reconstruction_size], information.sinogram_mpi_numbers[reconstructions_sent], information.sinogram_mpi_shifts[reconstructions_sent]);
-
-	      if (((recon_info_record.debug == DEBUG_FULL) || (recon_info_record.debug == DEBUG_POSTCENTERING)) && (recon_info_record.debug != DEBUG_NO_OUTPUT))
-		WriteData (&information.debug_post_centering_sinogram_mpi_buffer[reconstructions_sent*information.sinogram_adjusted_size], information.sinogram_mpi_numbers[reconstructions_sent], "postcenter", information.sinogram_adjusted_xdim, recon_info_record.sinogram_ydim, NX_FLOAT32);
-	      if (((recon_info_record.debug == DEBUG_FULL) || (recon_info_record.debug == DEBUG_POSTRING)) && (recon_info_record.debug != DEBUG_NO_OUTPUT))
-		WriteData (&information.debug_post_ring_sinogram_mpi_buffer[reconstructions_sent*information.sinogram_adjusted_size], information.sinogram_mpi_numbers[reconstructions_sent], "postring", information.sinogram_adjusted_xdim, recon_info_record.sinogram_ydim, NX_FLOAT32);
-
-	      reconstructions_sent++;
-	    }
-
-	  //Request new sinogram
-	  MPISendSinogramRequest (recon_algorithm->numberOfSinogramsNeeded(), recon_info_record.mayor_id);
-	}
 
       //Recieve server command
       mpi_command = MPIRecieveCommand (recon_info_record.mayor_id);
     }
 
-  if (recon_thread_running)
-    {
+  if (recon_thread_running){
+
       log_file->TimeStamp ("Waiting for reconstruction thread to exit");
-      if (recon_thread_running)
-	{
-	  pthread_join (reconstruction_thread_handle, NULL);
-	  recon_thread_running = false;
-	}
+      if (recon_thread_running){
+        pthread_join (reconstruction_thread_handle, NULL);
+        recon_thread_running = false;
+      }
 
       reconstructions_sent = 0;
-      while (reconstructions_sent != recon_algorithm->numberOfSinogramsNeeded())
-	{
-	  WriteReconstruction (&information.recon_calc_buffer[reconstructions_sent*information.reconstruction_size], information.sinogram_calc_numbers[reconstructions_sent], information.sinogram_calc_shifts[reconstructions_sent]);
+      while (reconstructions_sent != recon_algorithm->numberOfSinogramsNeeded()){
+	      
+        WriteReconstruction (&information.recon_calc_buffer[reconstructions_sent*information.reconstruction_size], 
+                              information.sinogram_calc_numbers[reconstructions_sent], 
+                              information.sinogram_calc_shifts[reconstructions_sent]
+        );
+
+	      if (((recon_info_record.debug == DEBUG_FULL) || (recon_info_record.debug == DEBUG_POSTCENTERING)) && (recon_info_record.debug != DEBUG_NO_OUTPUT))
+	        WriteData (&information.debug_post_centering_sinogram_mpi_buffer[reconstructions_sent*information.sinogram_adjusted_size], 
+                      information.sinogram_mpi_numbers[reconstructions_sent], 
+                      "postcenter", 
+                      recon_info_record.sinogram_xdim, 
+                      recon_info_record.sinogram_ydim, 
+                      NX_FLOAT32
+          );
+
+	      if (((recon_info_record.debug == DEBUG_FULL) || (recon_info_record.debug == DEBUG_POSTRING)) && (recon_info_record.debug != DEBUG_NO_OUTPUT))
+	        WriteData (&information.debug_post_ring_sinogram_mpi_buffer[reconstructions_sent*information.sinogram_adjusted_size], 
+                      information.sinogram_mpi_numbers[reconstructions_sent], 
+                      "postring", 
+                      recon_info_record.sinogram_xdim, 
+                      recon_info_record.sinogram_ydim, 
+                      NX_FLOAT32
+          );
+
+	      reconstructions_sent++;
+	    }
+  }
+  else{
+    reconstructions_sent = 0;
+    while (reconstructions_sent != recon_algorithm->numberOfSinogramsNeeded()){
+	    WriteReconstruction (&information.recon_calc_buffer[reconstructions_sent*information.reconstruction_size], 
+                            information.sinogram_calc_numbers[reconstructions_sent], 
+                            information.sinogram_calc_shifts[reconstructions_sent]
+      );
 
 	  if (((recon_info_record.debug == DEBUG_FULL) || (recon_info_record.debug == DEBUG_POSTCENTERING)) && (recon_info_record.debug != DEBUG_NO_OUTPUT))
-	    WriteData (&information.debug_post_centering_sinogram_mpi_buffer[reconstructions_sent*information.sinogram_adjusted_size], information.sinogram_mpi_numbers[reconstructions_sent], "postcenter", recon_info_record.sinogram_xdim, recon_info_record.sinogram_ydim, NX_FLOAT32);
+	    WriteData (&information.debug_post_centering_sinogram_mpi_buffer[reconstructions_sent*information.sinogram_adjusted_size], 
+                  information.sinogram_mpi_numbers[reconstructions_sent], 
+                  "postcenter", 
+                  recon_info_record.sinogram_xdim, 
+                  recon_info_record.sinogram_ydim, 
+                  NX_FLOAT32
+      );
+
 	  if (((recon_info_record.debug == DEBUG_FULL) || (recon_info_record.debug == DEBUG_POSTRING)) && (recon_info_record.debug != DEBUG_NO_OUTPUT))
-	    WriteData (&information.debug_post_ring_sinogram_mpi_buffer[reconstructions_sent*information.sinogram_adjusted_size], information.sinogram_mpi_numbers[reconstructions_sent], "postring", recon_info_record.sinogram_xdim, recon_info_record.sinogram_ydim, NX_FLOAT32);
+	    WriteData (&information.debug_post_ring_sinogram_mpi_buffer[reconstructions_sent*information.sinogram_adjusted_size], 
+                  information.sinogram_mpi_numbers[reconstructions_sent], 
+                  "postring", 
+                  recon_info_record.sinogram_xdim, 
+                  recon_info_record.sinogram_ydim, 
+                  NX_FLOAT32
+      );
 
 	  reconstructions_sent++;
-	}
-    }
-  else
-    {
-      reconstructions_sent = 0;
-      while (reconstructions_sent != recon_algorithm->numberOfSinogramsNeeded())
-	{
-	  WriteReconstruction (&information.recon_calc_buffer[reconstructions_sent*information.reconstruction_size], information.sinogram_calc_numbers[reconstructions_sent], information.sinogram_calc_shifts[reconstructions_sent]);
-
-	  if (((recon_info_record.debug == DEBUG_FULL) || (recon_info_record.debug == DEBUG_POSTCENTERING)) && (recon_info_record.debug != DEBUG_NO_OUTPUT))
-	    WriteData (&information.debug_post_centering_sinogram_mpi_buffer[reconstructions_sent*information.sinogram_adjusted_size], information.sinogram_mpi_numbers[reconstructions_sent], "postcenter", recon_info_record.sinogram_xdim, recon_info_record.sinogram_ydim, NX_FLOAT32);
-	  if (((recon_info_record.debug == DEBUG_FULL) || (recon_info_record.debug == DEBUG_POSTRING)) && (recon_info_record.debug != DEBUG_NO_OUTPUT))
-	    WriteData (&information.debug_post_ring_sinogram_mpi_buffer[reconstructions_sent*information.sinogram_adjusted_size], information.sinogram_mpi_numbers[reconstructions_sent], "postring", recon_info_record.sinogram_xdim, recon_info_record.sinogram_ydim, NX_FLOAT32);
-
-	  reconstructions_sent++;
-	}
-    }
+	  }
+  }
 
   if (saved_sinograms != NULL)
     free (saved_sinograms);
@@ -1926,8 +1919,7 @@ void ProcessingLoop (void)
 
 //_____________________________________________________________________________________
 
-void DestroyClient (void)
-{
+void DestroyClient (void){
   log_file->Message ("Destroying client process...");
 
   if (information.debug_post_centering_sinogram != NULL)
@@ -2011,8 +2003,7 @@ void DestroyClient (void)
 
 //_____________________________________________________________________________________
 
-void CreateClientTimers (void)
-{
+void CreateClientTimers (void){
   processing_slice_timer = log_file->CreateTimer ("Single_Slice");
   log_file->ResetTimer (processing_slice_timer);
 
@@ -2034,20 +2025,18 @@ void CreateClientTimers (void)
 
 //_____________________________________________________________________________________
 
-void DestroyClientTimers (void)
-{
-  log_file->DestroyTimer (processing_slice_timer);
+void DestroyClientTimers (void){
+  log_file->DestroyTimer (processing_slice_timer      );
   log_file->DestroyTimer (total_processing_slice_timer);
-  log_file->DestroyTimer (MPI_requests_timer);
-  log_file->DestroyTimer (MPI_sinogram_timer);
-  log_file->DestroyTimer (single_MPI_sinogram_timer);
-  log_file->DestroyTimer (write_reconstruction_timer);
+  log_file->DestroyTimer (MPI_requests_timer          );
+  log_file->DestroyTimer (MPI_sinogram_timer          );
+  log_file->DestroyTimer (single_MPI_sinogram_timer   );
+  log_file->DestroyTimer (write_reconstruction_timer  );
 }
 
 //_____________________________________________________________________________________
 
-void ClientProcess (void)
-{
+void ClientProcess (void){
   char    method[256];
 
   recon_file = new NexusBoxClass ();
@@ -2057,15 +2046,14 @@ void ClientProcess (void)
 
   CreateClientTimers ();
 
-  switch (recon_info_record.recon_algorithm)
-    {
-    case RECONSTRUCTION_FBP_DELAY_ONLY : strcpy (method, "RECONSTRUCTION_FBP_DELAY_ONLY"); break;
-    case RECONSTRUCTION_GRIDREC_DELAY_ONLY : strcpy (method, "RECONSTRUCTION_GRIDREC_DELAY_ONLY"); break;
-    case RECONSTRUCTION_FBP_NO_OPTIMIZATION : strcpy (method, "RECONSTRUCTION_NO_OPTIMIZATION"); break;
-    case RECONSTRUCTION_FBP_OPTIMIZED : strcpy (method, "RECONSTRUCTION_OPTIMIZED"); break;
-    case RECONSTRUCTION_FBP_CYLINDER_ONLY : strcpy (method, "RECONSTRUCTION_CYLINDER_ONLY"); break;
-    case RECONSTRUCTION_GRIDREC : strcpy (method, "RECONSTRUCTION_GRIDREC"); break;
-    }
+  switch (recon_info_record.recon_algorithm){
+    case RECONSTRUCTION_FBP_DELAY_ONLY      : strcpy (method, "RECONSTRUCTION_FBP_DELAY_ONLY"    ); break;
+    case RECONSTRUCTION_GRIDREC_DELAY_ONLY  : strcpy (method, "RECONSTRUCTION_GRIDREC_DELAY_ONLY"); break;
+    case RECONSTRUCTION_FBP_NO_OPTIMIZATION : strcpy (method, "RECONSTRUCTION_NO_OPTIMIZATION"   ); break;
+    case RECONSTRUCTION_FBP_OPTIMIZED       : strcpy (method, "RECONSTRUCTION_OPTIMIZED"         ); break;
+    case RECONSTRUCTION_FBP_CYLINDER_ONLY   : strcpy (method, "RECONSTRUCTION_CYLINDER_ONLY"     ); break;
+    case RECONSTRUCTION_GRIDREC             : strcpy (method, "RECONSTRUCTION_GRIDREC"           ); break;
+  }
   sprintf (msg, "I will be using method %s.\n", method);
   log_file->Message (msg);
 
@@ -2084,10 +2072,8 @@ void ClientProcess (void)
 
 //_____________________________________________________________________________________
 
-int StartTomoMPIClient (int argc, char* argv[], char *this_log_file_name, char * this_err_file_name)
-{
+int StartTomoMPIClient (int argc, char* argv[], char *this_log_file_name, char * this_err_file_name){
   char        msg[256];
-
 
   strcpy (log_file_name, this_log_file_name);
   strcpy (error_file_name, this_err_file_name);
@@ -2142,23 +2128,21 @@ int StartTomoMPIClient (int argc, char* argv[], char *this_log_file_name, char *
 //_____________________________________________________________________________________
 
 
-void RingCorrectionSingle (float *data, float ring_coeff) 
-{ 
+void RingCorrectionSingle (float *data, float ring_coeff) { 
   int         i, j, m; 
   float       mean_total; 
   float       tmp; 
  
   for (m=0;m<20;m++) {
-    
+
     // normalization of each projection: mean values estimation 
     for (i=0;i<recon_info_record.sinogram_ydim;i++) 
       information.mean_vect[i] = 0.0; 
     mean_total = 0.0; 
  
     for (i=0;i<recon_info_record.sinogram_ydim;i++) {
-        
       for (j=0;j<information.sinogram_adjusted_xdim;j++) {
-	information.mean_vect[i] += data[i*information.sinogram_adjusted_xdim+j]; 
+	      information.mean_vect[i] += data[i*information.sinogram_adjusted_xdim+j]; 
       }
 
       information.mean_vect[i] /= information.sinogram_adjusted_xdim; 
@@ -2169,10 +2153,9 @@ void RingCorrectionSingle (float *data, float ring_coeff)
     // renormalization of each projection to the global mean 
     for (i=0;i<recon_info_record.sinogram_ydim;i++) {
       for (j=0;j<information.sinogram_adjusted_xdim;j++) {
-	if (information.mean_vect[i] != 0.0) {
-	  data[i*information.sinogram_adjusted_xdim+j] = data[i*information.sinogram_adjusted_xdim+j]*mean_total/information.mean_vect[i];        // ring filtering: sum of projection and low-pass filter of the result 
- 
-	}
+  	    if (information.mean_vect[i] != 0.0) {
+	        data[i*information.sinogram_adjusted_xdim+j] = data[i*information.sinogram_adjusted_xdim+j]*mean_total/information.mean_vect[i];        // ring filtering: sum of projection and low-pass filter of the result 
+        }
       }
     }
 
@@ -2181,7 +2164,7 @@ void RingCorrectionSingle (float *data, float ring_coeff)
  
     for (i=0;i<recon_info_record.sinogram_ydim;i++) 
       for (j=0;j<information.sinogram_adjusted_xdim;j++) 
-	information.mean_sino_line_data[j] += data[i*information.sinogram_adjusted_xdim+j]; 
+	      information.mean_sino_line_data[j] += data[i*information.sinogram_adjusted_xdim+j]; 
  
     for (i=0;i<information.sinogram_adjusted_xdim;i++) 
       information.mean_sino_line_data[i] /= recon_info_record.sinogram_ydim; 
@@ -2196,13 +2179,14 @@ void RingCorrectionSingle (float *data, float ring_coeff)
     // ring corrections 
     for (i=0;i<recon_info_record.sinogram_ydim;i++) {
       for (j=0;j<information.sinogram_adjusted_xdim;j++) { 
-	tmp = information.mean_sino_line_data[j]-information.low_pass_sino_lines_data[j]; 
-	if ((data[i*information.sinogram_adjusted_xdim+j] - (tmp * ring_coeff) ) > 0.0) 
-	  data[i*information.sinogram_adjusted_xdim+j] -= (tmp * ring_coeff); 
-	else 
-	  data[i*information.sinogram_adjusted_xdim+j] = 0.0; 
+	      tmp = information.mean_sino_line_data[j]-information.low_pass_sino_lines_data[j]; 
+	    
+        if ((data[i*information.sinogram_adjusted_xdim+j] - (tmp * ring_coeff) ) > 0.0) 
+	        data[i*information.sinogram_adjusted_xdim+j] -= (tmp * ring_coeff); 
+	      else 
+	        data[i*information.sinogram_adjusted_xdim+j] = 0.0; 
+      
       } 
     } 
   }
- 
 } 
