@@ -13,15 +13,14 @@
 //-------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------
 
-FBP::FBP (void)
-{
-  num_sinograms_needed = 1;
+FBP::FBP (void):
+  fft_proj(NULL),
+  filtered_proj(NULL),
+  sines(NULL),
+  cosines(NULL),
+  filter_lut(NULL){
 
-  fft_proj = NULL;
-  sines = NULL;
-  cosines = NULL;
-  filter_lut = NULL;
-  filtered_proj = NULL;
+  num_sinograms_needed = 1;
 	
   sinogram1 = (float *) malloc (sizeof (float *));
   sinogram2 = NULL;
@@ -31,8 +30,7 @@ FBP::FBP (void)
 
 //---------------------------------------------------------------------------
 
-void FBP::acknowledgements (LogFileClass *acknowledge_file)
-{
+void FBP::acknowledgements (LogFileClass *acknowledge_file){
   acknowledge_file->Message ("__________________________________________________________________\n");
   acknowledge_file->Message ("FBP class");
   acknowledge_file->Message ("");
@@ -71,8 +69,7 @@ void FBP::acknowledgements (LogFileClass *acknowledge_file)
 
 //-------------------------------------------------------------------------------------
 
-void FBP::init (void)
-{
+void FBP::init (void){
   int     loop;
   float   temp;
 
@@ -101,74 +98,71 @@ void FBP::init (void)
 
 //-------------------------------------------------------------------------------------
 
-void FBP::reconstruct (void)
-{
+void FBP::reconstruct (void){
   int     loop,
-    loop2,
-    loop3,
-    n;
+          loop2,
+          loop3,
+          n;
+
   double  x,
-    y,
-    r,
-    temp_sum;
+          y,
+          r,
+          temp_sum;
+
   float   *sinogram,
-    *reconstruction,
-    *recon_offset,
-    sinxdiv2;
+          *reconstruction,
+          *recon_offset,
+          sinxdiv2;
 			  
 			  
   sinogram = sinogram1;
   reconstruction = reconstruction1;
 			      
-  if (reconstruction == NULL)
-    {
-      printf ("reconstruction memory not allocated \n");
-      return;
-    }
+  if (reconstruction == NULL){
+    printf ("reconstruction memory not allocated \n");
+    return;
+  }
   else
     for (loop=0;loop<sinogram_x_dim*sinogram_x_dim;loop++)
       reconstruction[loop] = 0.0;
 				
-  for (loop=0;loop<sinogram_y_dim;loop++)
-    {
-      for (loop2=0;loop2<sinogram_x_dim;loop2++)
-	{
-	  fft_proj[2*loop2+1] = sinogram[loop*sinogram_x_dim+loop2];
-	  fft_proj[2*loop2+2] = 0.0;
-	}
+  for (loop=0;loop<sinogram_y_dim;loop++){
+    for (loop2=0;loop2<sinogram_x_dim;loop2++){
+	    fft_proj[2*loop2+1] = sinogram[loop*sinogram_x_dim+loop2];
+	    fft_proj[2*loop2+2] = 0.0;
+	  }
 				      
-      four1 ((float *) fft_proj, sinogram_x_dim, 1);
-      for (loop2=0;loop2<2*sinogram_x_dim;loop2++)
-	fft_proj[loop2+1] = fft_proj[loop2+1]*filter_lut[loop2/2];
-      four1 ((float *) fft_proj, sinogram_x_dim, -1);
-      for (loop2=0;loop2<sinogram_x_dim;loop2++)
-	filtered_proj[loop*sinogram_x_dim+loop2] = fft_proj[2*loop2+1];
-    }
+    four1 ((float *) fft_proj, sinogram_x_dim, 1);
+    for (loop2=0;loop2<2*sinogram_x_dim;loop2++)
+	    fft_proj[loop2+1] = fft_proj[loop2+1]*filter_lut[loop2/2];
+    
+    four1 ((float *) fft_proj, sinogram_x_dim, -1);
+    for (loop2=0;loop2<sinogram_x_dim;loop2++)
+      filtered_proj[loop*sinogram_x_dim+loop2] = fft_proj[2*loop2+1];
+  }
 				  
   sinxdiv2 = (float) sinogram_x_dim/2.0;
   recon_offset = reconstruction;
-  for (loop=0;loop<sinogram_x_dim;loop++)
-    {
-      y = ((float) (loop - sinxdiv2))/sinxdiv2;
+  for (loop=0;loop<sinogram_x_dim;loop++){
+    y = ((float) (loop - sinxdiv2))/sinxdiv2;
 					    
-      for (loop2=0;loop2<sinogram_x_dim;loop2++)
-	{
-	  x = ((float) (loop2 - sinxdiv2))/sinxdiv2;
-	  for (loop3=0;loop3<sinogram_y_dim;loop3++)
-	    {
+    for (loop2=0;loop2<sinogram_x_dim;loop2++){
+	    x = ((float) (loop2 - sinxdiv2))/sinxdiv2;
+
+	    for (loop3=0;loop3<sinogram_y_dim;loop3++){
 	      r = x*cosines[loop3] + y*sines[loop3];
 	      if ((r >= -1) && (r < 1))
-		*recon_offset += (float) filtered_proj[loop3*sinogram_x_dim + (int) ((r+1)*sinxdiv2)];
+		      *recon_offset += (float) filtered_proj[loop3*sinogram_x_dim + (int) ((r+1)*sinxdiv2)];
 	    }
-	  recon_offset++;
-	}
-    }
+	  
+    recon_offset++;
+	  }
+  }
 }
 
 //-------------------------------------------------------------------------------------
 
-void FBP::destroy (void)
-{
+void FBP::destroy (void){
   if (fft_proj != NULL)
     free(fft_proj);
   if (sines != NULL)
@@ -187,8 +181,7 @@ void FBP::destroy (void)
 //-------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------
 
-void OptimizedFBP::acknowledgements (LogFileClass *acknowledge_file)
-{
+void OptimizedFBP::acknowledgements (LogFileClass *acknowledge_file){
   acknowledge_file->Message ("__________________________________________________________________");
   acknowledge_file->Message ("OptimizedFBP class");
   acknowledge_file->Message ("");
@@ -218,8 +211,7 @@ void OptimizedFBP::acknowledgements (LogFileClass *acknowledge_file)
 
 //-------------------------------------------------------------------------------------
 
-void OptimizedFBP::init (void)
-{
+void OptimizedFBP::init (void){
   int     loop;
   float   temp;
 
@@ -227,100 +219,97 @@ void OptimizedFBP::init (void)
   for(loop=0;loop<theta_list_size;loop++)
     theta_list[loop] = (theta_list[loop]*PI)/180.0;
     
-  fft_proj = (float *) malloc ((2*sinogram_x_dim+1)*sizeof(float));
-  sines = (float *) malloc (sinogram_y_dim*sizeof(float));
-  cosines = (float *) malloc (sinogram_y_dim*sizeof(float));
-  filter_lut = (float *) malloc (sinogram_x_dim*sizeof(float));
-  filtered_proj = (float*) malloc ((sinogram_y_dim*sinogram_x_dim)*sizeof(float));
+  fft_proj      = (float *) malloc ((2*sinogram_x_dim+1)              * sizeof(float));
+  sines         = (float *) malloc (   sinogram_y_dim                 * sizeof(float));
+  cosines       = (float *) malloc (   sinogram_y_dim                 * sizeof(float));
+  filter_lut    = (float *) malloc (   sinogram_x_dim                 * sizeof(float));
+  filtered_proj = (float *) malloc ((  sinogram_y_dim*sinogram_x_dim) * sizeof(float));
 	      
-  for (loop=0;loop<sinogram_x_dim;loop++)
-    {
-      temp =(float)(loop - (float) (sinogram_x_dim/2))/((float) (sinogram_x_dim/2));
-      filter_lut[loop] = 1-sqrt(fabs(temp));
-    }
+  for (loop=0;loop<sinogram_x_dim;loop++){
+    temp =(float)(loop - (float) (sinogram_x_dim/2))/((float) (sinogram_x_dim/2));
+    filter_lut[loop] = 1-sqrt(fabs(temp));
+  }
 		
-  for (loop=0;loop<sinogram_y_dim;loop++)
-    {
-      sines[loop] = sin(theta_list[loop]);
-      cosines[loop] = cos(theta_list[loop]);
-    }
+  for (loop=0;loop<sinogram_y_dim;loop++){
+    sines[loop]   = sin(theta_list[loop]);
+    cosines[loop] = cos(theta_list[loop]);
+  }
 		  
 }
 
 //-------------------------------------------------------------------------------------
 
-void OptimizedFBP::reconstruct (void)
-{
+void OptimizedFBP::reconstruct (void){
   int     loop,
-    loop2,
-    loop3,
-    n;
+          loop2,
+          loop3,
+          n;
+
   float   x,
-    y,
-    r,
-    pos_gate=5.0,
-    neg_gate=-5.0,
-    *sinogram,
-    *reconstruction,
-    *recon_offset,
-    sinxdiv2;
+          y,
+          r,
+          pos_gate=5.0,
+          neg_gate=-5.0,
+          *sinogram,
+          *reconstruction,
+          *recon_offset,
+          sinxdiv2;
 			
   sinogram = sinogram1;
   reconstruction = reconstruction1;
 			    
-  if (reconstruction == NULL)
-    {
+  if (reconstruction == NULL){
       printf("reconstruction memory not allocated \n");
       return;
-    }
+  }
   else
     for (loop=0;loop<sinogram_x_dim*sinogram_x_dim;loop++)
       reconstruction[loop] = 0.0;
 			      
-  for (loop=0;loop<sinogram_y_dim;loop++)
-    {
-      for (loop2=0;loop2<sinogram_x_dim;loop2++)
-	{
-	  if ((sinogram[loop*sinogram_x_dim+loop2] > neg_gate) && (sinogram[loop*sinogram_x_dim+loop2] < pos_gate))
-	    fft_proj[2*loop2+1] = sinogram[loop*sinogram_x_dim+loop2];
-	  else
-	    fft_proj[2*loop2+1] = 0.0;
-	  fft_proj[2*loop2+2] = 0.0;
-	}
-				    
+  for (loop=0;loop<sinogram_y_dim;loop++){
+
+      for (loop2=0;loop2<sinogram_x_dim;loop2++){
+        if ((sinogram[loop*sinogram_x_dim+loop2] > neg_gate) && (sinogram[loop*sinogram_x_dim+loop2] < pos_gate))
+          fft_proj[2*loop2+1] = sinogram[loop*sinogram_x_dim+loop2];
+        else
+          fft_proj[2*loop2+1] = 0.0;
+          
+        fft_proj[2*loop2+2] = 0.0;
+      }
+
       four1 ((float *) fft_proj, sinogram_x_dim, 1);
       for (loop2=0;loop2<2*sinogram_x_dim;loop2++)
-	fft_proj[loop2+1] = fft_proj[loop2+1]*filter_lut[loop2/2];
+        fft_proj[loop2+1] = fft_proj[loop2+1]*filter_lut[loop2/2];
+      
       four1 ((float *) fft_proj, sinogram_x_dim, -1);
       for (loop2=0;loop2<sinogram_x_dim;loop2++)
-	filtered_proj[loop*sinogram_x_dim+loop2] = fft_proj[2*loop2+1];
-    }
+        filtered_proj[loop*sinogram_x_dim+loop2] = fft_proj[2*loop2+1];
+  }
 				
   sinxdiv2 = (float) sinogram_x_dim/2.0;
   recon_offset = reconstruction;
-  for (loop=0;loop<sinogram_x_dim;loop++)
-    {
-      y = ((float) (loop - sinxdiv2))/sinxdiv2;
+
+  for (loop=0;loop<sinogram_x_dim;loop++){
+    y = ((float) (loop - sinxdiv2))/sinxdiv2;
 					  
-      for (loop2=0;loop2<sinogram_x_dim;loop2++)
-	{
-	  x = ((float) (loop2 - sinxdiv2))/sinxdiv2;
+    for (loop2=0;loop2<sinogram_x_dim;loop2++){
+      x = ((float) (loop2 - sinxdiv2))/sinxdiv2;
 						
-	  for (loop3=0;loop3<sinogram_y_dim;loop3++)
-	    {
+	    for (loop3=0;loop3<sinogram_y_dim;loop3++){
 	      r = x*cosines[loop3] + y*sines[loop3];
 	      if ((r >= -1) && (r < 1))
-		*recon_offset += (float) filtered_proj[loop3*sinogram_x_dim + (int) ((r+1)*sinxdiv2)];
+		      *recon_offset += (float) filtered_proj[loop3*sinogram_x_dim + (int) ((r+1)*sinxdiv2)];
 	    }
-	  recon_offset++;
-	}
-    }
+	    
+      recon_offset++;
+	  }
+  }
+
 }
 
 //-------------------------------------------------------------------------------------
 
-void OptimizedFBP::destroy (void)
-{
+void OptimizedFBP::destroy (void){
   if (fft_proj != NULL)
     free(fft_proj);
   if (sines != NULL)
@@ -339,8 +328,7 @@ void OptimizedFBP::destroy (void)
 //-------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------
 
-void CircleFBP::acknowledgements (LogFileClass *acknowledge_file)
-{
+void CircleFBP::acknowledgements (LogFileClass *acknowledge_file){
   acknowledge_file->Message ("__________________________________________________________________");
   acknowledge_file->Message ("CircleFBP class");
   acknowledge_file->Message ("");
@@ -366,8 +354,7 @@ void CircleFBP::acknowledgements (LogFileClass *acknowledge_file)
 
 //-------------------------------------------------------------------------------------
 
-void CircleFBP::init (void)
-{
+void CircleFBP::init (void){
   int     loop;
   float   temp;
 
@@ -375,44 +362,43 @@ void CircleFBP::init (void)
   for(loop=0;loop<theta_list_size;loop++)
     theta_list[loop] = (theta_list[loop]*PI)/180.0;
     
-  fft_proj = (float *) malloc ((2*sinogram_x_dim+1)*sizeof(float));
-  sines = (long *) malloc (sinogram_y_dim*sizeof(unsigned long));
-  cosines = (long *) malloc (sinogram_y_dim*sizeof(unsigned long));
-  filter_lut = (float *) malloc (sinogram_x_dim*sizeof(float));
-  filtered_proj = (float*) malloc ((sinogram_y_dim*sinogram_x_dim)*sizeof(float));
+  fft_proj      = (float *) malloc ((2*sinogram_x_dim+1)              * sizeof(float        ));
+  sines         = (long  *) malloc (   sinogram_y_dim                 * sizeof(unsigned long));
+  cosines       = (long  *) malloc (   sinogram_y_dim                 * sizeof(unsigned long));
+  filter_lut    = (float *) malloc (   sinogram_x_dim                 * sizeof(float        ));
+  filtered_proj = (float *) malloc ((  sinogram_y_dim*sinogram_x_dim) * sizeof(float        ));
 	      
-  for (loop=0;loop<sinogram_x_dim;loop++)
-    {
-      temp = (float)(loop - (float) (sinogram_x_dim/2))/((float) (sinogram_x_dim/2));
-      filter_lut[loop] = 1-sqrt(fabs(temp));
-    }
+  for (loop=0;loop<sinogram_x_dim;loop++){
+    temp = (float)(loop - (float) (sinogram_x_dim/2))/((float) (sinogram_x_dim/2));
+    filter_lut[loop] = 1-sqrt(fabs(temp));
+  }
 		
-  for (loop=0;loop<sinogram_y_dim;loop++)
-    {
-      sines[loop] = (long) (sin(theta_list[loop])*131072);
-      cosines[loop] = (long) (cos(theta_list[loop])*131072);
-    }
+  for (loop=0;loop<sinogram_y_dim;loop++){
+    sines[loop]   = (long) (sin(theta_list[loop])*131072);  // what is 131072??
+    cosines[loop] = (long) (cos(theta_list[loop])*131072);
+  }
 		  
 }
 
 //-------------------------------------------------------------------------------------
 
-void CircleFBP::reconstruct (void)
-{
+void CircleFBP::reconstruct (void){
   //FBP with additional filtering to do only a "circle" of the slice
   int     loop,
-    loop2,
-    loop3,
-    r,
-    sinogram_x_dim_div2;
+          loop2,
+          loop3,
+          r,
+          sinogram_x_dim_div2;
+
   float   pos_gate=5.0,
-    neg_gate=-5.0,
-    *sinogram,
-    *reconstruction,
-    *filtered_offset_1,
-    *recon_offset_1a,
-    *recon_offset_1b,
-    *filtered_offset;
+          neg_gate=-5.0,
+          *sinogram,
+          *reconstruction,
+          *filtered_offset_1,
+          *recon_offset_1a,
+          *recon_offset_1b,
+          *filtered_offset;
+
   int     lookup_index;
 			  
   sinogram = sinogram1;
@@ -421,130 +407,58 @@ void CircleFBP::reconstruct (void)
   sinogram_x_dim_div2 = sinogram_x_dim/2;
   r = sinogram_x_dim*sinogram_x_dim/4;
 				  
-  if (reconstruction == NULL)
-    {
-      printf("reconstruction memory not allocated \n");
-      return;
-    }
+  if (reconstruction == NULL){
+    printf("reconstruction memory not allocated \n");
+    return;
+  }
   else
-    for (loop=0;loop<sinogram_x_dim*sinogram_x_dim;loop++)
-      {
-	reconstruction[loop] = 0.0;
-      }
-				    
-  for (loop=0;loop<sinogram_y_dim;loop++)
-    {
-      for (loop2=0;loop2<sinogram_x_dim;loop2++)
-	{
-	  if ((sinogram[loop*sinogram_x_dim+loop2] > neg_gate) && (sinogram[loop*sinogram_x_dim+loop2] < pos_gate))
-	    fft_proj[2*loop2+1] = sinogram[loop*sinogram_x_dim+loop2];
-	  else
-	    fft_proj[2*loop2+1] = 0.0;
-	  fft_proj[2*loop2+2] = 0.0;
-	}
-					  
-      four1 (fft_proj, sinogram_x_dim, 1);
-      for (loop2=0;loop2<sinogram_x_dim*2;loop2++)
-	fft_proj[loop2+1] = fft_proj[loop2+1]*filter_lut[loop2/2];
-      four1(fft_proj, sinogram_x_dim, -1);
-      for (loop2=0;loop2<sinogram_x_dim*2;loop2++)
-	filtered_proj[loop*sinogram_x_dim+loop2] = fft_proj[2*loop2+1];
+    for (loop=0;loop<sinogram_x_dim*sinogram_x_dim;loop++){
+	    reconstruction[loop] = 0.0;
     }
+				    
+  for (loop=0;loop<sinogram_y_dim;loop++){
+
+    for (loop2=0;loop2<sinogram_x_dim;loop2++){
+	    if ((sinogram[loop*sinogram_x_dim+loop2] > neg_gate) && (sinogram[loop*sinogram_x_dim+loop2] < pos_gate))
+	      fft_proj[2*loop2+1] = sinogram[loop*sinogram_x_dim+loop2];
+	    else
+	      fft_proj[2*loop2+1] = 0.0;
+	  
+    fft_proj[2*loop2+2] = 0.0;
+	  }
+					  
+    four1 (fft_proj, sinogram_x_dim, 1);
+    for (loop2=0;loop2<sinogram_x_dim*2;loop2++)
+	    fft_proj[loop2+1] = fft_proj[loop2+1]*filter_lut[loop2/2];
+    
+    four1(fft_proj, sinogram_x_dim, -1);
+    for (loop2=0;loop2<sinogram_x_dim*2;loop2++)
+	    filtered_proj[loop*sinogram_x_dim+loop2] = fft_proj[2*loop2+1];
+  
+  }
 				      
   recon_offset_1a = reconstruction;
-  for (loop=-sinogram_x_dim_div2;loop<sinogram_x_dim_div2;loop++)
-    {
-      recon_offset_1a = &reconstruction[(loop+sinogram_x_dim_div2)*sinogram_x_dim];
-      for (loop2=-sinogram_x_dim_div2;loop2<sinogram_x_dim_div2;loop2++)
-	{
-	  if ((loop*loop+loop2*loop2) <= r)
-	    {
-	      recon_offset_1b = &recon_offset_1a[loop2+sinogram_x_dim_div2];
+  for (loop=-sinogram_x_dim_div2;loop<sinogram_x_dim_div2;loop++){
+    recon_offset_1a = &reconstruction[(loop+sinogram_x_dim_div2)*sinogram_x_dim];
+    
+    for (loop2=-sinogram_x_dim_div2;loop2<sinogram_x_dim_div2;loop2++){
+	    
+      if ((loop*loop+loop2*loop2) <= r){
+	      
+        recon_offset_1b = &recon_offset_1a[loop2+sinogram_x_dim_div2];
 							
 	      filtered_offset = filtered_proj + sinogram_x_dim_div2;
 							  
-	      for (loop3=0;loop3<sinogram_y_dim;loop3+=2)
-		{
-		  *recon_offset_1b += filtered_offset[(loop2*cosines[loop3] + loop*sines[loop3])>>17];
-		  filtered_offset += sinogram_x_dim;
+	      for (loop3=0;loop3<sinogram_y_dim;loop3+=2){
+		      *recon_offset_1b += filtered_offset[(loop2*cosines[loop3] + loop*sines[loop3])>>17];
+		      filtered_offset += sinogram_x_dim;
 								  
-		  *recon_offset_1b += filtered_offset[(loop2*cosines[loop3+1] + loop*sines[loop3+1])>>17];
-		  filtered_offset += sinogram_x_dim;
-		}
+		      *recon_offset_1b += filtered_offset[(loop2*cosines[loop3+1] + loop*sines[loop3+1])>>17];
+		      filtered_offset += sinogram_x_dim;
+		    }
 	    }
-	}
-    }
-					  
-  /*
-    int     loop,
-    loop2,
-    loop3,
-    n,
-    r,
-    sinogram_x_dim2,
-    sinogram_x_dimX2;
-    float   temp_sum,
-    pos_gate=5.0,
-    neg_gate=-5.0,
-    *sinogram,
-    *reconstruction,
-    *filtered_offset;
-					    
-    sinogram = sinogram1;
-    reconstruction = reconstruction1;
-					    
-    sinogram_x_dim2 = sinogram_x_dim/2;
-    sinogram_x_dimX2 = sinogram_x_dim*2;
-    r = sinogram_x_dim*sinogram_x_dim/4;
-					    
-    if (reconstruction == NULL)
-    {
-    printf("reconstruction memory not allocated \n");
-    return;
-    }
-    else
-    for (loop=0;loop<sinogram_x_dim*sinogram_x_dim;loop++)
-    reconstruction[loop] = 0.0;
-					    
-    for (loop=0;loop<sinogram_y_dim;loop++)
-    {
-    for (loop2=0;loop2<sinogram_x_dim;loop2++)
-    {
-    if ((sinogram[loop*sinogram_x_dim+loop2] > neg_gate) && (sinogram[loop*sinogram_x_dim+loop2] < pos_gate))
-    fft_proj[2*loop2+1] = sinogram[loop*sinogram_x_dim+loop2];
-    else
-    fft_proj[2*loop2+1] = 0.0;
-    fft_proj[2*loop2+2] = 0.0;
-    }
-					    
-    four1 (fft_proj, sinogram_x_dim, 1);
-    for (loop2=0;loop2<sinogram_x_dimX2;loop2++)
-    fft_proj[loop2+1] = fft_proj[loop2+1]*filter_lut[loop2/2];
-    four1(fft_proj, sinogram_x_dim, -1);
-    for (loop2=0;loop2<sinogram_x_dimX2;loop2++)
-    filtered_proj[loop*sinogram_x_dimX2+loop2] = fft_proj[loop2+1];
-    }
-					    
-    for (loop=-sinogram_x_dim2;loop<sinogram_x_dim2;loop++)
-    {
-    for (loop2=-sinogram_x_dim2;loop2<sinogram_x_dim2;loop2++)
-    {
-    if ((loop*loop+loop2*loop2) <= r)
-    {
-    temp_sum = 0.0;
-    filtered_offset = filtered_proj + sinogram_x_dim;
-    for (loop3=0;loop3<sinogram_y_dim;loop3++)
-    {
-    n = 2*((loop2*cosines[loop3] + loop*sines[loop3])/GRID_PRECISION);
-    temp_sum += filtered_offset[n];
-    filtered_offset += sinogram_x_dimX2;
-    }
-					    
-    reconstruction[(loop+sinogram_x_dim2)*sinogram_x_dim+(loop2+sinogram_x_dim2)] = temp_sum;
-    }
-    }
-    }
-  */
+	  }
+  }
 }
 
 //-------------------------------------------------------------------------------------
@@ -564,5 +478,3 @@ void CircleFBP::destroy (void)
 }
 						      
 //-------------------------------------------------------------------------------------
-
-
