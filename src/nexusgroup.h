@@ -105,11 +105,9 @@ public:
     #endif
 
     virtual ~NexusData (void){
-        if (name != NULL)
-            free (name);
+        if (name != NULL) free (name);
 
-        if (type != NULL)
-            free (type);
+        if (type != NULL) free (type);
 
         //If association = 1, we can't free memory--the parent process owns it.
 	    if (association == 0)
@@ -161,7 +159,7 @@ private:
 class NexusField : public NexusData
 {
 public:
-    NexusField (void);
+    NexusField (void) : next_field(NULL), attribute_list(NULL){};
 
     void PutSDSInfo (char *field_name, int field_rank, int *field_dims, int field_type, void *field_data);
     void PutSDSInfo (char *field_name, int field_rank, int *field_dims, int field_type);
@@ -176,15 +174,18 @@ public:
 
     void UpdateVarInfo (int field_rank, int *field_dims, int type, void *var_address);
 
-    void AddField (NexusField *field);
-    NexusField *NextField (void);
+    void AddField (NexusField *field){next_field = field;};
+    NexusField *NextField (void){ return (next_field);};
 
-    NexusAttribute *AttributeList (void);
+    NexusAttribute *AttributeList (void){return (attribute_list);};
     void AddToAttributeList (NexusAttribute *new_attrib);
 
     void WriteField (NXhandle file_handle, int compression_scheme);
 
-    ~NexusField (void);
+    ~NexusField (void){
+        if (attribute_list != NULL) delete (attribute_list);
+        if (next_field != NULL)     delete (next_field);
+    };
 
 private:
     NexusField          *next_field;

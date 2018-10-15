@@ -11,22 +11,18 @@
 #ifdef __unix__
 #define stricmp strcasecmp
 #endif
-//---------------------------------------------------------------------------
-//Private Methods
-//---------------------------------------------------------------------------
-
-NexusField::NexusField (void)
-{
-    next_field = NULL;
-    attribute_list = NULL;
-}
 
 //---------------------------------------------------------------------------
+//Public Methods
+//---------------------------------------------------------------------------
 
-void NexusField::PutSDSInfo (char *field_name, int field_rank, int *field_dims, int field_type, void *field_data)
-{
-long int    malloc_size;
-int         loop;
+void NexusField::PutSDSInfo (char *field_name, 
+                              int  field_rank, 
+                              int *field_dims, 
+                              int  field_type, 
+                             void *field_data){
+    long int    malloc_size;
+    int         loop;
 
     name = (char *) malloc (strlen (field_name) + 1);
     if (name == NULL)
@@ -41,97 +37,102 @@ int         loop;
     if (rank > 1)
         for (loop=0;loop<rank;loop++)
             size = size * arr_dims[loop];
-    else
-    {
+    else{
         size = arr_dims[0];
         for (loop=1;loop<rank;loop++)
             arr_dims[loop] = 0;
     }
 
     data_type = field_type;
-    switch (data_type)
-    {
+    switch (data_type){
         case NX_CHAR : {
-                    type= (char *) malloc (strlen ("NX_CHAR") + 1);
-				    if (type == NULL)
-						throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutSDSInfo!", (char *) "Memory allocation error!"));
+            type= (char *) malloc (strlen ("NX_CHAR") + 1);
+				    
+            if (type == NULL)
+				throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutSDSInfo!", (char *) "Memory allocation error!"));
 
-                    strcpy (type, "NX_CHAR");
+            strcpy (type, "NX_CHAR");
                     malloc_size = sizeof (char) * size + 1;
-                    break;
-                }
+        }; break;
+
         case NX_UINT8 : {
-                    type= (char *) malloc (strlen ("NX_UINT8") + 1);
-				    if (type == NULL)
-						throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutSDSInfo!", (char *) "Memory allocation error!"));
+            type= (char *) malloc (strlen ("NX_UINT8") + 1);
+			
+            if (type == NULL)
+				throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutSDSInfo!", (char *) "Memory allocation error!"));
 
-                    strcpy (type, "NX_UINT8");
-                    malloc_size = sizeof (char) * size;
-                    break;
-                }
+            strcpy (type, "NX_UINT8");
+            malloc_size = sizeof (char) * size;
+        }; break;
+
         case NX_INT8 : {
-                    type= (char *) malloc (strlen ("NX_INT8") + 1);
-				    if (type == NULL)
-						throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutSDSInfo!", (char *) "Memory allocation error!"));
+            type= (char *) malloc (strlen ("NX_INT8") + 1);
+			
+            if (type == NULL)
+				throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutSDSInfo!", (char *) "Memory allocation error!"));
 
-                    strcpy (type, "NX_INT8");
-                    malloc_size = sizeof (char) * size;
-                    break;
-                }
+            strcpy (type, "NX_INT8");
+            malloc_size = sizeof (char) * size;
+        }; break;
+        
         case NX_UINT16 : {
-                    type= (char *) malloc (strlen ("NX_UINT16") + 1);
-				    if (type == NULL)
-						throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutSDSInfo!", (char *) "Memory allocation error!"));
+            type= (char *) malloc (strlen ("NX_UINT16") + 1);
+			
+            if (type == NULL)
+				throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutSDSInfo!", (char *) "Memory allocation error!"));
 
-                    strcpy (type, "NX_UINT16");
-                    malloc_size = sizeof (unsigned short int) * size;
-                    break;
-                }
+            strcpy (type, "NX_UINT16");
+            malloc_size = sizeof (unsigned short int) * size;
+                    
+        }; break;
+
         case NX_INT16 : {
-                    type= (char *) malloc (strlen ("NX_INT16") + 1);
-				    if (type == NULL)
-						throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutSDSInfo!", (char *) "Memory allocation error!"));
+            type= (char *) malloc (strlen ("NX_INT16") + 1);
+			
+            if (type == NULL)
+				throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutSDSInfo!", (char *) "Memory allocation error!"));
 
-                    strcpy (type, "NX_INT16");
-                    malloc_size = sizeof (short int) * size;
-                    break;
-                }
+            strcpy (type, "NX_INT16");
+            malloc_size = sizeof (short int) * size;
+        }; break;
+
         case NX_UINT32 : {
-                    type= (char *) malloc (strlen ("NX_UINT32") + 1);
-				    if (type == NULL)
-						throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutSDSInfo!", (char *) "Memory allocation error!"));
+            type= (char *) malloc (strlen ("NX_UINT32") + 1);
+			
+            if (type == NULL)
+				throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutSDSInfo!", (char *) "Memory allocation error!"));
 
-                    strcpy (type, "NX_UINT32");
-                    malloc_size = sizeof (unsigned int) * size;
-                    break;
-                }
+            strcpy (type, "NX_UINT32");
+            malloc_size = sizeof (unsigned int) * size;
+        }; break;
+
         case NX_INT32 : {
-                    type= (char *) malloc (strlen ("NX_INT32") + 1);
-				    if (type == NULL)
-						throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutSDSInfo!", (char *) "Memory allocation error!"));
+            type= (char *) malloc (strlen ("NX_INT32") + 1);
+			if (type == NULL)
+				throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutSDSInfo!", (char *) "Memory allocation error!"));
 
-                    strcpy (type, "NX_INT32");
-                    malloc_size = sizeof (int) * size;
-                    break;
-                }
+            strcpy (type, "NX_INT32");
+            malloc_size = sizeof (int) * size;
+        }; break;
+
         case NX_FLOAT32 : {
-                    type= (char *) malloc (strlen ("NX_FLOAT32") + 1);
-				    if (type == NULL)
-						throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutSDSInfo!", (char *) "Memory allocation error!"));
+            type= (char *) malloc (strlen ("NX_FLOAT32") + 1);
+			if (type == NULL)
+				throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutSDSInfo!", (char *) "Memory allocation error!"));
 
-                    strcpy (type, "NX_FLOAT32");
-                    malloc_size = sizeof (float) * size;
-                    break;
-                }
+            strcpy (type, "NX_FLOAT32");
+            malloc_size = sizeof (float) * size;
+        }; break;
+
         case NX_FLOAT64 : {
-                    type= (char *) malloc (strlen ("NX_FLOAT64") + 1);
-				    if (type == NULL)
-						throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutSDSInfo!", (char *) "Memory allocation error!"));
+            type= (char *) malloc (strlen ("NX_FLOAT64") + 1);
+			
+            if (type == NULL)
+				throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutSDSInfo!", (char *) "Memory allocation error!"));
 
-                    strcpy (type, "NX_FLOAT64");
-                    malloc_size = sizeof (double) * size;
-                    break;
-                }
+            strcpy (type, "NX_FLOAT64");
+            malloc_size = sizeof (double) * size;
+        }; break;
 
     }
 
@@ -145,133 +146,12 @@ int         loop;
     valid = TRUE;
 }
 
-/*
-void NexusField::PutSDSInfo (char *field_name, int field_rank, int *field_dims, int field_type, void *field_data)
-{
-long int    malloc_size;
-int         loop;
-
-    name = (char *) malloc (strlen (field_name) + 1);
-    if (name == NULL)
-		throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutSDSInfo!", (char *) "Memory allocation error!"));
-    strcpy (name, field_name);
-
-    rank = field_rank;
-    for (loop=0;loop<rank;loop++)
-        arr_dims[loop] = field_dims[loop];
-
-    size = 1;
-    if (rank > 1)
-        for (loop=0;loop<rank;loop++)
-            size = size * arr_dims[loop];
-    else
-    {
-        size = arr_dims[0];
-        for (loop=1;loop<rank;loop++)
-            arr_dims[loop] = 0;
-    }
-
-    data_type = field_type;
-    switch (data_type)
-    {
-        case NX_CHAR : {
-                    type= (char *) malloc (strlen ("NX_CHAR") + 1);
-				    if (type == NULL)
-						throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutSDSInfo!", (char *) "Memory allocation error!"));
-
-                    strcpy (type, "NX_CHAR");
-                    malloc_size = sizeof (char) * size + 1;
-                    break;
-                }
-        case NX_UINT8 : {
-                    type= (char *) malloc (strlen ("NX_UINT8") + 1);
-				    if (type == NULL)
-						throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutSDSInfo!", (char *) "Memory allocation error!"));
-
-                    strcpy (type, "NX_UINT8");
-                    malloc_size = sizeof (unsigned char) * size;
-                    break;
-                }
-        case NX_INT8 : {
-                    type= (char *) malloc (strlen ("NX_INT8") + 1);
-				    if (type == NULL)
-						throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutSDSInfo!", (char *) "Memory allocation error!"));
-
-                    strcpy (type, "NX_INT8");
-                    malloc_size = sizeof (char) * size;
-                    break;
-                }
-        case NX_UINT16 : {
-                    type= (char *) malloc (strlen ("NX_UINT16") + 1);
-				    if (type == NULL)
-						throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutSDSInfo!", (char *) "Memory allocation error!"));
-
-                    strcpy (type, "NX_UINT16");
-                    malloc_size = sizeof (unsigned short) * size;
-                    break;
-                }
-        case NX_INT16 : {
-                    type= (char *) malloc (strlen ("NX_INT16") + 1);
-				    if (type == NULL)
-						throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutSDSInfo!", (char *) "Memory allocation error!"));
-
-                    strcpy (type, "NX_INT16");
-                    malloc_size = sizeof (short) * size;
-                    break;
-                }
-        case NX_UINT32 : {
-                    type= (char *) malloc (strlen ("NX_UINT32") + 1);
-				    if (type == NULL)
-						throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutSDSInfo!", (char *) "Memory allocation error!"));
-
-                    strcpy (type, "NX_UINT32");
-                    malloc_size = sizeof (unsigned long) * size;
-                    break;
-                }
-        case NX_INT32 : {
-                    type= (char *) malloc (strlen ("NX_INT32") + 1);
-				    if (type == NULL)
-						throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutSDSInfo!", (char *) "Memory allocation error!"));
-
-                    strcpy (type, "NX_INT32");
-                    malloc_size = sizeof (long) * size;
-                    break;
-                }
-        case NX_FLOAT32 : {
-                    type= (char *) malloc (strlen ("NX_FLOAT32") + 1);
-				    if (type == NULL)
-						throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutSDSInfo!", (char *) "Memory allocation error!"));
-
-                    strcpy (type, "NX_FLOAT32");
-                    malloc_size = sizeof (float) * size;
-                    break;
-                }
-        case NX_FLOAT64 : {
-                    type= (char *) malloc (strlen ("NX_FLOAT64") + 1);
-				    if (type == NULL)
-						throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutSDSInfo!", (char *) "Memory allocation error!"));
-
-                    strcpy (type, "NX_FLOAT64");
-                    malloc_size = sizeof (double) * size;
-                    break;
-                }
-    }
-
-    data = malloc (malloc_size);
-    if (data == NULL)
-		throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutSDSInfo!", (char *) "Memory allocation error!"));
-
-    if (data != NULL)
-        memcpy (data, field_data, malloc_size);
-
-    valid = TRUE;
-}
-*/
 //---------------------------------------------------------------------------
 
-void NexusField::PutSDSInfo (char *field_name, int field_rank, int *field_dims, int field_type)
-{
-int loop;
+void NexusField::PutSDSInfo (char *field_name, 
+                              int  field_rank, 
+                              int *field_dims, 
+                              int  field_type){
 
     name = (char *) malloc (strlen (field_name) + 1);
     if (name == NULL)
@@ -279,17 +159,16 @@ int loop;
     strcpy (name, field_name);
 
     rank = field_rank;
-    for (loop=0;loop<rank;loop++)
+    for (int loop=0;loop<rank;loop++)
         arr_dims[loop] = field_dims[loop];
 
     size = 1;
     if (rank > 1)
         for (loop=0;loop<rank;loop++)
             size = size * arr_dims[loop];
-    else
-    {
+    else{
         size = arr_dims[0];
-        for (loop=1;loop<rank;loop++)
+        for (int loop=1;loop<rank;loop++)
             arr_dims[loop] = 0;
     }
 
@@ -300,9 +179,9 @@ int loop;
 
 //---------------------------------------------------------------------------
 
-void NexusField::PutConstInfo (char *field_name, char *field_type, char *field_value)
-{
-int loop;
+void NexusField::PutConstInfo (char *field_name, 
+                               char *field_type, 
+                               char *field_value){
 
     name= (char *) malloc (strlen (field_name) + 1);
     if (name == NULL)
@@ -312,7 +191,7 @@ int loop;
     size = 1;
     rank = 1;
     arr_dims[0] = size;
-    for (loop=1;loop<rank;loop++)
+    for (int loop=1;loop<rank;loop++)
         arr_dims[loop] = 0;
 
     type= (char *) malloc (strlen (field_type) + 1);
@@ -320,11 +199,10 @@ int loop;
 		throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutConstInfo!", (char *) "Memory allocation error!"));
     strcpy (type, field_type);
 
-    if (!stricmp (field_type, "NX_CHAR"))
-    {
+    if (!stricmp (field_type, "NX_CHAR")){
         size = strlen (field_value);
         arr_dims[0] = size;
-        for (loop=1;loop<rank;loop++)
+        for (int loop=1;loop<rank;loop++)
             arr_dims[loop] = 0;
 
         data = malloc (sizeof (char) * size + 1);
@@ -335,8 +213,7 @@ int loop;
         data_type = NX_CHAR;
     }
 
-    if (!stricmp (field_type, "NX_UINT8"))
-    {
+    if (!stricmp (field_type, "NX_UINT8")){
         data = malloc (sizeof (char) * size);
         if (data == NULL)
 			throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutConstInfo!", (char *) "Memory allocation error!"));
@@ -346,8 +223,7 @@ int loop;
         data_type = NX_UINT8;
     }
 
-    if (!stricmp (field_type, "NX_INT8"))
-    {
+    if (!stricmp (field_type, "NX_INT8")){
         data = malloc (sizeof (char) * size);
         if (data == NULL)
 			throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutConstInfo!", (char *) "Memory allocation error!"));
@@ -357,8 +233,7 @@ int loop;
         data_type = NX_INT8;
     }
 
-    if (!stricmp (field_type, "NX_UINT16"))
-    {
+    if (!stricmp (field_type, "NX_UINT16")){
         data = malloc (sizeof (unsigned short int) * size);
         if (data == NULL)
 			throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutConstInfo!", (char *) "Memory allocation error!"));
@@ -368,8 +243,7 @@ int loop;
         data_type = NX_UINT16;
     }
 
-    if (!stricmp (field_type, "NX_INT16"))
-    {
+    if (!stricmp (field_type, "NX_INT16")){
         data = malloc (sizeof (short int) * size);
         if (data == NULL)
 			throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutConstInfo!", (char *) "Memory allocation error!"));
@@ -379,8 +253,7 @@ int loop;
         data_type = NX_INT16;
     }
 
-    if (!stricmp (field_type, "NX_UINT32"))
-    {
+    if (!stricmp (field_type, "NX_UINT32")){
         data = malloc (sizeof (unsigned int) * size);
         if (data == NULL)
 			throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutConstInfo!", (char *) "Memory allocation error!"));
@@ -390,8 +263,7 @@ int loop;
         data_type = NX_UINT32;
     }
 
-    if (!stricmp (field_type, "NX_INT32"))
-    {
+    if (!stricmp (field_type, "NX_INT32")){
         data = malloc (sizeof (int) * size);
         if (data == NULL)
 			throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutConstInfo!", (char *) "Memory allocation error!"));
@@ -401,8 +273,7 @@ int loop;
         data_type = NX_INT32;
     }
 
-    if (!stricmp (field_type, "NX_FLOAT32"))
-    {
+    if (!stricmp (field_type, "NX_FLOAT32")){
         data = malloc (sizeof (float) * size);
         if (data == NULL)
 			throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutConstInfo!", (char *) "Memory allocation error!"));
@@ -412,8 +283,7 @@ int loop;
         data_type = NX_FLOAT32;
     }
 
-    if (!stricmp (field_type, "NX_FLOAT64"))
-    {
+    if (!stricmp (field_type, "NX_FLOAT64")){
         data = malloc (sizeof (double) * size);
         if (data == NULL)
 			throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutConstInfo!", (char *) "Memory allocation error!"));
@@ -426,9 +296,11 @@ int loop;
 
 //---------------------------------------------------------------------------
 
-void NexusField::PutVarInfo (char *field_name, int field_rank, int *field_dims, int field_type, void *var_address)
-{
-int loop;
+void NexusField::PutVarInfo (char *field_name,
+                              int  field_rank, 
+                              int *field_dims, 
+                              int  field_type, 
+                             void *var_address){
 
     name = (char *) malloc (strlen (field_name) + 1);
     if (name == NULL)
@@ -436,97 +308,104 @@ int loop;
     strcpy (name, field_name);
 
     rank = field_rank;
-    for (loop=0;loop<rank;loop++)
+    for (int loop=0;loop<rank;loop++)
         arr_dims[loop] = field_dims[loop];
 
     size = 1;
     if (rank > 1)
-        for (loop=0;loop<rank;loop++)
+        for (int loop=0;loop<rank;loop++)
             size = size * arr_dims[loop];
-    else
-    {
+    else{
         size = arr_dims[0];
-        for (loop=1;loop<rank;loop++)
+        for (int loop=1;loop<rank;loop++)
             arr_dims[loop] = 0;
     }
 
 	association = 1;
 
     data_type = field_type;
-    switch (data_type)
-    {
+    switch (data_type){
         case NX_CHAR : {
-                    type= (char *) malloc (strlen ("NX_CHAR") + 1);
-				    if (type == NULL)
-						throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutVarInfo!", (char *) "Memory allocation error!"));
+            type= (char *) malloc (strlen ("NX_CHAR") + 1);
+			
+            if (type == NULL)
+				throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutVarInfo!", (char *) "Memory allocation error!"));
 
-                    strcpy (type, "NX_CHAR");
-                    break;
-                }
+            strcpy (type, "NX_CHAR");
+        }; break;
+
         case NX_UINT8 : {
-                    type= (char *) malloc (strlen ("NX_UINT8") + 1);
-				    if (type == NULL)
-						throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutVarInfo!", (char *) "Memory allocation error!"));
+            type= (char *) malloc (strlen ("NX_UINT8") + 1);
+			
+            if (type == NULL)
+				throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutVarInfo!", (char *) "Memory allocation error!"));
 
-                    strcpy (type, "NX_UINT8");
-                    break;
-                }
+            strcpy (type, "NX_UINT8");
+        }; break;
+
         case NX_INT8 : {
-                    type= (char *) malloc (strlen ("NX_INT8") + 1);
-				    if (type == NULL)
-						throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutVarInfo!", (char *) "Memory allocation error!"));
+            type= (char *) malloc (strlen ("NX_INT8") + 1);
+			
+            if (type == NULL)
+				throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutVarInfo!", (char *) "Memory allocation error!"));
 
-                    strcpy (type, "NX_INT8");
-                    break;
-                }
+            strcpy (type, "NX_INT8");
+        }; break;
+
         case NX_UINT16 : {
-                    type= (char *) malloc (strlen ("NX_UINT16") + 1);
-				    if (type == NULL)
-						throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutVarInfo!", (char *) "Memory allocation error!"));
+            type= (char *) malloc (strlen ("NX_UINT16") + 1);
+			
+            if (type == NULL)
+				throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutVarInfo!", (char *) "Memory allocation error!"));
 
-                    strcpy (type, "NX_UINT16");
-                    break;
-                }
+            strcpy (type, "NX_UINT16");
+        }; break;
+
         case NX_INT16 : {
-                    type= (char *) malloc (strlen ("NX_INT16") + 1);
-				    if (type == NULL)
-						throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutVarInfo!", (char *) "Memory allocation error!"));
+            type= (char *) malloc (strlen ("NX_INT16") + 1);
+			
+            if (type == NULL)
+				throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutVarInfo!", (char *) "Memory allocation error!"));
 
-                    strcpy (type, "NX_INT16");
-                    break;
-                }
+            strcpy (type, "NX_INT16");
+        }; break;
+
         case NX_UINT32 : {
-                    type= (char *) malloc (strlen ("NX_UINT32") + 1);
-				    if (type == NULL)
-						throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutVarInfo!", (char *) "Memory allocation error!"));
+            type= (char *) malloc (strlen ("NX_UINT32") + 1);
+			
+            if (type == NULL)
+				throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutVarInfo!", (char *) "Memory allocation error!"));
 
-                    strcpy (type, "NX_UINT32");
-                    break;
-                }
+            strcpy (type, "NX_UINT32");
+        }; break;
+
         case NX_INT32 : {
-                    type= (char *) malloc (strlen ("NX_INT32") + 1);
-				    if (type == NULL)
-						throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutVarInfo!", (char *) "Memory allocation error!"));
+            type= (char *) malloc (strlen ("NX_INT32") + 1);
+			
+            if (type == NULL)
+				throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutVarInfo!", (char *) "Memory allocation error!"));
 
-                    strcpy (type, "NX_INT32");
-                    break;
-                }
+            strcpy (type, "NX_INT32");
+        }; break;
+
         case NX_FLOAT32 : {
-                    type= (char *) malloc (strlen ("NX_FLOAT32") + 1);
-				    if (type == NULL)
-						throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutVarInfo!", (char *) "Memory allocation error!"));
+            type= (char *) malloc (strlen ("NX_FLOAT32") + 1);
+			
+            if (type == NULL)
+				throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutVarInfo!", (char *) "Memory allocation error!"));
 
-                    strcpy (type, "NX_FLOAT32");
-                    break;
-                }
+            strcpy (type, "NX_FLOAT32");
+        }; break;
+
         case NX_FLOAT64 : {
-                    type= (char *) malloc (strlen ("NX_FLOAT64") + 1);
-				    if (type == NULL)
-						throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutVarInfo!", (char *) "Memory allocation error!"));
+            type= (char *) malloc (strlen ("NX_FLOAT64") + 1);
 
-                    strcpy (type, "NX_FLOAT64");
-                    break;
-                }
+			if (type == NULL)
+				throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutVarInfo!", (char *) "Memory allocation error!"));
+
+            strcpy (type, "NX_FLOAT64");
+        }; break;
+
     }
 
     data = var_address;
@@ -534,10 +413,11 @@ int loop;
 
 //---------------------------------------------------------------------------
 #ifdef USECAPV
-void NexusField::PutPVInfo (char *field_name, char *field_type, char *field_value)
-{
-int loop;
-NexusAttribute *pv_name_attribute;
+void NexusField::PutPVInfo (char *field_name, 
+                            char *field_type, 
+                            char *field_value){
+
+    NexusAttribute *pv_name_attribute;
 
     name = (char *) malloc (strlen (field_name) + 1);
     if (name == NULL)
@@ -548,7 +428,7 @@ NexusAttribute *pv_name_attribute;
     size = 1;
     rank = 1;
     arr_dims[0] = size;
-    for (loop=1;loop<rank;loop++)
+    for (int loop=1;loop<rank;loop++)
         arr_dims[loop] = 0;
 
     type= (char *) malloc (strlen (field_type) + 1);
@@ -560,14 +440,13 @@ NexusAttribute *pv_name_attribute;
     if (pv == NULL)
 		throw (new NexusExceptionClass ((char *) "Error in method NexusField::PutPVInfo!", (char *) "Could not create object CAPV!"));
 
-    if (!stricmp (field_type, "NX_CHAR"))
-    {
+    if (!stricmp (field_type, "NX_CHAR")){
         pv_type = DBR_STRING;
         data_type = NX_CHAR;
 
         size = strlen ("EMPTY");
         arr_dims[0] = size;
-        for (loop=1;loop<rank;loop++)
+        for (int loop=1;loop<rank;loop++)
             arr_dims[loop] = 0;
 
         data = malloc (sizeof (char) * size + 1);
@@ -578,8 +457,7 @@ NexusAttribute *pv_name_attribute;
         data_type = NX_CHAR;
     }
 
-    if (!stricmp (field_type, "NX_INT8"))
-    {
+    if (!stricmp (field_type, "NX_INT8")){
         pv_type = DBR_SHORT;
         data_type = NX_INT8;
 
@@ -591,8 +469,7 @@ NexusAttribute *pv_name_attribute;
 		memcpy (data, &temp, sizeof (char));
 	}
 
-	if (!stricmp (field_type, "NX_INT32"))
-	{
+	if (!stricmp (field_type, "NX_INT32")){
 		pv_type = DBR_LONG;
 		data_type = NX_INT32;
 
@@ -604,8 +481,7 @@ NexusAttribute *pv_name_attribute;
 		memcpy (data, &temp, sizeof (int));
 	}
 
-	if (!stricmp (field_type, "NX_FLOAT32"))
-	{
+	if (!stricmp (field_type, "NX_FLOAT32")){
 		pv_type = DBR_FLOAT;
 		data_type = NX_FLOAT32;
 
@@ -617,8 +493,7 @@ NexusAttribute *pv_name_attribute;
 		memcpy (data, &temp, sizeof (float));
 	}
 
-	if (!stricmp (field_type, "NX_FLOAT64"))
-	{
+	if (!stricmp (field_type, "NX_FLOAT64")){
 		pv_type = DBR_DOUBLE;
 		data_type = NX_FLOAT64;
 
@@ -637,24 +512,25 @@ NexusAttribute *pv_name_attribute;
 	AddToAttributeList (pv_name_attribute);
 }
 #endif
+
 //---------------------------------------------------------------------------
 
-void NexusField::UpdateVarInfo (int field_rank, int *field_dims, int field_type, void *var_address)
-{
-int loop;
+void NexusField::UpdateVarInfo (int  field_rank, 
+                                int *field_dims, 
+                                int  field_type, 
+                               void *var_address){
 
 	rank = field_rank;
-	for (loop=0;loop<rank;loop++)
+	for (int loop=0;loop<rank;loop++)
 		arr_dims[loop] = field_dims[loop];
 
     size = 1;
     if (rank > 1)
-        for (loop=0;loop<rank;loop++)
+        for (int loop=0;loop<rank;loop++)
             size = size * arr_dims[loop];
-    else
-    {
+    else{
         size = arr_dims[0];
-        for (loop=1;loop<rank;loop++)
+        for (int loop=1;loop<rank;loop++)
             arr_dims[loop] = 0;
     }
 
@@ -665,35 +541,13 @@ int loop;
 
 //---------------------------------------------------------------------------
 
-void NexusField::AddField (NexusField *field)
-{
-    next_field = field;
-}
-
-//---------------------------------------------------------------------------
-
-NexusField *NexusField::NextField (void)
-{
-    return (next_field);
-}
-
-//---------------------------------------------------------------------------
-
-NexusAttribute *NexusField::AttributeList (void)
-{
-    return (attribute_list);
-}
-
-//---------------------------------------------------------------------------
-
-void NexusField::AddToAttributeList (NexusAttribute *new_attrib)
-{
-NexusAttribute      *current_attrib;
+void NexusField::AddToAttributeList (NexusAttribute *new_attrib){
+    
+    NexusAttribute      *current_attrib;
 
     if (attribute_list == NULL)
         attribute_list = new_attrib;
-    else
-    {
+    else{
         current_attrib = attribute_list;
         while (current_attrib->NextAttribute () != NULL)
             current_attrib = current_attrib->NextAttribute ();
@@ -704,54 +558,49 @@ NexusAttribute      *current_attrib;
 
 //---------------------------------------------------------------------------
 #ifdef USECAPV
-void NexusField::PVUpdate (void)
-{
-struct timeb	now;
+void NexusField::PVUpdate (void){
+    struct timeb	now;
 
 	//if channel is not connected, check to see if last reconnect time was
     //greater than 60 seconds ago.  If it was, try and reconnect.  Otherwise,
     //mark now as the last reconnect time.
-    if (!pv->CA_IsConnected ())
-	{
+    if (!pv->CA_IsConnected ()){
         ftime (&now);
 		if ((now.time - reconnect_time) > 60)
-        	if (pv->CA_ReConnect () != PV_OKAY)
-            {
+        	if (pv->CA_ReConnect () != PV_OKAY){
             	reconnect_time = now.time;
 				throw (new NexusExceptionClass ((char *) "Error in method NexusField::PVUpdate!", (char *) "PV connection failed!"));
 		    }
     }
 
-	if (pv->CA_Get ())
-    {
+	if (pv->CA_Get ()){
         ftime (&now);
         reconnect_time = now.time;
 		throw (new NexusExceptionClass ((char *) "Error in method NexusField::PVUpdate!", (char *) "PV connection failed!"));
     }
 
-    switch (data_type)
-    {
-        case NX_CHAR : PutDataVal ((char *) pv->GetPVValue (), strlen ((char *) pv->GetPVValue ())); break;
-		case NX_INT32 : PutDataVal ((long int *) pv->GetPVValue ()); break;
-		case NX_FLOAT32 : PutDataVal ((float *) pv->GetPVValue ()); break;
-        case NX_FLOAT64 : PutDataVal ((double *) pv->GetPVValue ()); break;
+    switch (data_type){
+        case NX_CHAR    : PutDataVal ((char *) pv->GetPVValue (), strlen ((char *) pv->GetPVValue ())); break;
+		case NX_INT32   : PutDataVal ((long int *) pv->GetPVValue ()                                 ); break;
+		case NX_FLOAT32 : PutDataVal ((float *) pv->GetPVValue ()                                    ); break;
+        case NX_FLOAT64 : PutDataVal ((double *) pv->GetPVValue ()                                   ); break;
     }
 }
 #endif
+
 //---------------------------------------------------------------------------
 
-void NexusField::WriteField (NXhandle file_handle, int compression_scheme)
-{
-int             length;
-NexusAttribute  *current_attribute;
+void NexusField::WriteField (NXhandle file_handle, 
+                                  int compression_scheme){
 
-	try
-	{
+    int             length;
+    NexusAttribute  *current_attribute;
+
+	try{
 		if (!use)
 			return;
 
-		if (!required)
-		{
+		if (!required){
 			length = strlen (MISSING_DATA_ERROR_STR);
 			MakeData (name, NX_CHAR, 1, &length, file_handle, compression_scheme);
 
@@ -774,29 +623,16 @@ NexusAttribute  *current_attribute;
 		PutData (data, file_handle);
 
 		current_attribute = attribute_list;
-		while (current_attribute != NULL)
-		{
+		while (current_attribute != NULL){
 			current_attribute->WriteAttribute (file_handle);
 			current_attribute = current_attribute->NextAttribute ();
 		}
 
 		CloseData (file_handle);
 	}
-	catch (...)
-	{
+	catch (...){
 		throw;
 	}
 }
 
 //---------------------------------------------------------------------------
-
-NexusField::~NexusField (void)
-{
-    if (attribute_list != NULL)
-        delete (attribute_list);
-
-    if (next_field != NULL)
-        delete (next_field);
-
-}
-
