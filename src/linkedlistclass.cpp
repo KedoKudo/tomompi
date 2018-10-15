@@ -11,32 +11,26 @@
 
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
-LinkedListClass::LinkedListClass ()
-{
+LinkedListClass::LinkedListClass() :
+index(0){
 	previous_in_list = NULL;
     next_in_list = NULL;
-
-    index = 0;
 }
 //---------------------------------------------------------------------------
-int LinkedListClass::Index (void)
-{
+int LinkedListClass::Index (void){
 	return (index);
 }
 //---------------------------------------------------------------------------
-LinkedListClass *LinkedListClass::PreviousInList (void)
-{
+LinkedListClass *LinkedListClass::PreviousInList (void){
 	return (previous_in_list);
 }
 //---------------------------------------------------------------------------
-LinkedListClass *LinkedListClass::NextInList (void)
-{
+LinkedListClass *LinkedListClass::NextInList (void){
 	return (next_in_list);
 }
 //---------------------------------------------------------------------------
-void LinkedListClass::AddToList (LinkedListClass *new_info)
-{
-LinkedListClass		*last_item;
+void LinkedListClass::AddToList (LinkedListClass *new_info){
+	LinkedListClass		*last_item;
 
 	last_item = FindLastItem ();
 
@@ -45,9 +39,8 @@ LinkedListClass		*last_item;
     last_item->next_in_list->index = index + 1;
 }
 //---------------------------------------------------------------------------
-LinkedListClass *LinkedListClass::FindLastItem (void)
-{
-LinkedListClass		*current_entry;
+LinkedListClass *LinkedListClass::FindLastItem (void){
+	LinkedListClass		*current_entry;
 
 	current_entry = this;
     while (current_entry->NextInList () != NULL)
@@ -56,10 +49,8 @@ LinkedListClass		*current_entry;
     return (current_entry);
 }
 //---------------------------------------------------------------------------
-LinkedListClass::~LinkedListClass ()
-{
-	if (next_in_list != NULL)
-	{
+LinkedListClass::~LinkedListClass (){
+	if (next_in_list != NULL){
     	delete (next_in_list);
 		next_in_list = NULL;
 	}

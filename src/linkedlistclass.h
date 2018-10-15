@@ -10,8 +10,8 @@ class LinkedListClass
 #endif
 {
 public:
-LinkedListClass		*previous_in_list,
-					*next_in_list;
+	LinkedListClass		*previous_in_list,
+						*next_in_list;
 
 	LinkedListClass (void);
 
