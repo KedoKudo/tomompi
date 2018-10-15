@@ -41,13 +41,34 @@ public:
                         use,
                         association;
 
-#ifdef USECAPV
+    #ifdef USECAPV
     CAPV                *pv;
     long int				pv_type;
     long int				reconnect_time;
-#endif
+    #endif
 
-    NexusData ();
+    NexusData ():
+        name(NULL),
+        type(NULL),
+        data(NULL),
+        valid(FALSE),
+        association(0),
+        required(TRUE),
+        uptodate(TRUE),
+        use(TRUE){
+    
+        #ifdef USECAPV
+	    pv = NULL;
+        #endif
+
+        // The original if block for setting use, the else clause will 
+        // never be invoked with the default value of required=True
+        // if (required)
+        //     use = TRUE;
+        // else
+        //     use = FALSE;
+
+    };
 
     void PutDataVal (char *new_data, long int new_size);
     void PutDataVal (unsigned char *new_data);
@@ -75,15 +96,31 @@ public:
 
     int DataValid (void);
 
-#ifdef USECAPV
+    #ifdef USECAPV
     void PVConnect (void);
     void PVDisconnect (void);
 	void PVReConnect (void);
     int PVIsConnected (void);
 	int PVLastReconnectAttempt (void);
-#endif
+    #endif
 
-    virtual ~NexusData (void);
+    virtual ~NexusData (void){
+        if (name != NULL)
+            free (name);
+
+        if (type != NULL)
+            free (type);
+
+        //If association = 1, we can't free memory--the parent process owns it.
+	    if (association == 0)
+	  	    if (data != NULL)
+    	   	    free (data);
+
+        #ifdef USECAPV
+	    if (pv != NULL)
+    	    free (pv);
+        #endif
+    };
 
 private:
 
