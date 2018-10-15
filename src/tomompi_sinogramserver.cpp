@@ -1,4 +1,3 @@
- 
 //_____________________________________________________________________________________ 
 //_____________________________________________________________________________________ 
 //_____________________________________________________________________________________ 
@@ -38,30 +37,36 @@ int				front_end_id = 0,
 				sinograms_to_create, 
 				pass_number, 
 				sinogram_buffer; 
+
 bool			sinogram_thread_running; 
+
 char			exp_file_path[256], 
 				exp_file_name[256], 
 				data_group_index[256], 
 				file_version[10]; 
+
 FileListClass 		*top_projection_file_list = NULL, 
-					*top_white_file_list = NULL, 
-					*top_dark_file_list = NULL; 
+					*top_white_file_list      = NULL, 
+					*top_dark_file_list       = NULL; 
+
 NexusBoxClass           data_file; 
-float		       	*dark_field_sino_ave_buf1 = NULL, 
-					*dark_field_sino_ave_buf2 = NULL, 
+
+float		       	*dark_field_sino_ave_buf1    = NULL, 
+					*dark_field_sino_ave_buf2    = NULL, 
 					*dark_field_buffer_sinograms = NULL, 
 					*dark_field_server_sinograms = NULL; 
  
-unsigned short int	                *temp_buffer = NULL, 
-					*server_sinograms = NULL, 
-					*buffer_sinograms = NULL, 
-					*sino_buf1 = NULL, 
-					*sino_buf2 = NULL, 
+unsigned short int	*temp_buffer                  = NULL, 
+					*server_sinograms             = NULL, 
+					*buffer_sinograms             = NULL, 
+					*sino_buf1                    = NULL, 
+					*sino_buf2                    = NULL, 
 					*white_field_server_sinograms = NULL, 
 					*white_field_buffer_sinograms = NULL, 
-					*white_field_sino_buf1 = NULL, 
-					*white_field_sino_buf2 = NULL; 
-SINOGRAMINFO                            *sinogram_list = NULL; 
+					*white_field_sino_buf1        = NULL, 
+					*white_field_sino_buf2        = NULL;
+
+SINOGRAMINFO	*sinogram_list = NULL; 
  
 int				total_reconstruction_timer, 
 				sinogram_pass_timer, 
@@ -70,9 +75,8 @@ int				total_reconstruction_timer,
 
 //_____________________________________________________________________________________ 
  
-void ServerAcknowledgements (void) 
-{ 
-        LogFileClass *acknowledge_file = NULL; 
+void ServerAcknowledgements (void) { 
+    LogFileClass *acknowledge_file = NULL; 
  
 	acknowledge_file = new LogFileClass ("./", "server_acknowledge.txt"); 
  
@@ -84,10 +88,10 @@ void ServerAcknowledgements (void)
 	acknowledge_file->Message ("       Brian Tieman"); 
 	acknowledge_file->Message ("       Argonne National Laboratory"); 
 	acknowledge_file->Message ("       tieman@aps.anl.gov"); 
-        acknowledge_file->Message (""); 
+    acknowledge_file->Message (""); 
 	acknowledge_file->Message ("8/20/2003   V1.0   BT  First version with acknowledgements"); 
-        acknowledge_file->Message ("9/4/2003    V1.0   BT  Server now generates integer sinograms"); 
-        acknowledge_file->Message ("        to send to the clients.  The clients then perform the"); 
+    acknowledge_file->Message ("9/4/2003    V1.0   BT  Server now generates integer sinograms"); 
+    acknowledge_file->Message ("        to send to the clients.  The clients then perform the"); 
 	acknowledge_file->Message ("        normalization."); 
 	acknowledge_file->Message ("9/10/2003   V1.2   BT  Server now determines whether or not to autocenter"); 
 	acknowledge_file->Message ("        based on a flag set in the experiment file."); 
@@ -296,8 +300,7 @@ void ServerAcknowledgements (void)
  
 //_____________________________________________________________________________________ 
  
-void InitSampleLocation (int argc, char *argv[]) 
-{ 
+void InitSampleLocation (int argc, char *argv[]) { 
 	strcpy (exp_file_path, argv[1]); 
 	if (exp_file_path[strlen (exp_file_path)-1] != '/') 
 		strcat (exp_file_path, "/"); 
@@ -311,16 +314,19 @@ void InitSampleLocation (int argc, char *argv[])
  
 //_____________________________________________________________________________________ 
  
-int ReadOverrideConfigFile (void) 
-{ 
-int 	error_code, 
-		index; 
-FILE 	*setup_file = NULL; 
-char    override_file_name[256], 
-		parameter_name[256], 
-		parameter_value[256]; 
-char 	ch; 
- 
+int ReadOverrideConfigFile (void) { 
+
+	int 	error_code, 
+			index; 
+
+	FILE 	*setup_file = NULL; 
+
+	char    override_file_name[256], 
+			parameter_name[256], 
+			parameter_value[256]; 
+
+	char 	ch; 
+
 	error_code = 0; 
  
 	recon_info_record.recon_algorithm = RECONSTRUCTION_GRIDREC; 
@@ -328,8 +334,7 @@ char 	ch;
  
 	strcpy (override_file_name, exp_file_path); 
 	strcat (override_file_name, "override_exp_file.config"); 
-	if ((setup_file = fopen (override_file_name, "rt")) == NULL) 
-	{ 
+	if ((setup_file = fopen (override_file_name, "rt")) == NULL){ 
 		sprintf(msg, "override_exp_file.config could not be opened.  We will be using the information from the experiment file."); 
 		log_file->Message (msg); 
 		return (1); 
@@ -339,20 +344,17 @@ char 	ch;
 	log_file->Message (msg); 
  
 	strcpy (parameter_name, "empty"); 
-	while (strcmp (parameter_name, "End")) 
-	{ 
+	while (strcmp (parameter_name, "End")) { 
 		//Get parameter_name 
 		ch = fgetc (setup_file); 
 		if (ch == EOF) 
 			return(-1); 
  
 		index = 0; 
-		while (ch != '<') 
-		{ 
+		while (ch != '<') { 
 			//ignore comment lines 
 			if (ch == '#') 
-				while ((ch != '\n') && (ch != '\r')) 
-				{ 
+				while ((ch != '\n') && (ch != '\r')) { 
 					ch = fgetc (setup_file); 
 					if (ch == EOF) 
 						return (-1); 
@@ -361,12 +363,12 @@ char 	ch;
 			ch = fgetc (setup_file); 
 			if (ch == EOF) 
 				return(-1); 
-		} 
+		}
+
 		ch = fgetc (setup_file); 
 		if (ch == EOF) 
 			return(-1); 
-		while (ch != '>') 
-		{ 
+		while (ch != '>') { 
 			parameter_name[index] = ch; 
 			index++; 
  
@@ -377,15 +379,13 @@ char 	ch;
 		parameter_name[index] = '\0'; 
  
 		//Get parameter_value 
-		if (strcmp (parameter_name, "End")) 
-		{ 
+		if (strcmp (parameter_name, "End")) { 
 			ch = fgetc (setup_file); 
 			if (ch == EOF) 
 				return(-1); 
  
 			index = 0; 
-			while ((ch != '\n') && (ch != '\r')) 
-			{ 
+			while ((ch != '\n') && (ch != '\r')) { 
 				parameter_value[index] = ch; 
 				index++; 
  
@@ -396,351 +396,328 @@ char 	ch;
 			parameter_value[index] = '\0'; 
 		} 
  
-//Reconstruction algorithm 
-		if (!strcmp (parameter_name, "Reconstruction Algorithm")) 
-		{ 
-			if (!strcmp (parameter_value, "FBP Delay Only")) 
-			{ 
+		//Reconstruction algorithm 
+		if (!strcmp (parameter_name, "Reconstruction Algorithm")) { 
+			if (!strcmp (parameter_value, "FBP Delay Only")) { 
 				sprintf (msg, "Reconstruction algorithm: FBP Delay Only"); 
 				recon_info_record.recon_algorithm = RECONSTRUCTION_FBP_DELAY_ONLY; 
 			} 
-			if (!strcmp (parameter_value, "GRIDREC Delay Only")) 
-			{ 
+			if (!strcmp (parameter_value, "GRIDREC Delay Only")) { 
 				sprintf (msg, "Reconstruction algorithm: Gridrec Delay Only"); 
 				recon_info_record.recon_algorithm = RECONSTRUCTION_GRIDREC_DELAY_ONLY; 
 			} 
-			if (!strcmp (parameter_value, "FBP No Optimization")) 
-			{ 
+			if (!strcmp (parameter_value, "FBP No Optimization")) { 
 				sprintf (msg, "Reconstruction algorithm: FBP No Optimization"); 
 				recon_info_record.recon_algorithm = RECONSTRUCTION_FBP_NO_OPTIMIZATION; 
 			} 
-			if (!strcmp (parameter_value, "FBP Optimized")) 
-			{ 
+			if (!strcmp (parameter_value, "FBP Optimized")) { 
 				sprintf (msg, "Reconstruction algorithm: FBP Optimized"); 
 				recon_info_record.recon_algorithm = RECONSTRUCTION_FBP_OPTIMIZED; 
 			} 
-			if (!strcmp (parameter_value, "FBP Cylinder Only")) 
-			{ 
+			if (!strcmp (parameter_value, "FBP Cylinder Only")) { 
 				sprintf (msg, "Reconstruction algorithm: FBP Cylinder Only"); 
 				recon_info_record.recon_algorithm = RECONSTRUCTION_FBP_CYLINDER_ONLY; 
 			} 
-			if (!strcmp (parameter_value, "GRIDREC")) 
-			{ 
+			if (!strcmp (parameter_value, "GRIDREC")) { 
 				sprintf (msg, "Reconstruction algorithm: GRIDREC"); 
 				recon_info_record.recon_algorithm = RECONSTRUCTION_GRIDREC; 
 			} 
- 
-		 } 
 
-// Zero padding for GRIDREC
+		} 
 
-		if (!strcmp (parameter_name, "GRIDREC Padding")) 
-		{ 
-			if (!strcmp (parameter_value, "GRIDREC_PADDING_NONE")) 
-			{ 
+		// Zero padding for GRIDREC
+		if (!strcmp (parameter_name, "GRIDREC Padding")) {
+
+			if (!strcmp (parameter_value, "GRIDREC_PADDING_NONE")) { 
 				sprintf (msg, "GRIDREC Padding: GRIDREC_PADDING_NONE"); 
 				recon_info_record.gridrec_padding = GRIDREC_PADDING_NONE; 
 			} 
-			if (!strcmp (parameter_value, "GRIDREC_PADDING_HALF")) 
-			{ 
+
+			if (!strcmp (parameter_value, "GRIDREC_PADDING_HALF")) { 
 				sprintf (msg, "GRIDREC Padding: GRIDREC_PADDING_HALF"); 
 				recon_info_record.gridrec_padding = GRIDREC_PADDING_HALF; 
 			} 
-			if (!strcmp (parameter_value, "GRIDREC_PADDING_ONE_AND_HALF")) 
-			{ 
+
+			if (!strcmp (parameter_value, "GRIDREC_PADDING_ONE_AND_HALF")) { 
 				sprintf (msg, "GRIDREC Padding: GRIDREC_PADDING_ONE_AND_HALF"); 
 				recon_info_record.gridrec_padding = GRIDREC_PADDING_ONE_AND_HALF; 
 			} 
-			if (!strcmp (parameter_value, "GRIDREC_PADDING_BOUNDARY")) 
-			{ 
+
+			if (!strcmp (parameter_value, "GRIDREC_PADDING_BOUNDARY")) { 
 				sprintf (msg, "GRIDREC Padding: GRIDREC_PADDING_BOUNDARY"); 
 				recon_info_record.gridrec_padding = GRIDREC_PADDING_BOUNDARY; 
 			} 
 
 		 } 
 
-//Filter algorithm 
-		if (!strcmp (parameter_name, "Filter Algorithm")) 
-		{ 
-			if (!strcmp (parameter_value, "None")) 
-			{ 
+		//Filter algorithm 
+		if (!strcmp (parameter_name, "Filter Algorithm")) { 
+
+			if (!strcmp (parameter_value, "None")) { 
 				sprintf (msg, "Filter Algorithm: None"); 
 				recon_info_record.filter = FILTER_NONE; 
 			} 
-			if (!strcmp (parameter_value, "Shepp/Logan")) 
-			{ 
+
+			if (!strcmp (parameter_value, "Shepp/Logan")) { 
 				sprintf (msg, "Filter Algorithm: Shepp/Logan"); 
 				recon_info_record.filter = FILTER_SHEPP_LOGAN; 
-			} 
-			if (!strcmp (parameter_value, "Hann")) 
-			{ 
+			}
+
+			if (!strcmp (parameter_value, "Hann")) { 
 				sprintf (msg, "Filter Algorithm: Hann"); 
 				recon_info_record.filter = FILTER_HANN; 
-			} 
-			if (!strcmp (parameter_value, "Hamming")) 
-			{ 
+			}
+
+			if (!strcmp (parameter_value, "Hamming")) { 
 				sprintf (msg, "Filter Algorithm: Hamming"); 
 				recon_info_record.filter = FILTER_HAMMING; 
 			} 
-			if (!strcmp (parameter_value, "Ramp")) 
-			{ 
+
+			if (!strcmp (parameter_value, "Ramp")) { 
 				sprintf (msg, "Filter Algorithm: Ramp"); 
 				recon_info_record.filter = FILTER_RAMP; 
 			} 
-			if (!strcmp (parameter_value, "FBP")) 
-			{ 
+
+			if (!strcmp (parameter_value, "FBP")) { 
 				sprintf (msg, "Filter Algorithm: FBP"); 
 				recon_info_record.filter = FILTER_FBP; 
 			} 
  
-		 } 
- 
-//Output File Format 
-		if (!strcmp (parameter_name, "Output File Format")) 
-		{ 
-			if (!strcmp (parameter_value, "HDF4")) 
-			{ 
-				sprintf (msg, "Output File Format: HDF4"); 
-				recon_info_record.file_format = HDF4; 
-			} 
-			if (!strcmp (parameter_value, "HDF5")) 
-			{ 
-				sprintf (msg, "Output File Format: HDF5"); 
-				recon_info_record.file_format = HDF5; 
-			} 
-			if (!strcmp (parameter_value, "BIN")) 
-			{ 
-				sprintf (msg, "Output File Format: BIN"); 
-				recon_info_record.file_format = BIN; 
-			} 
 		} 
  
-//Use Slices File 
-		if (!strcmp (parameter_name, "Use Slices File")) 
-		{ 
-			if (!strcmp (parameter_value, "true")) 
-			{ 
+		//Output File Format 
+		if (!strcmp (parameter_name, "Output File Format")) {
+
+			if (!strcmp (parameter_value, "HDF4")) { 
+				sprintf (msg, "Output File Format: HDF4"); 
+				recon_info_record.file_format = HDF4; 
+			}
+
+			if (!strcmp (parameter_value, "HDF5")) { 
+				sprintf (msg, "Output File Format: HDF5"); 
+				recon_info_record.file_format = HDF5; 
+			}
+
+			if (!strcmp (parameter_value, "BIN")) { 
+				sprintf (msg, "Output File Format: BIN"); 
+				recon_info_record.file_format = BIN; 
+			}
+
+		} 
+ 
+		//Use Slices File 
+		if (!strcmp (parameter_name, "Use Slices File")) { 
+			
+			if (!strcmp (parameter_value, "true")) { 
 				sprintf (msg, "Use Slices File: true"); 
 				recon_info_record.use_slices_file = true; 
 			} 
-			if (!strcmp (parameter_value, "false")) 
-			{ 
+
+			if (!strcmp (parameter_value, "false")) { 
 				sprintf (msg, "Use Slices File: false"); 
 				recon_info_record.use_slices_file = false; 
-			} 
+			}
+
 		} 
  
-//Files per Pass 
-		if (!strcmp (parameter_name, "Files Per Pass")) 
-		{ 
+		//Files per Pass 
+		if (!strcmp (parameter_name, "Files Per Pass")) { 
 			sprintf (msg, "Files Per Pass: %s", parameter_value); 
 			files_per_pass = atoi (parameter_value); 
 		} 
  
-//Fixed Shift 
-		if (!strcmp (parameter_name, "Use Fixed Shift")) 
-		{ 
-			if (!strcmp (parameter_value, "true")) 
-			{ 
+		//Fixed Shift 
+		if (!strcmp (parameter_name, "Use Fixed Shift")) { 
+			
+			if (!strcmp (parameter_value, "true")) { 
 				sprintf (msg, "Use Fixed Shift: true"); 
 				recon_info_record.use_fixed_shift = true; 
 			} 
-			if (!strcmp (parameter_value, "false")) 
-			{ 
+
+			if (!strcmp (parameter_value, "false")) { 
 				sprintf (msg, "Use Fixed Shift: false"); 
 				recon_info_record.use_fixed_shift = false; 
 			} 
 		} 
-		if (!strcmp (parameter_name, "Fixed Shift Value")) 
-		{ 
+		if (!strcmp (parameter_name, "Fixed Shift Value")) { 
 			sprintf (msg, "Fixed Shift Value: %s", parameter_value); 
-
 			recon_info_record.fixed_shift_value = atof (parameter_value); 
-
 		} 
  
-//Start fixed shift 
-		if (!strcmp (parameter_name, "Start Fixed Shift")) 
-		{ 
+		//Start fixed shift 
+		if (!strcmp (parameter_name, "Start Fixed Shift")) { 
 			sprintf (msg, "Start Fixed Shift: %s", parameter_value); 
 			recon_info_record.start_fixed_shift = atof (parameter_value);  
 		} 
  
-//End fixed shift 
-		if (!strcmp (parameter_name, "End Fixed Shift")) 
-		{ 
+		//End fixed shift 
+		if (!strcmp (parameter_name, "End Fixed Shift")) { 
 			sprintf (msg, "End Fixed Shift: %s", parameter_value); 
 			recon_info_record.end_fixed_shift = atof (parameter_value);   
 		} 
 
-//Fixed shift interval
-		if (!strcmp (parameter_name, "Fixed Shift Interval"))   
-		{ 
+		//Fixed shift interval
+		if (!strcmp (parameter_name, "Fixed Shift Interval")) { 
 			sprintf (msg, "Fixed Shift Interval: %s", parameter_value); 
 			recon_info_record.fixed_shift_interval = atof (parameter_value); 
 		} 
 
  
-//Auto-Centering 
-		if (!strcmp (parameter_name, "Auto-Centering")) 
-		{ 
-			if (!strcmp (parameter_value, "true")) 
-			{ 
+		//Auto-Centering 
+		if (!strcmp (parameter_name, "Auto-Centering")) { 
+			if (!strcmp (parameter_value, "true")) { 
 				sprintf (msg, "Auto-Centering: true"); 
 				recon_info_record.centering = true; 
 			} 
-			if (!strcmp (parameter_value, "false")) 
-			{ 
+			
+			if (!strcmp (parameter_value, "false")) { 
 				sprintf (msg, "Auto-Centering: false"); 
 				recon_info_record.centering = false; 
 			} 
 		} 
  
-//Ring Removal 
-		if (!strcmp (parameter_name, "Use Ring Removal")) 
-		{ 
-			if (!strcmp (parameter_value, "true")) 
-			{ 
+		//Ring Removal 
+		if (!strcmp (parameter_name, "Use Ring Removal")) { 
+
+			if (!strcmp (parameter_value, "true")) { 
 				sprintf (msg, "Use Ring Removal: true"); 
 				recon_info_record.use_ring_removal = true; 
 			} 
-			if (!strcmp (parameter_value, "false")) 
-			{ 
+
+			if (!strcmp (parameter_value, "false")) { 
 				sprintf (msg, "Use Ring Removal: false"); 
 				recon_info_record.use_ring_removal = false; 
 			} 
 		} 
-		if (!strcmp (parameter_name, "Ring Removal Coefficient")) 
-		{ 
+		if (!strcmp (parameter_name, "Ring Removal Coefficient")) { 
 			sprintf (msg, "Ring Removal Coefficient: %s", parameter_value); 
 			recon_info_record.ring_removal_coeff = atof (parameter_value); 
 		} 
  
-//Average White Fields 
-		if (!strcmp (parameter_name, "Average White Fields")) 
-		{ 
-			if (!strcmp (parameter_value, "true")) 
-			{ 
+		//Average White Fields 
+		if (!strcmp (parameter_name, "Average White Fields")) { 
+			
+			if (!strcmp (parameter_value, "true")) { 
 				sprintf (msg, "Average White Fields: true"); 
 				recon_info_record.average_white_fields = true; 
 			} 
-			if (!strcmp (parameter_value, "false")) 
-			{ 
+
+			if (!strcmp (parameter_value, "false")) { 
 				sprintf (msg, "Average White Fields: false"); 
 				recon_info_record.average_white_fields = false; 
-			} 
+			}
+
 		} 
  
-//Data Index 
-		if (!strcmp (parameter_name, "Data Index")) 
-		{ 
+		//Data Index 
+		if (!strcmp (parameter_name, "Data Index")) { 
 			sprintf (msg, "Data Index: %s", parameter_value); 
 			strcpy (data_group_index, parameter_value); 
 		} 
  
-//Compression Type 
-		if (!strcmp (parameter_name, "Compression Type")) 
-		{ 
-			if (!strcmp (parameter_value, "None")) 
-			{ 
+		//Compression Type 
+		if (!strcmp (parameter_name, "Compression Type")) { 
+			
+			if (!strcmp (parameter_value, "None")) { 
 				sprintf (msg, "Compression Type: None"); 
 				recon_info_record.compression_type = NX_COMP_NONE; 
 			} 
-			if (!strcmp (parameter_value, "LZW")) 
-			{ 
+
+			if (!strcmp (parameter_value, "LZW")) { 
 				sprintf (msg, "Compression Type: LZW"); 
 				recon_info_record.compression_type = NX_COMP_LZW; 
-			} 
-			if (!strcmp (parameter_value, "RLE")) 
-			{ 
+			}
+
+			if (!strcmp (parameter_value, "RLE")) { 
 				sprintf (msg, "Compression Type: RLE"); 
 				recon_info_record.compression_type = NX_COMP_RLE; 
-			} 
-			if (!strcmp (parameter_value, "HUF")) 
-			{ 
+			}
+
+			if (!strcmp (parameter_value, "HUF")) { 
 				sprintf (msg, "Compression Type: HUF"); 
 				recon_info_record.compression_type = NX_COMP_HUF; 
-			} 
+			}
+
 		} 
  
-//Rescale To Integer 
-		if (!strcmp (parameter_name, "Rescale To Int")) 
-		{ 
-			if (!strcmp (parameter_value, "true")) 
-			{ 
+		//Rescale To Integer 
+		if (!strcmp (parameter_name, "Rescale To Int")) { 
+			
+			if (!strcmp (parameter_value, "true")) { 
 				sprintf (msg, "Rescale To Int: true"); 
 				recon_info_record.rescale_to_int = true; 
-			} 
-			if (!strcmp (parameter_value, "false")) 
-			{ 
+			}
+
+			if (!strcmp (parameter_value, "false")) { 
 				sprintf (msg, "Rescale To Int: false"); 
 				recon_info_record.rescale_to_int = false; 
-			} 
-		} 
-		if (!strcmp (parameter_name, "Data Range Min")) 
-		{ 
+			}
+
+		}
+
+		if (!strcmp (parameter_name, "Data Range Min")) { 
 			sprintf (msg, "Data Range Min: %s", parameter_value); 
 			recon_info_record.scale_data_range_min = atof (parameter_value); 
-		} 
-		if (!strcmp (parameter_name, "Data Range Max")) 
-		{ 
+		}
+
+		if (!strcmp (parameter_name, "Data Range Max")) { 
 			sprintf (msg, "Data Range Max: %s", parameter_value); 
 			recon_info_record.scale_data_range_max = atof (parameter_value); 
 		} 
  
-//Debug 
-		if (!strcmp (parameter_name, "Debug")) 
-		{ 
-			if (!strcmp (parameter_value, "None")) 
-			{ 
+		//Debug 
+		if (!strcmp (parameter_name, "Debug")) { 
+
+			if (!strcmp (parameter_value, "None")) { 
 				sprintf (msg, "Debug: None"); 
 				recon_info_record.debug = DEBUG_NONE; 
-			} 
-			if (!strcmp (parameter_value, "White Field")) 
-			{ 
+			}
+
+			if (!strcmp (parameter_value, "White Field")) { 
 				sprintf (msg, "White Field"); 
 				recon_info_record.debug = DEBUG_WHITEFIELD; 
-			} 
-			if (!strcmp (parameter_value, "Dark Field")) 
-			{ 
+			}
+
+			if (!strcmp (parameter_value, "Dark Field")) { 
 				sprintf (msg, "Debug: Dark Field"); 
 				recon_info_record.debug = DEBUG_DARKFIELD; 
-			} 
-			if (!strcmp (parameter_value, "Sinogram Pre-Norm")) 
-			{ 
+			}
+
+			if (!strcmp (parameter_value, "Sinogram Pre-Norm")) { 
 				sprintf (msg, "Debug: Sinogram Pre-Norm"); 
 				recon_info_record.debug = DEBUG_PRENORM; 
-			} 
-			if (!strcmp (parameter_value, "Sinogram Post-Norm")) 
-			{ 
+			}
+
+			if (!strcmp (parameter_value, "Sinogram Post-Norm")) { 
 				sprintf (msg, "Debug: Sinogram Post-Norm"); 
 				recon_info_record.debug = DEBUG_POSTNORM; 
 			} 
-			if (!strcmp (parameter_value, "Post Centering")) 
-			{ 
+
+			if (!strcmp (parameter_value, "Post Centering")) { 
 				sprintf (msg, "Debug: Post Centering"); 
 				recon_info_record.debug = DEBUG_POSTCENTERING; 
 			} 
-			if (!strcmp (parameter_value, "Post Ring Removal")) 
-			{ 
+
+			if (!strcmp (parameter_value, "Post Ring Removal")) { 
 				sprintf (msg, "Debug: Post Ring Removal"); 
 				recon_info_record.debug = DEBUG_POSTRING; 
 			} 
-			if (!strcmp (parameter_value, "Full")) 
-			{ 
+
+			if (!strcmp (parameter_value, "Full")) { 
 				sprintf (msg, "Debug: Full"); 
 				recon_info_record.debug = DEBUG_FULL; 
 			} 
-			if (!strcmp (parameter_value, "No Output")) 
-			{ 
+
+			if (!strcmp (parameter_value, "No Output")) { 
 				sprintf (msg, "Debug: No Output"); 
 				recon_info_record.debug = DEBUG_NO_OUTPUT; 
-			} 
-			if (!strcmp (parameter_value, "No Reconstruction")) 
-			{ 
+			}
+
+			if (!strcmp (parameter_value, "No Reconstruction")) { 
 				sprintf (msg, "Debug: No Reconstruction"); 
 				recon_info_record.debug = DEBUG_NO_RECONSTRUCTION; 
 			} 
+
 		} 
  
 		log_file->Message(msg); 
@@ -748,16 +725,14 @@ char 	ch;
  
 	fclose (setup_file); 
  
-//Validate Ring Removal Coefficient 
-	if (recon_info_record.ring_removal_coeff < 0) 
-	{ 
+	//Validate Ring Removal Coefficient 
+	if (recon_info_record.ring_removal_coeff < 0) { 
 		recon_info_record.ring_removal_coeff = 0; 
 		sprintf (msg, "WARNING! Ring Removal Coefficient must be > 0--I will adjust it for you."); 
 		log_file->Message (msg); 
 	} 
  
-	if (recon_info_record.ring_removal_coeff > 5) 
-	{ 
+	if (recon_info_record.ring_removal_coeff > 5) { 
 		recon_info_record.ring_removal_coeff = 5; 
 		sprintf (msg, "WARNING! Ring Removal Coefficient must be < 5--I will adjust it for you."); 
 		log_file->Message (msg); 
@@ -769,22 +744,19 @@ char 	ch;
  
 //_____________________________________________________________________________________ 
  
-void WriteConfigFile () 
-{ 
-FILE 	*setup_file = NULL; 
-char	*configuration_file = NULL; 
+void WriteConfigFile () { 
+	FILE 	*setup_file = NULL; 
+	char	*configuration_file = NULL; 
  
 	configuration_file = (char *) malloc (strlen (recon_info_record.log_path) + strlen (recon_info_record.base_name) + strlen (".config") + 1); 
-    if (configuration_file == NULL) 
-    { 
+    if (configuration_file == NULL) { 
         sprintf (msg, "Could not allocat memory for configuration_file."); 
         error_log->addError (msg, "WriteConfigFile ()"); 
     } 
  
 	sprintf (configuration_file, "%s%s.config", recon_info_record.log_path, recon_info_record.base_name); 
  
-	if ((setup_file = fopen (configuration_file, "w")) == NULL) 
-	{ 
+	if ((setup_file = fopen (configuration_file, "w")) == NULL) { 
 		sprintf(msg, "%s%s", configuration_file, " could not be opened."); 
 		log_file->ErrorMessage (msg, "WriteConfigFile"); 
         error_log->addError (msg, "WriteConfigFile ()"); 
@@ -796,7 +768,7 @@ char	*configuration_file = NULL;
 	fprintf (setup_file, "##%s\n", exp_file_name); 
 	fprintf (setup_file, "##TomoMPI Version:%s\n", VERSION); 
  
-//Reconstruction algorithm 
+	//Reconstruction algorithm 
 	fprintf (setup_file, "\n"); 
 	fprintf (setup_file, "##Reconstruction Algorithm\n"); 
 	fprintf (setup_file, "##	Options:\n"); 
@@ -806,18 +778,19 @@ char	*configuration_file = NULL;
 	fprintf (setup_file, "##		FBP Optimized\n"); 
 	fprintf (setup_file, "##		FBP Cylinder Only\n"); 
 	fprintf (setup_file, "##		GRIDREC\n"); 
-	switch (recon_info_record.recon_algorithm) 
-	{ 
-		case RECONSTRUCTION_FBP_DELAY_ONLY : fprintf (setup_file, "<Reconstruction Algorithm>FBP Delay Only\n"); break; 
-		case RECONSTRUCTION_GRIDREC_DELAY_ONLY : fprintf (setup_file, "<Reconstruction Algorithm>GRIDREC Delay Only\n"); break; 
-		case RECONSTRUCTION_FBP_NO_OPTIMIZATION : fprintf (setup_file, "<Reconstruction Algorithm>FBP No Optimization\n"); break; 
-		case RECONSTRUCTION_FBP_OPTIMIZED : fprintf (setup_file, "<Reconstruction Algorithm>FBP Optimized\n"); break; 
-		case RECONSTRUCTION_FBP_CYLINDER_ONLY : fprintf (setup_file, "<Reconstruction Algorithm>FBP Cylinder Only\n"); break; 
-		case RECONSTRUCTION_GRIDREC : fprintf (setup_file, "<Reconstruction Algorithm>GRIDREC\n"); break; 
-		default : fprintf (setup_file, "<Reconstruction Algorithm>Gridrec\n"); break; 
-	 } 
+	switch (recon_info_record.recon_algorithm) { 
 
-//GRIDREC Padding
+		case RECONSTRUCTION_FBP_DELAY_ONLY      : fprintf (setup_file, "<Reconstruction Algorithm>FBP Delay Only\n"     ); break; 
+		case RECONSTRUCTION_GRIDREC_DELAY_ONLY  : fprintf (setup_file, "<Reconstruction Algorithm>GRIDREC Delay Only\n" ); break; 
+		case RECONSTRUCTION_FBP_NO_OPTIMIZATION : fprintf (setup_file, "<Reconstruction Algorithm>FBP No Optimization\n"); break; 
+		case RECONSTRUCTION_FBP_OPTIMIZED       : fprintf (setup_file, "<Reconstruction Algorithm>FBP Optimized\n"      ); break; 
+		case RECONSTRUCTION_FBP_CYLINDER_ONLY   : fprintf (setup_file, "<Reconstruction Algorithm>FBP Cylinder Only\n"  ); break; 
+		case RECONSTRUCTION_GRIDREC             : fprintf (setup_file, "<Reconstruction Algorithm>GRIDREC\n"            ); break; 
+		
+		default : fprintf (setup_file, "<Reconstruction Algorithm>Gridrec\n"); break; 
+	} 
+
+	//GRIDREC Padding
 
 	fprintf (setup_file, "\n"); 
 	fprintf (setup_file, "##GRIDREC Padding\n"); 
@@ -826,16 +799,17 @@ char	*configuration_file = NULL;
 	fprintf (setup_file, "##		GRIDREC_PADDING_HALF\n"); 
 	fprintf (setup_file, "##		GRIDREC_PADDING_ONE_AND_HALF\n"); 
 	fprintf (setup_file, "##		GRIDREC_PADDING_BOUNDARY\n"); 
-	switch (recon_info_record.gridrec_padding) 
-	{ 
-		case GRIDREC_PADDING_NONE : fprintf (setup_file, "<GRIDREC Padding>GRIDREC_PADDING_NONE\n"); break; 
-		case GRIDREC_PADDING_HALF : fprintf (setup_file, "<GRIDREC Padding>GRIDREC_PADDING_HALF\n"); break; 
+	switch (recon_info_record.gridrec_padding) { 
+
+		case GRIDREC_PADDING_NONE         : fprintf (setup_file, "<GRIDREC Padding>GRIDREC_PADDING_NONE\n"        ); break; 
+		case GRIDREC_PADDING_HALF         : fprintf (setup_file, "<GRIDREC Padding>GRIDREC_PADDING_HALF\n"        ); break; 
 		case GRIDREC_PADDING_ONE_AND_HALF : fprintf (setup_file, "<GRIDREC Padding>GRIDREC_PADDING_ONE_AND_HALF\n"); break; 
-		case GRIDREC_PADDING_BOUNDARY : fprintf (setup_file, "<GRIDREC Padding>GRIDREC_PADDING_BOUNDARY\n"); break; 
+		case GRIDREC_PADDING_BOUNDARY     : fprintf (setup_file, "<GRIDREC Padding>GRIDREC_PADDING_BOUNDARY\n"    ); break; 
+		
 		default : fprintf (setup_file, "<GRIDREC Padding>GRIDREC_PADDING_BOUNDARY\n"); break; 
 	 } 
 
-//Filter algorithm 
+	//Filter algorithm 
 	fprintf (setup_file, "\n"); 
 	fprintf (setup_file, "##Filter Algorithm\n"); 
 	fprintf (setup_file, "##	Options:\n"); 
@@ -845,33 +819,35 @@ char	*configuration_file = NULL;
 	fprintf (setup_file, "##	Hamming\n"); 
 	fprintf (setup_file, "##	Ramp\n"); 
 	fprintf (setup_file, "##	FBP\n"); 
-	switch (recon_info_record.filter) 
-	{ 
-		case FILTER_NONE : fprintf (setup_file, "<Filter Algorithm>None\n"); break; 
+	switch (recon_info_record.filter) {
+
+		case FILTER_NONE        : fprintf (setup_file, "<Filter Algorithm>None\n"       ); break; 
 		case FILTER_SHEPP_LOGAN : fprintf (setup_file, "<Filter Algorithm>Shepp/Logan\n"); break; 
-		case FILTER_HANN : fprintf (setup_file, "<Filter Algorithm>Hann\n"); break; 
-		case FILTER_HAMMING : fprintf (setup_file, "<Filter Algorithm>Hamming\n"); break; 
-		case FILTER_RAMP : fprintf (setup_file, "<Filter Algorithm>Ramp\n"); break; 
-		case FILTER_FBP : fprintf (setup_file, "<Filter Algorithm>FBP\n"); break; 
+		case FILTER_HANN        : fprintf (setup_file, "<Filter Algorithm>Hann\n"       ); break; 
+		case FILTER_HAMMING     : fprintf (setup_file, "<Filter Algorithm>Hamming\n"    ); break; 
+		case FILTER_RAMP        : fprintf (setup_file, "<Filter Algorithm>Ramp\n"       ); break; 
+		case FILTER_FBP         : fprintf (setup_file, "<Filter Algorithm>FBP\n"        ); break; 
+
 		default : fprintf (setup_file, "<Filter Algorithm>None\n"); break; 
 	 } 
  
-//Output File Format 
+	//Output File Format 
 	fprintf (setup_file, "\n"); 
 	fprintf (setup_file, "##Output File Format\n"); 
 	fprintf (setup_file, "##	Options:\n"); 
 	fprintf (setup_file, "##		HDF4\n"); 
 	fprintf (setup_file, "##		HDF5\n"); 
 	fprintf (setup_file, "##		BIN\n"); 
-	switch (recon_info_record.file_format) 
-	{ 
+	switch (recon_info_record.file_format) { 
+
 		case HDF4 : fprintf (setup_file, "<Output File Format>HDF4\n"); break; 
 		case HDF5 : fprintf (setup_file, "<Output File Format>HDF5\n"); break; 
-		case BIN : fprintf (setup_file, "<Output File Format>BIN\n"); break; 
+		case BIN  : fprintf (setup_file, "<Output File Format>BIN\n" ); break; 
+
 		default : fprintf (setup_file, "<Output File Format>HDF5\n"); break; 
 	} 
  
-//Use Slices File 
+	//Use Slices File 
 	fprintf (setup_file, "\n"); 
 	fprintf (setup_file, "##Use Slices File\n"); 
 	fprintf (setup_file, "##	Options:\n"); 
@@ -885,7 +861,7 @@ char	*configuration_file = NULL;
 	else 
 		fprintf (setup_file, "<Use Slices File>false\n"); 
  
-//Start fixed shift 
+	//Start fixed shift 
 	fprintf (setup_file, "\n"); 
 	fprintf (setup_file, "##Start Fixed Shift\n"); 
 	fprintf (setup_file, "##	Options:\n"); 
@@ -895,7 +871,7 @@ char	*configuration_file = NULL;
 	fprintf (setup_file, "##		<Use Fixed Shift>true\n"); 
 	fprintf (setup_file, "<Start Fixed Shift>%f\n", recon_info_record.start_fixed_shift); 
  
-//End fixed shift 
+	//End fixed shift 
 	fprintf (setup_file, "\n"); 
 	fprintf (setup_file, "##End Fixed Shift\n"); 
 	fprintf (setup_file, "##	Options:\n"); 
@@ -905,7 +881,7 @@ char	*configuration_file = NULL;
 	fprintf (setup_file, "##		<Use Fixed Shift>true\n"); 
 	fprintf (setup_file, "<End Fixed Shift>%f\n", recon_info_record.end_fixed_shift); 
 
-//Fixed shift interval                     
+	//Fixed shift interval                     
 	fprintf (setup_file, "\n");                             
 	fprintf (setup_file, "##Fixed Shift Interval\n"); 
 	fprintf (setup_file, "##	Options:\n"); 
@@ -915,14 +891,14 @@ char	*configuration_file = NULL;
 	fprintf (setup_file, "##		<Use Fixed Shift>true\n"); 
 	fprintf (setup_file, "<Fixed Shift Interval>%f\n", recon_info_record.fixed_shift_interval); 
   
-//Files per Pass 
+	//Files per Pass 
 	fprintf (setup_file, "\n"); 
 	fprintf (setup_file, "##Files Per Pass\n"); 
 	fprintf (setup_file, "##	Options:\n"); 
 	fprintf (setup_file, "##		power of 2 prefered\n"); 
 	fprintf (setup_file, "<Files Per Pass>%d\n", files_per_pass); 
  
-//Fixed Shift 
+	//Fixed Shift 
 	fprintf (setup_file, "\n"); 
 	fprintf (setup_file, "##Use Fixed Shift\n"); 
 	fprintf (setup_file, "##	Options:\n"); 
@@ -944,7 +920,7 @@ char	*configuration_file = NULL;
 	// fprintf (setup_file, "<Fixed Shift Value>%d\n", recon_info_record.fixed_shift_value); 
 	fprintf (setup_file, "<Fixed Shift Value>%f\n", recon_info_record.fixed_shift_value); 
  
-//Auto-Centering 
+	//Auto-Centering 
 	fprintf (setup_file, "\n"); 
 	fprintf (setup_file, "##Auto-Centering\n"); 
 	fprintf (setup_file, "##	Options:\n"); 
@@ -955,7 +931,7 @@ char	*configuration_file = NULL;
 	else 
 		fprintf (setup_file, "<Auto-Centering>false\n"); 
  
-//Ring Removal 
+	//Ring Removal 
 	fprintf (setup_file, "\n"); 
 	fprintf (setup_file, "##Use Ring Removal\n"); 
 	fprintf (setup_file, "##	Options:\n"); 
@@ -974,7 +950,7 @@ char	*configuration_file = NULL;
 	fprintf (setup_file, "##		<Use Ring Removal>true\n"); 
 	fprintf (setup_file, "<Ring Removal Coefficient>%f\n", recon_info_record.ring_removal_coeff); 
  
-//Average White Fields 
+	//Average White Fields 
 	fprintf (setup_file, "\n"); 
 	fprintf (setup_file, "##Average White Fields\n"); 
 	fprintf (setup_file, "##	Options:\n"); 
@@ -985,14 +961,14 @@ char	*configuration_file = NULL;
 	else 
 		fprintf (setup_file, "<Average White Fields>false\n"); 
  
-//Data Index 
+	//Data Index 
 	fprintf (setup_file, "\n"); 
 	fprintf (setup_file, "##Data Index\n"); 
 	fprintf (setup_file, "##	Options:\n"); 
 	fprintf (setup_file, "##		example: ;entry1;data;data\n"); 
 	fprintf (setup_file, "<Data Index>%s\n", data_group_index); 
  
-//Compression Type 
+	//Compression Type 
 	fprintf (setup_file, "\n"); 
 	fprintf (setup_file, "##Compressiong Type\n"); 
 	fprintf (setup_file, "##	Options:\n"); 
@@ -1003,12 +979,13 @@ char	*configuration_file = NULL;
 	fprintf (setup_file, "##	Requires:\n"); 
 	fprintf (setup_file, "##		<Output File Format>HDF4\n"); 
 	fprintf (setup_file, "##		<Output File Format>HDF5\n"); 
-	switch (recon_info_record.compression_type) 
-	{ 
+	switch (recon_info_record.compression_type) { 
+
 		case NX_COMP_NONE : fprintf (setup_file, "<Compression Type>None\n"); break; 
-		case NX_COMP_LZW : fprintf (setup_file, "<Compression Type>LZW\n"); break; 
-		case NX_COMP_RLE : fprintf (setup_file, "<Compression Type>RLE\n"); break; 
-		case NX_COMP_HUF : fprintf (setup_file, "<Compression Type>HUF\n"); break; 
+		case NX_COMP_LZW  : fprintf (setup_file, "<Compression Type>LZW\n" ); break; 
+		case NX_COMP_RLE  : fprintf (setup_file, "<Compression Type>RLE\n" ); break; 
+		case NX_COMP_HUF  : fprintf (setup_file, "<Compression Type>HUF\n" ); break; 
+
 		default : fprintf (setup_file, "<Compression Type>None\n"); break; 
 	} 
  
@@ -1052,18 +1029,19 @@ char	*configuration_file = NULL;
 	fprintf (setup_file, "##		Full\n"); 
 	fprintf (setup_file, "##		No Output\n"); 
 	fprintf (setup_file, "##		No Reconstruction\n"); 
-	switch (recon_info_record.debug) 
-	{ 
-		case DEBUG_NONE : fprintf (setup_file, "<Debug>None\n"); break; 
-		case DEBUG_WHITEFIELD : fprintf (setup_file, "<Debug>White Field\n"); break; 
-		case DEBUG_DARKFIELD : fprintf (setup_file, "<Debug>Dark Field\n"); break; 
-		case DEBUG_PRENORM : fprintf (setup_file, "<Debug>Sinogram Pre-Norm\n"); break; 
-		case DEBUG_POSTNORM : fprintf (setup_file, "<Debug>Sinogram Post-Norm\n"); break; 
-		case DEBUG_POSTCENTERING : fprintf (setup_file, "<Debug>Post Centering\n"); break; 
-		case DEBUG_POSTRING : fprintf (setup_file, "<Debug>Post Ring Removal\n"); break; 
-		case DEBUG_FULL : fprintf (setup_file, "<Debug>Full\n"); break; 
-		case DEBUG_NO_OUTPUT : fprintf (setup_file, "<Debug>No Output\n"); break; 
-		case DEBUG_NO_RECONSTRUCTION : fprintf (setup_file, "<Debug>No Reconstruction\n"); break; 
+	switch (recon_info_record.debug) { 
+
+		case DEBUG_NONE              : fprintf (setup_file, "<Debug>None\n"              ); break; 
+		case DEBUG_WHITEFIELD        : fprintf (setup_file, "<Debug>White Field\n"       ); break; 
+		case DEBUG_DARKFIELD         : fprintf (setup_file, "<Debug>Dark Field\n"        ); break; 
+		case DEBUG_PRENORM           : fprintf (setup_file, "<Debug>Sinogram Pre-Norm\n" ); break; 
+		case DEBUG_POSTNORM          : fprintf (setup_file, "<Debug>Sinogram Post-Norm\n"); break; 
+		case DEBUG_POSTCENTERING     : fprintf (setup_file, "<Debug>Post Centering\n"    ); break; 
+		case DEBUG_POSTRING          : fprintf (setup_file, "<Debug>Post Ring Removal\n" ); break; 
+		case DEBUG_FULL              : fprintf (setup_file, "<Debug>Full\n"              ); break; 
+		case DEBUG_NO_OUTPUT         : fprintf (setup_file, "<Debug>No Output\n"         ); break; 
+		case DEBUG_NO_RECONSTRUCTION : fprintf (setup_file, "<Debug>No Reconstruction\n" ); break; 
+
 		default : fprintf (setup_file, "<Debug>None\n"); break; 
 	} 
  
@@ -1080,45 +1058,44 @@ char	*configuration_file = NULL;
  
 //_____________________________________________________________________________________ 
  
-void ReadExpFile (void) 
-{ 
-NexusBoxClass		exp_file; 
-int 		        rank, 
-			dims[2], 
-			type, 
-			loop; 
-char		        index[256], 
+void ReadExpFile (void) { 
+	NexusBoxClass	exp_file; 
+
+	int	rank, 
+		dims[2], 
+		type, 
+		loop; 
+
+	char	index[256], 
 			temp_str[256], 
 			file_name[256], 
 			*file_list = NULL, 
 			*temp_file_list = NULL, 
 			recon_algorithm[50], 
 			error_msg[256]; 
-float		        start_angle, 
+
+	float	start_angle, 
 			end_angle, 
 			angle_interval; 
- 
-        file_list = NULL; 
+	
+	file_list = NULL; 
  
 	exp_file.SetReadScheme (ENTIRE_CONTENTS); 
 	exp_file.ReadAll (exp_file_path, exp_file_name); 
  
-//File Version 
+	//File Version 
 	strcpy (index, ";tomompi_version;tomompi_version"); 
-	if (!exp_file.IndexExists(index)) 
-	{ 
+	if (!exp_file.IndexExists(index)) { 
 		strcpy (file_version, "V1.3"); 
 	} 
-	else 
-	{ 
+	else { 
 		exp_file.GetDatumInfo (index, &rank, dims, &type); 
 		exp_file.GetDatum (index, file_version); 
 	} 
  
-//Base Name 
+	//Base Name 
 	strcpy (index, ";experiment;setup;sample;base_name"); 
-	if (!exp_file.IndexExists(index)) 
-	{ 
+	if (!exp_file.IndexExists(index)) { 
 		sprintf (error_msg, "Index %s does not exist.", index); 
 		log_file->ErrorMessage (error_msg, "ReadExpFile"); 
         error_log->addError (error_msg, "ReadExpFile ()"); 
@@ -1126,10 +1103,9 @@ float		        start_angle,
 	exp_file.GetDatumInfo (index, &rank, dims, &type); 
 	exp_file.GetDatum (index, recon_info_record.base_name); 
  
-//Reconstruction Algorithm 
+	//Reconstruction Algorithm 
 	strcpy (index, ";experiment;reconstruction;algorithm"); 
-	if (exp_file.IndexExists(index)) 
-	{ 
+	if (exp_file.IndexExists(index)) { 
 		exp_file.GetDatumInfo (index, &rank, dims, &type); 
 		exp_file.GetDatum (index, recon_algorithm); 
 		if ((!strcmp (recon_algorithm, "FBP_DELAY_ONLY")) || (!strcmp (recon_algorithm, "FBP Delay Only"))) 
@@ -1145,16 +1121,14 @@ float		        start_angle,
 		if (!strcmp (recon_algorithm, "GRIDREC")) 
 			recon_info_record.recon_algorithm = RECONSTRUCTION_GRIDREC; 
 	} 
-	else 
-	{ 
+	else { 
 		sprintf (error_msg, "Index %s does not exist.  Using default.", index); 
 		log_file->WarningMessage (error_msg, "ReadExpFile"); 
 	} 
  
-//Filter Algorithm 
+	//Filter Algorithm 
 	strcpy (index, ";experiment;reconstruction;filter"); 
-	if (!exp_file.IndexExists(index)) 
-	{ 
+	if (!exp_file.IndexExists(index)) { 
 		exp_file.GetDatumInfo (index, &rank, dims, &type); 
 		exp_file.GetDatum (index, temp_str); 
 		if (!strcmp (temp_str, "None")) 
@@ -1170,16 +1144,14 @@ float		        start_angle,
 		if (!strcmp (temp_str, "FBP")) 
 			recon_info_record.filter = FILTER_FBP; 
 	} 
-	else 
-	{ 
+	else { 
 		sprintf (error_msg, "Index %s does not exist.  Using default.", index); 
 		log_file->WarningMessage (error_msg, "ReadExpFile"); 
 	} 
  
-//Use Slices File 
+	//Use Slices File 
 	strcpy (index, ";experiment;reconstruction;cluster_config;use_slices_file"); 
-	if (exp_file.IndexExists(index)) 
-	{ 
+	if (exp_file.IndexExists(index)) { 
 		exp_file.GetDatumInfo (index, &rank, dims, &type); 
 		exp_file.GetDatum (index, temp_str); 
 		if (!strcmp (temp_str, "true")) 
@@ -1187,24 +1159,21 @@ float		        start_angle,
 		else 
 			recon_info_record.use_slices_file = 0; 
 	} 
-	else 
-	{ 
+	else { 
 		sprintf (error_msg, "Index %s does not exist.  Using default.", index); 
 		log_file->WarningMessage (error_msg, "ReadExpFile"); 
 	} 
  
-//Files per Pass 
+	//Files per Pass 
 	sprintf (error_msg, "Index %s: %d", index, files_per_pass); 
 	log_file->WarningMessage (error_msg, "ReadExpFile"); 
  
 	strcpy (index, ";experiment;reconstruction;cluster_config;files_per_pass"); 
-	if (exp_file.IndexExists(index)) 
-	{ 
+	if (exp_file.IndexExists(index)) { 
 		exp_file.GetDatumInfo (index, &rank, dims, &type); 
 		exp_file.GetDatum (index, &files_per_pass); 
 	} 
-	else 
-	{ 
+	else { 
 		sprintf (error_msg, "Index %s does not exist.  Using default.", index); 
 		log_file->WarningMessage (error_msg, "ReadExpFile"); 
 	} 
@@ -1212,24 +1181,20 @@ float		        start_angle,
 	sprintf (error_msg, "Index %s: %d", index, files_per_pass); 
 	log_file->WarningMessage (error_msg, "ReadExpFile"); 
  
-//Fixed Shift 
+	//Fixed Shift 
 	strcpy (index, ";experiment;reconstruction;use_fixed_shift"); 
-	if (exp_file.IndexExists(index)) 
-	{ 
+	if (exp_file.IndexExists(index)) { 
 		exp_file.GetDatumInfo (index, &rank, dims, &type); 
 		exp_file.GetDatum (index, temp_str); 
-		if (!strcmp (temp_str, "true")) 
-		{ 
+		if (!strcmp (temp_str, "true")) { 
 			recon_info_record.use_fixed_shift = 1; 
  
 			strcpy (index, ";experiment;reconstruction;fixed_shift_value"); 
-			if (exp_file.IndexExists(index)) 
-			{ 
+			if (exp_file.IndexExists(index)) { 
 				exp_file.GetDatumInfo (index, &rank, dims, &type); 
 				exp_file.GetDatum (index, &recon_info_record.fixed_shift_value); 
 			} 
-			else 
-			{ 
+			else { 
 				sprintf (error_msg, "Index %s does not exist.  Using default.", index); 
 				log_file->WarningMessage (error_msg, "ReadExpFile"); 
 			} 
@@ -1237,16 +1202,14 @@ float		        start_angle,
 		else 
 			recon_info_record.use_fixed_shift = 0; 
 	} 
-	else 
-	{ 
+	else { 
 		sprintf (error_msg, "Index %s does not exist.  Using default.", index); 
 		log_file->WarningMessage (error_msg, "ReadExpFile"); 
 	} 
  
-//Auto-Centering 
+	//Auto-Centering 
 	strcpy (index, ";experiment;reconstruction;auto_centering"); 
-	if (exp_file.IndexExists(index)) 
-	{ 
+	if (exp_file.IndexExists(index)) { 
 		exp_file.GetDatumInfo (index, &rank, dims, &type); 
 		exp_file.GetDatum (index, temp_str); 
 		if ((!strcmp (temp_str, "on")) || (!strcmp (temp_str, "true"))) 
@@ -1254,30 +1217,25 @@ float		        start_angle,
 		else 
 			recon_info_record.centering = 0; 
 	} 
-	else 
-	{ 
+	else { 
 		sprintf (error_msg, "Index %s does not exist.  Using default.", index); 
 		log_file->WarningMessage (error_msg, "ReadExpFile"); 
 	} 
  
-//Ring Removal 
+	//Ring Removal 
 	strcpy (index, ";experiment;reconstruction;use_ring_removal"); 
-	if (exp_file.IndexExists(index)) 
-	{ 
+	if (exp_file.IndexExists(index)) { 
 		exp_file.GetDatumInfo (index, &rank, dims, &type); 
 		exp_file.GetDatum (index, temp_str); 
-		if (!strcmp (temp_str, "true")) 
-		{ 
+		if (!strcmp (temp_str, "true")) { 
 			recon_info_record.use_ring_removal = 1; 
  
 			strcpy (index, ";experiment;reconstruction;ring_removal_coefficient"); 
-			if (exp_file.IndexExists(index)) 
-			{ 
+			if (exp_file.IndexExists(index)) { 
 				exp_file.GetDatumInfo (index, &rank, dims, &type); 
 				exp_file.GetDatum (index, &recon_info_record.ring_removal_coeff); 
 			} 
-			else 
-			{ 
+			else { 
 				sprintf (error_msg, "Index %s does not exist.  Using default.", index); 
 				log_file->WarningMessage (error_msg, "ReadExpFile"); 
 			} 
@@ -1285,16 +1243,14 @@ float		        start_angle,
 		else 
 			recon_info_record.use_ring_removal = 0; 
 	} 
-	else 
-	{ 
+	else { 
 		sprintf (error_msg, "Index %s does not exist.  Using default.", index); 
 		log_file->WarningMessage (error_msg, "ReadExpFile"); 
 	} 
  
-//Average White Fields 
+	//Average White Fields 
 	strcpy (index, ";experiment;reconstruction;average_white_fields"); 
-	if (exp_file.IndexExists(index)) 
-	{ 
+	if (exp_file.IndexExists(index)) { 
 		exp_file.GetDatumInfo (index, &rank, dims, &type); 
 		exp_file.GetDatum (index, temp_str); 
 		if (!strcmp (temp_str, "true")) 
@@ -1302,29 +1258,25 @@ float		        start_angle,
 		else 
 			recon_info_record.centering = 0; 
 	} 
-	else 
-	{ 
+	else { 
 		sprintf (error_msg, "Index %s does not exist.  Using default.", index); 
 		log_file->WarningMessage (error_msg, "ReadExpFile"); 
 	} 
  
-//Data Group Index 
+	//Data Group Index 
 	strcpy (index, ";experiment;reconstruction;cluster_config;data_group_index"); 
-	if (exp_file.IndexExists(index)) 
-	{ 
+	if (exp_file.IndexExists(index)) { 
 		exp_file.GetDatumInfo (index, &rank, dims, &type); 
 		exp_file.GetDatum (index, data_group_index); 
 	} 
-	else 
-	{ 
+	else { 
 		sprintf (error_msg, "Index %s does not exist.  Using default.", index); 
 		log_file->WarningMessage (error_msg, "ReadExpFile"); 
 	} 
  
-//Generate Thetas 
+	//Generate Thetas 
 	strcpy (index, ";experiment;acquisition;parameters;start_angle"); 
-	if (!exp_file.IndexExists(index)) 
-	{ 
+	if (!exp_file.IndexExists(index)) { 
 		sprintf (error_msg, "Index %s does not exist.", index); 
 		log_file->ErrorMessage (error_msg, "ReadExpFile"); 
 		error_log->addError (error_msg, "ReadExpFile ()"); 
@@ -1334,8 +1286,7 @@ float		        start_angle,
 	log_file->Message(msg); 
  
 	strcpy (index, ";experiment;acquisition;parameters;end_angle"); 
-	if (!exp_file.IndexExists(index)) 
-	{ 
+	if (!exp_file.IndexExists(index)) { 
 		sprintf (error_msg, "Index %s does not exist.", index); 
 		log_file->ErrorMessage (error_msg, "ReadExpFile"); 
         error_log->addError (error_msg, "ReadExpFile ()"); 
@@ -1345,8 +1296,7 @@ float		        start_angle,
 	log_file->Message(msg); 
  
 	strcpy (index, ";experiment;acquisition;parameters;angle_interval"); 
-	if (!exp_file.IndexExists(index)) 
-	{ 
+	if (!exp_file.IndexExists(index)) { 
 		sprintf (error_msg, "Index %s does not exist.", index); 
 		log_file->ErrorMessage (error_msg, "ReadExpFile"); 
         error_log->addError (error_msg, "ReadExpFile ()"); 
@@ -1355,16 +1305,15 @@ float		        start_angle,
 	sprintf (msg, "%s%f", "Angle Interval: ", angle_interval); 
 	log_file->Message(msg); 
  
-//In file version "V1.3" and lower (no file version listed in file), the correct index is 
-//      ";experiment;acquisition;parameters;whitedark_interval" 
-//In file version "V1.4" and higher (version saved in ";tomompi_version", the correct index is 
-//      ";experiment;acquisition;parameters;white_interval" 
+	//In file version "V1.3" and lower (no file version listed in file), the correct index is 
+	//      ";experiment;acquisition;parameters;whitedark_interval" 
+	//In file version "V1.4" and higher (version saved in ";tomompi_version", the correct index is 
+	//      ";experiment;acquisition;parameters;white_interval" 
 	if (!strcmp (file_version, "V1.3")) 
 		strcpy (index, ";experiment;acquisition;parameters;whitedark_interval"); 
 	else 
 		strcpy (index, ";experiment;acquisition;parameters;white_interval"); 
-	if (!exp_file.IndexExists(index)) 
-	{ 
+	if (!exp_file.IndexExists(index)) { 
 		sprintf (error_msg, "Index %s does not exist.", index); 
 		log_file->ErrorMessage (error_msg, "ReadExpFile"); 
         error_log->addError (error_msg, "ReadExpFile ()"); 
@@ -1373,64 +1322,53 @@ float		        start_angle,
 	sprintf (msg, "%s%d", "White/Dark Interval: ", recon_info_record.whitedark_interval); 
 	log_file->Message(msg); 
  
-	if (start_angle < end_angle) 
-	{ 
+	if (start_angle < end_angle) { 
 		recon_info_record.theta_list_size = (int) ((end_angle - start_angle) / angle_interval); 
-        if (recon_info_record.theta_list != NULL) 
-        { 
+        if (recon_info_record.theta_list != NULL) { 
             free (recon_info_record.theta_list); 
             recon_info_record.theta_list = NULL; 
         } 
 		recon_info_record.theta_list = (float *) malloc (sizeof(float)*recon_info_record.theta_list_size); 
-        if (recon_info_record.theta_list == NULL) 
-        { 
+        if (recon_info_record.theta_list == NULL) { 
             sprintf (msg, "Could not allocat memory for recon_info_record.theta_list."); 
             error_log->addError (msg, "ReadExpFile ()"); 
         } 
         memset (recon_info_record.theta_list, 0, sizeof(float)*recon_info_record.theta_list_size); 
  
-	int theta_index = 0; 
-	while (start_angle < end_angle) 
-	  { 
-	    recon_info_record.theta_list[theta_index] = start_angle; 
-	    start_angle += angle_interval; 
-	    theta_index++; 
-	  } 
- 
+		int theta_index = 0; 
+		while (start_angle < end_angle) { 
+	    	recon_info_record.theta_list[theta_index] = start_angle; 
+	    	start_angle += angle_interval; 
+	    	theta_index++; 
+		} 
 	} 
-	else 
-	{ 
-	  recon_info_record.theta_list_size = (int) ((start_angle - end_angle) / angle_interval); 
-	  if (recon_info_record.theta_list != NULL) 
-	    { 
-	      free (recon_info_record.theta_list); 
-	      recon_info_record.theta_list = NULL; 
-	    } 
-	  recon_info_record.theta_list = (float *) malloc (sizeof(float)*recon_info_record.theta_list_size); 
-	  if (recon_info_record.theta_list == NULL) 
-	    { 
-	      sprintf (msg, "Could not allocat memory for recon_info_record.theta_list"); 
-	      error_log->addError (msg, "ReadExpFile ()"); 
-	    } 
-	  memset (recon_info_record.theta_list, 0, sizeof(float)*recon_info_record.theta_list_size); 
+	else { 
+		recon_info_record.theta_list_size = (int) ((start_angle - end_angle) / angle_interval); 
+		if (recon_info_record.theta_list != NULL) { 
+			free (recon_info_record.theta_list); 
+			recon_info_record.theta_list = NULL;
+			} 
+	  	recon_info_record.theta_list = (float *) malloc (sizeof(float)*recon_info_record.theta_list_size); 
+	  	if (recon_info_record.theta_list == NULL) {
+			sprintf (msg, "Could not allocat memory for recon_info_record.theta_list"); 
+	      	error_log->addError (msg, "ReadExpFile ()"); 
+		} 
+	  	memset (recon_info_record.theta_list, 0, sizeof(float)*recon_info_record.theta_list_size); 
  
-	  int theta_index = 0; 
-	  while (end_angle < start_angle) 
-	    { 
-	      recon_info_record.theta_list[theta_index] = end_angle; 
-	      end_angle += angle_interval; 
-	      theta_index++; 
+	  	int theta_index = 0; 
+	  	while (end_angle < start_angle) { 
+	    	recon_info_record.theta_list[theta_index] = end_angle; 
+	      	end_angle += angle_interval; 
+	      	theta_index++; 
 	    } 
- 
-	} 
+ 	} 
  
 	sprintf (msg, "List of %d theta values generated...", recon_info_record.theta_list_size); 
 	log_file->Message(msg); 
  
-//Projection File Names 
+	//Projection File Names 
 	strcpy (index, ";experiment;acquisition;projections;names"); 
-	if (!exp_file.IndexExists(index)) 
-	{ 
+	if (!exp_file.IndexExists(index)) { 
 		sprintf (error_msg, "Index %s does not exist.", index); 
 		log_file->ErrorMessage (error_msg, "ReadExpFile"); 
 		error_log->addError (error_msg, "ReadExpFile ()"); 
@@ -1440,14 +1378,12 @@ float		        start_angle,
 	sprintf (msg, "Dims[0]=%d, dims[1]=%d", dims[0], dims[1]); 
 	log_file->Message (msg); 
  
-    if (file_list != NULL) 
-    { 
+    if (file_list != NULL) { 
         free (file_list); 
         file_list = NULL; 
     } 
     file_list = (char *) malloc (sizeof(char)*dims[0]*dims[1]); 
-    if (file_list == NULL) 
-    { 
+    if (file_list == NULL) { 
         sprintf (msg, "Could not allocat memory for file_list."); 
         error_log->addError (msg, "ReadExpFile ()"); 
     } 
@@ -1461,8 +1397,7 @@ float		        start_angle,
  
 	top_projection_file_list = new FileListClass(file_name); 
  
-	for (loop=1;loop<dims[0];loop++) 
-	{ 
+	for (loop=1;loop<dims[0];loop++) { 
 		strncpy (file_name, temp_file_list, dims[1]); 
 		file_name[dims[1]] = '\0'; 
 		temp_file_list = &temp_file_list[dims[1]]; 
@@ -1475,21 +1410,18 @@ float		        start_angle,
  
 	//White Field File Names 
 	strcpy (index, ";experiment;acquisition;white_field;names"); 
-	if (!exp_file.IndexExists(index)) 
-	{ 
+	if (!exp_file.IndexExists(index)) { 
 		sprintf (error_msg, "Index %s does not exist.", index); 
 		log_file->ErrorMessage (error_msg, "ReadExpFile"); 
         error_log->addError (error_msg, "ReadExpFile ()"); 
 	} 
 	exp_file.GetDatumInfo (index, &rank, dims, &type); 
-    if (file_list != NULL) 
-    { 
+    if (file_list != NULL) { 
         free (file_list); 
         file_list = NULL; 
     } 
 	file_list = (char *) malloc (sizeof(char)*dims[0]*dims[1]); 
-    if (file_list == NULL) 
-    { 
+    if (file_list == NULL) { 
         sprintf (msg, "Could not allocat memory for file_list."); 
         error_log->addError (msg, "ReadExpFile ()"); 
     } 
@@ -1503,8 +1435,7 @@ float		        start_angle,
  
 	top_white_file_list = new FileListClass(file_name); 
  
-	for (loop=1;loop<dims[0];loop++) 
-	{ 
+	for (loop=1;loop<dims[0];loop++) { 
 		strncpy (file_name, temp_file_list, dims[1]); 
 		file_name[dims[1]] = '\0'; 
 		temp_file_list = &temp_file_list[dims[1]]; 
@@ -1517,26 +1448,23 @@ float		        start_angle,
 	sprintf (msg, "List of %d white field file names read...", num_white_fields); 
 	log_file->Message(msg); 
  
-//Dark Field File Names 
+	//Dark Field File Names 
 	strcpy (index, ";experiment;acquisition;black_field;names"); 
-	if (!exp_file.IndexExists(index)) 
-	{ 
+	if (!exp_file.IndexExists(index)) { 
 		sprintf (error_msg, "Index %s does not exist.", index); 
 		log_file->ErrorMessage (error_msg, "ReadExpFile"); 
 		error_log->addError (error_msg, "ReadExpFile ()"); 
 	} 
 	exp_file.GetDatumInfo (index, &rank, dims, &type); 
-	if (file_list != NULL) 
-	  { 
+	if (file_list != NULL) { 
 	    free (file_list); 
 	    file_list = NULL; 
-	  } 
+	} 
 	file_list = (char *) malloc (sizeof(char)*dims[0]*dims[1]); 
-	if (file_list == NULL) 
-	  { 
+	if (file_list == NULL) { 
 	    sprintf (msg, "Could not allocat memory for file_list."); 
 	    error_log->addError (msg, "ReadExpFile ()"); 
-	  } 
+	} 
 	exp_file.GetDatum (index, file_list); 
  
 	temp_file_list = file_list; 
@@ -1549,8 +1477,7 @@ float		        start_angle,
  
 	num_dark_fields = dims[0]; 
  
-	for (loop=1;loop<num_dark_fields;loop++) 
-	{ 
+	for (loop=1;loop<num_dark_fields;loop++) { 
 		strncpy (file_name, temp_file_list, dims[1]); 
 		file_name[dims[1]] = '\0'; 
 		temp_file_list = &temp_file_list[dims[1]]; 
@@ -1558,21 +1485,21 @@ float		        start_angle,
 		top_dark_file_list->AddToList (new FileListClass(file_name)); 
 	} 
  
-	if (file_list != NULL) 
-	  { 
+	if (file_list != NULL) { 
 	    free (file_list); 
 	    file_list == NULL; 
-	  } 
+	} 
  
 	sprintf (msg, "List of %d dark field file names read...", num_dark_fields); 
 	log_file->Message(msg); 
  
-//Compression Type 
+	//Compression Type 
 	strcpy (index, ";experiment;reconstruction;cluster_config;compression_type"); 
-	if (exp_file.IndexExists(index)) 
-	{ 
+	if (exp_file.IndexExists(index)) {
+
 		exp_file.GetDatumInfo (index, &rank, dims, &type); 
 		exp_file.GetDatum (index, temp_str); 
+
 		if (!strcmp (temp_str, "None")) 
 			recon_info_record.compression_type = NX_COMP_NONE; 
 		if (!strcmp (temp_str, "LZW")) 
@@ -1582,18 +1509,18 @@ float		        start_angle,
 		if (!strcmp (temp_str, "HUF")) 
 			recon_info_record.compression_type = NX_COMP_HUF; 
 	} 
-	else 
-	{ 
+	else { 
 		sprintf (error_msg, "Index %s does not exist.  Using default.", index); 
 		log_file->WarningMessage (error_msg, "ReadExpFile"); 
 	} 
  
-//Debug Type 
+	//Debug Type 
 	strcpy (index, ";experiment;reconstruction;cluster_config;debug_type"); 
-	if (exp_file.IndexExists(index)) 
-	{ 
+	if (exp_file.IndexExists(index)) { 
+
 		exp_file.GetDatumInfo (index, &rank, dims, &type); 
 		exp_file.GetDatum (index, temp_str); 
+
 		if (!strcmp (temp_str, "None")) 
 			recon_info_record.debug = DEBUG_NONE; 
 		if (!strcmp (temp_str, "White Field")) 
@@ -1615,51 +1542,46 @@ float		        start_angle,
 		if (!strcmp (temp_str, "No Reconstruction")) 
 			recon_info_record.debug = DEBUG_NO_RECONSTRUCTION; 
 	} 
-	else 
-	{ 
+	else { 
 		sprintf (error_msg, "Index %s does not exist.  Using default.", index); 
 		log_file->WarningMessage (error_msg, "ReadExpFile"); 
 	} 
  
-//Read Data Dims 
+	//Read Data Dims 
 	strcpy (index, ";experiment;setup;detector;size_x"); 
-	if (exp_file.IndexExists(index)) 
-	{ 
+	if (exp_file.IndexExists(index)) {
+
 		exp_file.GetDatumInfo (index, &rank, dims, &type); 
 		exp_file.GetDatum (index, &data_xdim); 
 	} 
-	else 
-	{ 
+	else { 
 		sprintf (error_msg, "Index %s does not exist.  Using default.", index); 
 		log_file->WarningMessage (error_msg, "ReadExpFile"); 
-	} 
+	}
+
 	strcpy (index, ";experiment;setup;detector;size_y"); 
-	if (exp_file.IndexExists(index)) 
-	{ 
+	if (exp_file.IndexExists(index)) { 
 		exp_file.GetDatumInfo (index, &rank, dims, &type); 
 		exp_file.GetDatum (index, &data_ydim); 
 	} 
-	else 
-	{ 
+	else { 
 		sprintf (error_msg, "Index %s does not exist.  Using default.", index); 
 		log_file->WarningMessage (error_msg, "ReadExpFile"); 
 	} 
- 
  
 } 
  
 //_____________________________________________________________________________________ 
  
-void UpdateExpFile (void) 
-{ 
-int			        file_name_size; 
-NexusBoxClass		exp_file; 
-int    				dims[2], 
-					loop; 
-char    			file_name[256], 
-					value_str[256], 
-					*file_list = NULL; 
-float		    	time; 
+void UpdateExpFile (void) { 
+	int			        file_name_size; 
+	NexusBoxClass		exp_file; 
+	int    				dims[2], 
+						loop; 
+	char    			file_name[256], 
+						value_str[256], 
+						*file_list = NULL; 
+	float		    	time; 
  
 	log_file->Message ("Updating experiment file..."); 
  
@@ -1669,8 +1591,7 @@ float		    	time;
  
 	loop = 0; 
  
-	switch (recon_info_record.file_format) 
-	{ 
+	switch (recon_info_record.file_format) { 
 		case HDF4 : { 
 			sprintf (file_name, "rec_%s_%05d.hdf", recon_info_record.base_name, loop); 
 			break; 
@@ -1686,22 +1607,18 @@ float		    	time;
 	} 
  
 	file_name_size = strlen (file_name); 
-    if (file_list != NULL) 
-    { 
+    if (file_list != NULL) { 
         free (file_list); 
         file_list = NULL; 
     } 
 	file_list = (char *) malloc (num_files_handled * file_name_size); 
-    if (file_list == NULL) 
-    { 
+    if (file_list == NULL) { 
         sprintf (msg, "Could not allocat memory for file_list."); 
         error_log->addError (msg, "UpdateExpFile ()"); 
     } 
  
-	for (loop=0;loop<num_files_handled;loop++) 
-	{ 
-		switch (recon_info_record.file_format) 
-		{ 
+	for (loop=0;loop<num_files_handled;loop++) { 
+		switch (recon_info_record.file_format) { 
 			case HDF4 : { 
 				sprintf (file_name, "rec_%s_%05d.hdf", recon_info_record.base_name, sinogram_list[loop].sinogram_number); 
 				break; 
@@ -1718,14 +1635,15 @@ float		    	time;
 		strncpy (&file_list[loop*file_name_size], file_name, file_name_size); 
 	} 
  
-//If the "reconstruction" group does not exist--create it... 
+	//If the "reconstruction" group does not exist--create it... 
 	if (!exp_file.IndexExists (";experiment;reconstruction")) 
 		exp_file.CreateGroup (";experiment", "reconstruction", "Reconstruction"); 
-//If the "cluster_config" group does not exist--create it... 
+	
+	//If the "cluster_config" group does not exist--create it... 
 	if (!exp_file.IndexExists (";experiment;reconstruction;cluster_config")) 
 		exp_file.CreateGroup (";experiment;reconstruction", "cluster_config", "Cluster"); 
  
-//Write reconstructed list 
+	//Write reconstructed list 
 	dims[1] = file_name_size; 
 	dims[0] = num_files_handled; 
 	if (!exp_file.IndexExists (";experiment;reconstruction;slices")) 
@@ -1735,7 +1653,7 @@ float		    	time;
 	else 
 		exp_file.PutDatum (";experiment;reconstruction;slices;names", file_list, 2, dims, NX_CHAR); 
  
-//Write reconstruction time 
+	//Write reconstruction time 
 	dims[1] = 0; 
 	dims[0] = 1; 
 	time = (float) log_file->GetTime(total_reconstruction_timer); 
@@ -1744,7 +1662,7 @@ float		    	time;
 	else 
 		exp_file.PutDatum (";experiment;reconstruction;reconstruction_time", (void *) &time, 1, dims, NX_FLOAT32); 
  
-//Write min and max data range values 
+	//Write min and max data range values 
 	dims[1] = 0; 
 	dims[0] = 1; 
 	if (!exp_file.IndexExists (";experiment;reconstruction;data_range_min")) 
@@ -1757,7 +1675,7 @@ float		    	time;
 	else 
 		exp_file.PutDatum (";experiment;reconstruction;data_range_max", (void *) &data_range_max, 1, dims, NX_FLOAT32); 
  
-//Write scaled min and max data range values and if scaling was even used 
+	//Write scaled min and max data range values and if scaling was even used 
 	if (recon_info_record.rescale_to_int) 
 		strcpy (value_str, "true"); 
 	else 
@@ -1781,13 +1699,13 @@ float		    	time;
 	else 
 		exp_file.PutDatum (";experiment;reconstruction;scale_data_max", (void *) &recon_info_record.scale_data_range_max, 1, dims, NX_FLOAT32); 
  
-//Write number of processes used 
+	//Write number of processes used 
 	if (!exp_file.IndexExists (";experiment;reconstruction;cluster_config;num_processes")) 
 		exp_file.CreateField (";experiment;reconstruction;cluster_config", "num_processes", 1, dims, NX_UINT32, &num_processes); 
 	else 
 		exp_file.PutDatum (";experiment;reconstruction;cluster_config;num_processes", &num_processes, 1, dims, NX_UINT32); 
  
-//Write TomoMPI Version 
+	//Write TomoMPI Version 
 	strcpy (value_str, VERSION); 
 	dims[1] = 0; 
 	dims[0] = strlen (value_str); 
@@ -1796,17 +1714,19 @@ float		    	time;
 	else 
 		exp_file.PutDatum (";experiment;reconstruction;cluster_config;version", value_str, 1, dims, NX_CHAR); 
  
-//Write reconstruction algorithm 
-	switch (recon_info_record.recon_algorithm) 
-	{ 
-		case RECONSTRUCTION_FBP_DELAY_ONLY : sprintf (value_str, "FBP Delay Only"); break; 
-		case RECONSTRUCTION_GRIDREC_DELAY_ONLY : sprintf (value_str, "GRIDREC Delay Only"); break; 
+	//Write reconstruction algorithm 
+	switch (recon_info_record.recon_algorithm) { 
+
+		case RECONSTRUCTION_FBP_DELAY_ONLY      : sprintf (value_str, "FBP Delay Only"     ); break; 
+		case RECONSTRUCTION_GRIDREC_DELAY_ONLY  : sprintf (value_str, "GRIDREC Delay Only" ); break; 
 		case RECONSTRUCTION_FBP_NO_OPTIMIZATION : sprintf (value_str, "FBP No Optimization"); break; 
-		case RECONSTRUCTION_FBP_OPTIMIZED : sprintf (value_str, "FBP Optimized"); break; 
-		case RECONSTRUCTION_FBP_CYLINDER_ONLY : sprintf (value_str, "FBP Cylinder Only"); break; 
-		case RECONSTRUCTION_GRIDREC : sprintf (value_str, "GRIDREC"); break; 
+		case RECONSTRUCTION_FBP_OPTIMIZED       : sprintf (value_str, "FBP Optimized"      ); break; 
+		case RECONSTRUCTION_FBP_CYLINDER_ONLY   : sprintf (value_str, "FBP Cylinder Only"  ); break; 
+		case RECONSTRUCTION_GRIDREC             : sprintf (value_str, "GRIDREC"            ); break;
+
 		default : sprintf (value_str, "Unknown"); break; 
-	} 
+	}
+
 	dims[1] = 0; 
 	dims[0] = strlen (value_str); 
 	if (!exp_file.IndexExists (";experiment;reconstruction;algorithm")) 
@@ -1814,17 +1734,19 @@ float		    	time;
 	else 
 		exp_file.PutDatum (";experiment;reconstruction;algorithm", value_str, 1, dims, NX_CHAR); 
  
-//Write filter 
-	switch (recon_info_record.filter) 
-	{ 
-		case FILTER_NONE :sprintf (value_str, "None"); break; 
+	//Write filter 
+	switch (recon_info_record.filter) {
+
+		case FILTER_NONE        : sprintf (value_str, "None"       ); break; 
 		case FILTER_SHEPP_LOGAN : sprintf (value_str, "Shepp/Logan"); break; 
-		case FILTER_HANN : sprintf (value_str, "Hann"); break; 
-		case FILTER_HAMMING : sprintf (value_str, "Hamming"); break; 
-		case FILTER_RAMP : sprintf (value_str, "Ramp"); break; 
-		case FILTER_FBP : sprintf (value_str, "FBP"); break; 
+		case FILTER_HANN        : sprintf (value_str, "Hann"       ); break; 
+		case FILTER_HAMMING     : sprintf (value_str, "Hamming"    ); break; 
+		case FILTER_RAMP        : sprintf (value_str, "Ramp"       ); break; 
+		case FILTER_FBP         : sprintf (value_str, "FBP"        ); break; 
+
 		default : sprintf (value_str, "Unknown"); break; 
 	} 
+
 	dims[1] = 0; 
 	dims[0] = strlen (value_str); 
 	if (!exp_file.IndexExists (";experiment;reconstruction;filter")) 
@@ -1832,7 +1754,7 @@ float		    	time;
 	else 
 		exp_file.PutDatum (";experiment;reconstruction;filter", value_str, 1, dims, NX_CHAR); 
  
-//Write use_slices_file 
+	//Write use_slices_file 
 	if (recon_info_record.use_slices_file) 
 		strcpy (value_str, "true"); 
 	else 
@@ -1844,7 +1766,7 @@ float		    	time;
 	else 
 		exp_file.PutDatum (";experiment;reconstruction;cluster_config;use_slices_file", value_str, 1, dims, NX_CHAR); 
  
-//Files per Pass 
+	//Files per Pass 
 	dims[1] = 0; 
 	dims[0] = 1; 
 	if (!exp_file.IndexExists (";experiment;reconstruction;cluster_config;files_per_pass")) 
@@ -1852,90 +1774,98 @@ float		    	time;
 	else 
 		exp_file.PutDatum (";experiment;reconstruction;cluster_config;files_per_pass", (void *) &files_per_pass, 1, dims, NX_INT32); 
  
-//Fixed Shift 
+	//Fixed Shift 
 	if (recon_info_record.use_fixed_shift) 
 		strcpy (value_str, "true"); 
 	else 
 		strcpy (value_str, "false"); 
+
 	dims[1] = 0; 
 	dims[0] = strlen (value_str); 
 	if (!exp_file.IndexExists (";experiment;reconstruction;use_fixed_shift")) 
 		exp_file.CreateField (";experiment;reconstruction", "use_fixed_shift", 1, dims, NX_CHAR, value_str); 
 	else 
 		exp_file.PutDatum (";experiment;reconstruction;use_fixed_shift", value_str, 1, dims, NX_CHAR); 
+
 	dims[1] = 0; 
 	dims[0] = 1; 
-	if (!exp_file.IndexExists (";experiment;reconstruction;fixed_shift_value")) {
-
+	if (!exp_file.IndexExists (";experiment;reconstruction;fixed_shift_value"))
 	  exp_file.CreateField (";experiment;reconstruction", "fixed_shift_value", 1, dims, NX_FLOAT32, (void *) &recon_info_record.fixed_shift_value); 
-
-	}
-	else {
-
+	else
 	  exp_file.PutDatum (";experiment;reconstruction;fixed_shift_value", (void *) &recon_info_record.fixed_shift_value, 1, dims, NX_FLOAT32); 
-
-	}
+	
  
-//Auto-Centering 
+	//Auto-Centering 
 	if (recon_info_record.centering) 
 		strcpy (value_str, "true"); 
 	else 
 		strcpy (value_str, "false"); 
+	
 	dims[1] = 0; 
 	dims[0] = strlen (value_str); 
+	
 	if (!exp_file.IndexExists (";experiment;reconstruction;auto_centering")) 
 		exp_file.CreateField (";experiment;reconstruction", "auto_centering", 1, dims, NX_CHAR, value_str); 
 	else 
 		exp_file.PutDatum (";experiment;reconstruction;auto_centering", value_str, 1, dims, NX_CHAR); 
  
-//Ring Removal 
+	//Ring Removal 
 	if (recon_info_record.use_ring_removal) 
 		strcpy (value_str, "true"); 
 	else 
 		strcpy (value_str, "false"); 
+	
 	dims[1] = 0; 
 	dims[0] = strlen (value_str); 
+	
 	if (!exp_file.IndexExists (";experiment;reconstruction;use_ring_removal")) 
 		exp_file.CreateField (";experiment;reconstruction", "use_ring_removal", 1, dims, NX_CHAR, value_str); 
 	else 
 		exp_file.PutDatum (";experiment;reconstruction;use_ring_removal", value_str, 1, dims, NX_CHAR); 
+	
 	dims[1] = 0; 
 	dims[0] = 1; 
+	
 	if (!exp_file.IndexExists (";experiment;reconstruction;ring_removal_coefficient")) 
 		exp_file.CreateField (";experiment;reconstruction", "ring_removal_coefficient", 1, dims, NX_FLOAT32, (void *) &recon_info_record.ring_removal_coeff); 
 	else 
 		exp_file.PutDatum (";experiment;reconstruction;ring_removal_coefficient", (void *) &recon_info_record.ring_removal_coeff, 1, dims, NX_FLOAT32); 
  
-//Average White Fields 
+	//Average White Fields 
 	if (recon_info_record.average_white_fields) 
 		strcpy (value_str, "true"); 
 	else 
 		strcpy (value_str, "false"); 
+	
 	dims[1] = 0; 
 	dims[0] = strlen (value_str); 
+	
 	if (!exp_file.IndexExists (";experiment;reconstruction;average_white_fields")) 
 		exp_file.CreateField (";experiment;reconstruction", "average_white_fields", 1, dims, NX_CHAR, value_str); 
 	else 
 		exp_file.PutDatum (";experiment;reconstruction;average_white_fields", value_str, 1, dims, NX_CHAR); 
  
-//Data Index 
+	//Data Index 
 	strcpy (value_str, data_group_index); 
 	dims[1] = 0; 
 	dims[0] = strlen (value_str); 
+	
 	if (!exp_file.IndexExists (";experiment;reconstruction;cluster_config;data_group_index")) 
 		exp_file.CreateField (";experiment;reconstruction;cluster_config", "data_group_index", 1, dims, NX_CHAR, value_str); 
 	else 
 		exp_file.PutDatum (";experiment;reconstruction;cluster_config;data_group_index", value_str, 1, dims, NX_CHAR); 
  
-//Compression Type 
-	switch (recon_info_record.compression_type) 
-	{ 
+	//Compression Type 
+	switch (recon_info_record.compression_type) {
+
 		case NX_COMP_NONE : sprintf (value_str, "None"); break; 
-		case NX_COMP_LZW : sprintf (value_str, "LZW"); break; 
-		case NX_COMP_RLE : sprintf (value_str, "RLE"); break; 
-		case NX_COMP_HUF : sprintf (value_str, "HUF"); break; 
+		case NX_COMP_LZW  : sprintf (value_str, "LZW" ); break; 
+		case NX_COMP_RLE  : sprintf (value_str, "RLE" ); break; 
+		case NX_COMP_HUF  : sprintf (value_str, "HUF" ); break;
+
 		default : sprintf (value_str, "Unknown"); break; 
-	} 
+	}
+
 	dims[1] = 0; 
 	dims[0] = strlen (value_str); 
 	if (!exp_file.IndexExists (";experiment;reconstruction;cluster_config;compression_type")) 
@@ -1943,23 +1873,26 @@ float		    	time;
 	else 
 		exp_file.PutDatum (";experiment;reconstruction;cluster_config;compression_type", value_str, 1, dims, NX_CHAR); 
  
-//Debug Type 
-	switch (recon_info_record.debug) 
-	{ 
-		case DEBUG_NONE : sprintf (value_str, "None"); break; 
-		case DEBUG_WHITEFIELD : sprintf (value_str, "White Field"); break; 
-		case DEBUG_DARKFIELD : sprintf (value_str, "Dark Field"); break; 
-		case DEBUG_PRENORM : sprintf (value_str, "Sinogram Pre-Norm"); break; 
-		case DEBUG_POSTNORM : sprintf (value_str, "Sinogram Post-Norm"); break; 
-		case DEBUG_POSTCENTERING : sprintf (value_str, "Post Centering"); break; 
-		case DEBUG_POSTRING : sprintf (value_str, "Post Ring Removal"); break; 
-		case DEBUG_FULL : sprintf (value_str, "Full"); break; 
-		case DEBUG_NO_OUTPUT : sprintf (value_str, "No Output"); break; 
-		case DEBUG_NO_RECONSTRUCTION : sprintf (value_str, "No Reconstruction"); break; 
+	//Debug Type 
+	switch (recon_info_record.debug) {
+
+		case DEBUG_NONE              : sprintf (value_str, "None"              ); break; 
+		case DEBUG_WHITEFIELD        : sprintf (value_str, "White Field"       ); break; 
+		case DEBUG_DARKFIELD         : sprintf (value_str, "Dark Field"        ); break; 
+		case DEBUG_PRENORM           : sprintf (value_str, "Sinogram Pre-Norm" ); break; 
+		case DEBUG_POSTNORM          : sprintf (value_str, "Sinogram Post-Norm"); break; 
+		case DEBUG_POSTCENTERING     : sprintf (value_str, "Post Centering"    ); break; 
+		case DEBUG_POSTRING          : sprintf (value_str, "Post Ring Removal" ); break; 
+		case DEBUG_FULL              : sprintf (value_str, "Full"              ); break; 
+		case DEBUG_NO_OUTPUT         : sprintf (value_str, "No Output"         ); break; 
+		case DEBUG_NO_RECONSTRUCTION : sprintf (value_str, "No Reconstruction" ); break; 
+		
 		default : sprintf (value_str, "Unknown"); break; 
 	} 
+
 	dims[1] = 0; 
-	dims[0] = strlen (value_str); 
+	dims[0] = strlen (value_str);
+
 	if (!exp_file.IndexExists (";experiment;reconstruction;cluster_config;debug_type")) 
 		exp_file.CreateField (";experiment;reconstruction;cluster_config", "debug_type", 1, dims, NX_CHAR, value_str); 
 	else 
@@ -1967,8 +1900,7 @@ float		    	time;
  
 	exp_file.WriteAll (exp_file_path, exp_file_name); 
  
-    if (file_list != NULL) 
-    { 
+    if (file_list != NULL) { 
 	   free (file_list); 
        file_list = NULL; 
     } 
@@ -1978,18 +1910,18 @@ float		    	time;
  
 //_____________________________________________________________________________________ 
  
-void CreateSinogramsFromBinary (void) 
-{ 
-FileListClass		*current_file = NULL; 
-int					current_line, 
-					data_size, 
-					data_offset, 
-					loop, 
-					header_size; 
-char    			temp_path[256], 
-					file_name[256]; 
-ifstream			input_file; 
-struct stat 		stat_buffer; 
+void CreateSinogramsFromBinary (void) { 
+
+	FileListClass		*current_file = NULL; 
+	int					current_line, 
+						data_size, 
+						data_offset, 
+						loop, 
+						header_size; 
+	char    			temp_path[256], 
+						file_name[256]; 
+	ifstream			input_file; 
+	struct stat 		stat_buffer; 
  
 	sprintf (msg, "\nLooks like files are binary.  Starting pass %d", pass_number); 
 	log_file->Message(msg); 
@@ -2003,8 +1935,7 @@ struct stat 		stat_buffer;
  
     log_file->Message ("Generating first pass of sinograms..."); 
  
-    if (recon_info_record.use_slices_file) 
-    { 
+    if (recon_info_record.use_slices_file) { 
         log_file->Message ("Generating requested sinograms only..."); 
          
         //buffer projections 
@@ -2012,38 +1943,38 @@ struct stat 		stat_buffer;
          
         current_file = top_projection_file_list; 
         current_line = 0; 
-        while (current_file->NextInList () != NULL) 
-	  { 
-	    sprintf (file_name, "%s%s", temp_path, current_file->file_name); 
-	    if (stat (file_name, &stat_buffer) == 0) 
-	      { 
-		input_file.open (file_name, ios::binary); 
- 
-		data_size = sizeof (unsigned short) * recon_info_record.sinogram_xdim; 
-                for (loop=0;loop<files_per_pass;loop++) 
-		  { 
-		    data_offset = header_size + sizeof (unsigned short) * sinogram_list[loop].sinogram_number * recon_info_record.sinogram_xdim; 
- 
-		    input_file.seekg (data_offset, ios::beg); 
- 
-		    input_file.read ((char *) &buffer_sinograms[(loop*sinogram_size)+(current_line*recon_info_record.sinogram_xdim)], data_size); 
-		  } 
- 
-		input_file.close (); 
-	      } 
-	    else 
-	      { 
-		for (loop=0;loop<sinograms_to_create;loop++) 
-		  memcpy (&buffer_sinograms[(loop*sinogram_size)+(current_line*recon_info_record.sinogram_xdim)], &buffer_sinograms[(loop*sinogram_size)+((current_line-1)*recon_info_record.sinogram_xdim)], sizeof (unsigned short int) * recon_info_record.sinogram_xdim); 
- 
-		sprintf (msg, "Could not read file %s!", file_name); 
-		error_log->addError (msg, "StartTomoMPIServer ()"); 
-		error_log->addAutoResolution ("Using previous projection instead..."); 
-	      } 
-        	 
-	    current_file = (FileListClass *) current_file->NextInList (); 
-            current_line++; 
-	  } 
+        while (current_file->NextInList () != NULL) { 
+			sprintf (file_name, "%s%s", temp_path, current_file->file_name);
+
+			if (stat (file_name, &stat_buffer) == 0) { 
+				input_file.open (file_name, ios::binary); 
+	
+				data_size = sizeof (unsigned short) * recon_info_record.sinogram_xdim; 
+				
+				for (loop=0;loop<files_per_pass;loop++) { 
+					data_offset = header_size + sizeof (unsigned short) * sinogram_list[loop].sinogram_number * recon_info_record.sinogram_xdim; 
+					input_file.seekg (data_offset, ios::beg); 
+					input_file.read ((char *) &buffer_sinograms[(loop*sinogram_size)+(current_line*recon_info_record.sinogram_xdim)], data_size); 
+				} 
+	
+				input_file.close (); 
+			} 
+			else { 
+				for (loop=0;loop<sinograms_to_create;loop++) 
+					memcpy (&buffer_sinograms[(loop*sinogram_size)+(current_line*recon_info_record.sinogram_xdim)], 
+					        &buffer_sinograms[(loop*sinogram_size)+((current_line-1)*recon_info_record.sinogram_xdim)], 
+							sizeof (unsigned short int) * recon_info_record.sinogram_xdim
+					); 
+	
+				sprintf (msg, "Could not read file %s!", file_name); 
+				error_log->addError (msg, "StartTomoMPIServer ()"); 
+				error_log->addAutoResolution ("Using previous projection instead..."); 
+			} 
+				
+			current_file = (FileListClass *) current_file->NextInList (); 
+			
+			current_line++; 
+	    } 
  
         log_file->Message ("Generating requested white fields only..."); 
  
@@ -2051,36 +1982,34 @@ struct stat 		stat_buffer;
 		memset (white_field_buffer_sinograms, 0, sizeof(float) * recon_info_record.white_size); 
 		current_file = top_white_file_list; 
 		current_line = 0; 
-		while (current_file != NULL) 
-		{ 
+		while (current_file != NULL) { 
 			sprintf (file_name, "%s%s", temp_path, current_file->file_name); 
-			if (stat (file_name, &stat_buffer) == 0) 
-			{ 
+			if (stat (file_name, &stat_buffer) == 0) { 
 				input_file.open (file_name, ios::binary); 
  
 				data_size = sizeof (unsigned short) * recon_info_record.sinogram_xdim; 
-    	        for (loop=0;loop<files_per_pass;loop++) 
-                { 
+    	        for (loop=0;loop<files_per_pass;loop++) { 
            	    	data_offset = header_size + sizeof (unsigned short) * sinogram_list[loop].sinogram_number * recon_info_record.sinogram_xdim; 
- 
 					input_file.seekg (data_offset, ios::beg); 
- 
 					input_file.read ((char *) &white_field_buffer_sinograms[(loop*recon_info_record.white_size)+(current_line*recon_info_record.sinogram_xdim)], data_size); 
                	} 
 					 
 				input_file.close (); 
 			} 
-       		else 
-			{ 
+       		else { 
 	   	        for (loop=0;loop<sinograms_to_create;loop++) 
-					memcpy (&white_field_buffer_sinograms[(loop*recon_info_record.white_size)+(current_line*recon_info_record.sinogram_xdim)], &white_field_buffer_sinograms[(loop*recon_info_record.white_size)+((current_line-1)*recon_info_record.sinogram_xdim)], sizeof (unsigned short int) * recon_info_record.sinogram_xdim); 
+					memcpy (&white_field_buffer_sinograms[(loop*recon_info_record.white_size)+(current_line*recon_info_record.sinogram_xdim)], 
+					        &white_field_buffer_sinograms[(loop*recon_info_record.white_size)+((current_line-1)*recon_info_record.sinogram_xdim)], 
+							sizeof (unsigned short int) * recon_info_record.sinogram_xdim
+					); 
  
 				sprintf (msg, "Could not read file %s!", file_name); 
 				error_log->addError (msg, "StartTomoMPIServer ()"); 
 				error_log->addAutoResolution ("Using previous white field instead..."); 
        		} 
  
-			current_file = (FileListClass *) current_file->NextInList (); 
+			current_file = (FileListClass *) current_file->NextInList ();
+
 			current_line++; 
 		} 
  
@@ -2089,20 +2018,15 @@ struct stat 		stat_buffer;
 		//now average the dark fields--we'll send only the average to the clients. 
 		memset (dark_field_buffer_sinograms, 0, sizeof(float) * recon_info_record.dark_size); 
 		current_file = top_dark_file_list; 
-		while (current_file != NULL) 
-		{ 
+		while (current_file != NULL) { 
 			sprintf (file_name, "%s%s", temp_path, current_file->file_name); 
-			if (stat (file_name, &stat_buffer) == 0) 
-			{ 
+			if (stat (file_name, &stat_buffer) == 0) { 
 				input_file.open (file_name, ios::binary); 
  
 				data_size = sizeof (unsigned short) * recon_info_record.sinogram_xdim; 
-   	            for (loop=0;loop<files_per_pass;loop++) 
-       	        { 
+   	            for (loop=0;loop<files_per_pass;loop++) { 
            	    	data_offset = header_size + sizeof (unsigned short) * sinogram_list[loop].sinogram_number * recon_info_record.sinogram_xdim; 
- 
 					input_file.seekg (data_offset, ios::beg); 
- 
 					input_file.read ((char *) temp_buffer, data_size); 
 					for (int loop2=0;loop2<recon_info_record.sinogram_xdim;loop2++) 
 						dark_field_buffer_sinograms[loop*recon_info_record.sinogram_xdim] += (float) temp_buffer[loop2] / (float) num_dark_fields; 
@@ -2110,8 +2034,7 @@ struct stat 		stat_buffer;
  
 				input_file.close (); 
 			} 
-        	else 
-			{ 
+        	else { 
 				sprintf (msg, "Could not read file %s!", file_name); 
 	            error_log->addError (msg, "StartTomoMPIServer ()"); 
 				error_log->addAutoResolution ("This dark field will not be averaged in..."); 
@@ -2123,8 +2046,7 @@ struct stat 		stat_buffer;
 		log_file->Message ("Done generating requested slices."); 
 		 
 	} 
-	else 
-	{ 
+	else { 
         log_file->Message ("Generating first pass of sinograms..."); 
  
 		header_size = 1024; 
@@ -2134,11 +2056,11 @@ struct stat 		stat_buffer;
 		//buffer projections 
 		current_file = top_projection_file_list; 
 		current_line = 0; 
-		while (current_file->NextInList () != NULL)  //this let's us stop 1 file before the end--which is a redundant file anyway 
-		{ 
+
+		//this let's us stop 1 file before the end--which is a redundant file anyway
+		while (current_file->NextInList () != NULL) { 
 			sprintf (file_name, "%s%s", temp_path, current_file->file_name); 
-			if (stat (file_name, &stat_buffer) == 0) 
-			{ 
+			if (stat (file_name, &stat_buffer) == 0) { 
 				input_file.open (file_name, ios::binary); 
 				input_file.seekg (data_offset, ios::beg); 
  
@@ -2146,12 +2068,17 @@ struct stat 		stat_buffer;
 				input_file.close (); 
  
 				for (loop=0;loop<sinograms_to_create;loop++) 
-					memcpy (&buffer_sinograms[(loop*sinogram_size)+(current_line*recon_info_record.sinogram_xdim)], &temp_buffer[loop*recon_info_record.sinogram_xdim], sizeof(unsigned short int)*recon_info_record.sinogram_xdim); 
+					memcpy (&buffer_sinograms[(loop*sinogram_size)+(current_line*recon_info_record.sinogram_xdim)], 
+					        &temp_buffer[loop*recon_info_record.sinogram_xdim], 
+							sizeof(unsigned short int)*recon_info_record.sinogram_xdim
+					); 
 			} 
-        	else 
-			{ 
+        	else { 
    	        	for (loop=0;loop<sinograms_to_create;loop++) 
-					memcpy (&buffer_sinograms[(loop*sinogram_size)+(current_line*recon_info_record.sinogram_xdim)], &buffer_sinograms[(loop*sinogram_size)+((current_line-1)*recon_info_record.sinogram_xdim)], sizeof (unsigned short int) * recon_info_record.sinogram_xdim); 
+					memcpy (&buffer_sinograms[(loop*sinogram_size)+(current_line*recon_info_record.sinogram_xdim)], 
+					        &buffer_sinograms[(loop*sinogram_size)+((current_line-1)*recon_info_record.sinogram_xdim)], 
+							sizeof (unsigned short int) * recon_info_record.sinogram_xdim
+					); 
  
 				sprintf (msg, "Could not read file %s!", file_name); 
 				error_log->addError (msg, "StartTomoMPIServer ()"); 
@@ -2166,11 +2093,9 @@ struct stat 		stat_buffer;
 		memset (white_field_buffer_sinograms, 0, sizeof(float) * recon_info_record.white_size); 
 		current_file = top_white_file_list; 
 		current_line = 0; 
-		while (current_file != NULL) 
-		{ 
+		while (current_file != NULL) { 
 			sprintf (file_name, "%s%s", temp_path, current_file->file_name); 
-			if (stat (file_name, &stat_buffer) == 0) 
-			{ 
+			if (stat (file_name, &stat_buffer) == 0) { 
 				input_file.open (file_name, ios::binary); 
 				input_file.seekg (data_offset, ios::beg); 
  
@@ -2178,12 +2103,17 @@ struct stat 		stat_buffer;
 				input_file.close (); 
  
 				for (loop=0;loop<sinograms_to_create;loop++) 
-					memcpy (&white_field_buffer_sinograms[(loop*recon_info_record.white_size)+(current_line*recon_info_record.sinogram_xdim)], &temp_buffer[loop*recon_info_record.sinogram_xdim], sizeof(unsigned short int)*recon_info_record.sinogram_xdim); 
+					memcpy (&white_field_buffer_sinograms[(loop*recon_info_record.white_size)+(current_line*recon_info_record.sinogram_xdim)], 
+					        &temp_buffer[loop*recon_info_record.sinogram_xdim], 
+							sizeof(unsigned short int)*recon_info_record.sinogram_xdim
+					); 
 			} 
-        	else 
-			{ 
+        	else { 
 	   	        for (loop=0;loop<sinograms_to_create;loop++) 
-					memcpy (&white_field_buffer_sinograms[(loop*recon_info_record.white_size)+(current_line*recon_info_record.sinogram_xdim)], &white_field_buffer_sinograms[(loop*recon_info_record.white_size)+((current_line-1)*recon_info_record.sinogram_xdim)], sizeof (unsigned short int) * recon_info_record.sinogram_xdim); 
+					memcpy (&white_field_buffer_sinograms[(loop*recon_info_record.white_size)+(current_line*recon_info_record.sinogram_xdim)], 
+					        &white_field_buffer_sinograms[(loop*recon_info_record.white_size)+((current_line-1)*recon_info_record.sinogram_xdim)], 
+							sizeof (unsigned short int) * recon_info_record.sinogram_xdim
+					); 
  
 				sprintf (msg, "Could not read file %s!", file_name); 
 				error_log->addError (msg, "StartTomoMPIServer ()"); 
@@ -2197,11 +2127,9 @@ struct stat 		stat_buffer;
 		//now average the dark fields--we'll send only the average to the clients. 
 		memset (dark_field_buffer_sinograms, 0, sizeof(float) * recon_info_record.dark_size); 
 		current_file = top_dark_file_list; 
-		while (current_file != NULL) 
-		{ 
+		while (current_file != NULL) { 
 			sprintf (file_name, "%s%s", temp_path, current_file->file_name); 
-			if (stat (file_name, &stat_buffer) == 0) 
-			{ 
+			if (stat (file_name, &stat_buffer) == 0) { 
 				input_file.open (file_name, ios::binary); 
 				input_file.seekg (data_offset, ios::beg); 
  
@@ -2211,8 +2139,7 @@ struct stat 		stat_buffer;
 				for (int loop=0;loop<recon_info_record.dark_size;loop++) 
 					dark_field_buffer_sinograms[loop] += (float) temp_buffer[loop] / (float) num_dark_fields; 
 			} 
-        	else 
-			{ 
+        	else { 
 				sprintf (msg, "Could not read file %s!", file_name); 
     	        error_log->addError (msg, "StartTomoMPIServer ()"); 
 				error_log->addAutoResolution ("This dark field will not be averaged in..."); 
@@ -2230,16 +2157,19 @@ struct stat 		stat_buffer;
  
 //_____________________________________________________________________________________ 
  
-void CreateSinogramsFromHDF (void) 
-{ 
-FileListClass       *current_file = NULL; 
-int                 start_dims[2], 
-                    length_dims[2], 
-                    current_line, 
-                    loop; 
-char                temp_path[256], 
-                    full_file_name[512]; 
-struct stat         stat_buffer; 
+void CreateSinogramsFromHDF (void) {
+
+	FileListClass       *current_file = NULL; 
+
+	int                 start_dims[2], 
+						length_dims[2], 
+						current_line, 
+						loop; 
+
+	char                temp_path[256], 
+						full_file_name[512]; 
+
+	struct stat         stat_buffer; 
  
  
     sprintf (msg, "\nLooks like files are HDF.  Starting pass %d", pass_number); 
@@ -2255,29 +2185,24 @@ struct stat         stat_buffer;
     //all files should have same template--so create it here 
     data_file.CreateTemplate (temp_path, top_projection_file_list->file_name); 
  
-    if (recon_info_record.use_slices_file) 
-    { 
+    if (recon_info_record.use_slices_file) { 
         log_file->Message ("Generating requested sinograms only..."); 
  
         //buffer projections 
         current_file = top_projection_file_list; 
         current_line = 0; 
-        while (current_file->NextInList () != NULL) 
-        { 
+        while (current_file->NextInList () != NULL) { 
             sprintf (full_file_name, "%s%s", temp_path, current_file->file_name); 
-            if (stat (full_file_name, &stat_buffer) == 0) 
-            { 
+            if (stat (full_file_name, &stat_buffer) == 0) { 
                 data_file.ChangeFile (temp_path, current_file->file_name); 
  
-                if (!data_file.IndexExists(data_group_index)) 
-                { 
+                if (!data_file.IndexExists(data_group_index)) { 
                     sprintf (msg, "ERROR: Data Group Index %s not found in file %s%s!", data_group_index, temp_path, current_file->file_name); 
                     log_file->Message (msg); 
                     error_log->addError (msg, "CreateSinogramsFromHDF ()"); 
                 } 
  
-                for (loop=0;loop<files_per_pass;loop++) 
-                { 
+                for (loop=0;loop<files_per_pass;loop++) { 
                     start_dims[0] = sinogram_list[loop].sinogram_number;    //this is the y dim in a 2D array 
                     start_dims[1] = 0;                                      //this is the x dim in a 2D array 
                     length_dims[0] = 1; 
@@ -2286,10 +2211,12 @@ struct stat         stat_buffer;
                     data_file.GetDatumSlab (data_group_index, &buffer_sinograms[(loop*sinogram_size)+(current_line*recon_info_record.sinogram_xdim)], start_dims, length_dims); 
                 } 
             } 
-            else 
-            { 
+            else { 
                 for (loop=0;loop<files_per_pass;loop++) 
-                    memcpy (&buffer_sinograms[(loop*sinogram_size)+(current_line*recon_info_record.sinogram_xdim)], &buffer_sinograms[(loop*sinogram_size)+((current_line-1)*recon_info_record.sinogram_xdim)], sizeof (unsigned short) * recon_info_record.sinogram_xdim); 
+                    memcpy (&buffer_sinograms[(loop*sinogram_size)+(current_line*recon_info_record.sinogram_xdim)], 
+					        &buffer_sinograms[(loop*sinogram_size)+((current_line-1)*recon_info_record.sinogram_xdim)], 
+							sizeof (unsigned short) * recon_info_record.sinogram_xdim
+					); 
  
                 sprintf (msg, "Could not read file %s!", full_file_name); 
                 error_log->addError (msg, "StartTomoMPIServer ()"); 
@@ -2301,25 +2228,21 @@ struct stat         stat_buffer;
         } 
  
         //buffer white fields 
-	memset (white_field_buffer_sinograms, 0, sizeof(float) * recon_info_record.white_size); 
+		memset (white_field_buffer_sinograms, 0, sizeof(float) * recon_info_record.white_size); 
         current_file = top_white_file_list; 
         current_line = 0; 
-        while (current_file != NULL) 
-        { 
+        while (current_file != NULL) { 
             sprintf (full_file_name, "%s%s", temp_path, current_file->file_name); 
-            if (stat (full_file_name, &stat_buffer) == 0) 
-            { 
+            if (stat (full_file_name, &stat_buffer) == 0) { 
                 data_file.ChangeFile (temp_path, current_file->file_name); 
  
-                if (!data_file.IndexExists(data_group_index)) 
-                { 
+                if (!data_file.IndexExists(data_group_index)) { 
                     sprintf (msg, "ERROR: Data Group Index %s not found in file %s%s!", data_group_index, temp_path, current_file->file_name); 
                     log_file->Message (msg); 
                     error_log->addError (msg, "CreateSinogramsFromHDF ()"); 
                 } 
  
-                for (int loop=0;loop<files_per_pass;loop++) 
-                { 
+                for (int loop=0;loop<files_per_pass;loop++) { 
                     start_dims[0] = sinogram_list[loop].sinogram_number;    //this is the y dim in a 2D array 
                     start_dims[1] = 0;                                      //this is the x dim in a 2D array 
                     length_dims[0] = 1; 
@@ -2328,10 +2251,12 @@ struct stat         stat_buffer;
                     data_file.GetDatumSlab (data_group_index, &white_field_buffer_sinograms[(loop*recon_info_record.white_size)+(current_line*recon_info_record.sinogram_xdim)], start_dims, length_dims); 
                 } 
             } 
-            else 
-            { 
+            else { 
                 for (loop=0;loop<sinograms_to_create;loop++) 
-                    memcpy (&white_field_buffer_sinograms[(loop*recon_info_record.white_size)+(current_line*recon_info_record.sinogram_xdim)], &white_field_buffer_sinograms[(loop*recon_info_record.white_size)+((current_line-1)*recon_info_record.sinogram_xdim)], sizeof (unsigned short int) * recon_info_record.sinogram_xdim); 
+                    memcpy (&white_field_buffer_sinograms[(loop*recon_info_record.white_size)+(current_line*recon_info_record.sinogram_xdim)], 
+					        &white_field_buffer_sinograms[(loop*recon_info_record.white_size)+((current_line-1)*recon_info_record.sinogram_xdim)], 
+							sizeof (unsigned short int) * recon_info_record.sinogram_xdim
+					); 
  
                 sprintf (msg, "Could not read file %s!", full_file_name); 
                 error_log->addError (msg, "StartTomoMPIServer ()"); 
@@ -2343,25 +2268,21 @@ struct stat         stat_buffer;
         } 
  
         //now average the dark fields--we'll send only the average to the clients. 
-	memset (dark_field_buffer_sinograms, 0, sizeof(float) * recon_info_record.dark_size); 
+		memset (dark_field_buffer_sinograms, 0, sizeof(float) * recon_info_record.dark_size); 
         current_file = top_dark_file_list; 
         current_line = 0; 
-        while (current_file != NULL) 
-        { 
+        while (current_file != NULL) { 
             sprintf (full_file_name, "%s%s", temp_path, current_file->file_name); 
-            if (stat (full_file_name, &stat_buffer) == 0) 
-            { 
+            if (stat (full_file_name, &stat_buffer) == 0) { 
                 data_file.ChangeFile (temp_path, current_file->file_name); 
  
-                if (!data_file.IndexExists(data_group_index)) 
-                { 
+                if (!data_file.IndexExists(data_group_index)) { 
                     sprintf (msg, "ERROR: Data Group Index %s not found in file %s%s!", data_group_index, temp_path, current_file->file_name); 
                     log_file->Message (msg); 
                     error_log->addError (msg, "CreateSinogramsFromHDF ()"); 
                 } 
  
-                for (int loop=0;loop<files_per_pass;loop++) 
-                { 
+                for (int loop=0;loop<files_per_pass;loop++) { 
                     memset (&dark_field_buffer_sinograms[loop*recon_info_record.sinogram_xdim], 0, sizeof(float) * recon_info_record.sinogram_xdim); 
  
                     start_dims[0] = sinogram_list[loop].sinogram_number;    //this is the y dim in a 2D array 
@@ -2375,8 +2296,7 @@ struct stat         stat_buffer;
                        dark_field_buffer_sinograms[(loop*recon_info_record.sinogram_xdim)+loop2] += (float) temp_buffer[loop2] / (float) num_dark_fields; 
                 } 
             } 
-            else 
-            { 
+            else { 
                 sprintf (msg, "Could not read file %s!", full_file_name); 
                 error_log->addError (msg, "StartTomoMPIServer ()"); 
                 error_log->addAutoResolution ("This dark field will not be averaged in..."); 
@@ -2387,8 +2307,7 @@ struct stat         stat_buffer;
         } 
  
     } 
-    else 
-    { 
+    else { 
         log_file->Message ("Generating first pass of sinograms..."); 
  
         start_dims[0] = pass_number*sinograms_to_create;    //this is the y dim in a 2D array 
@@ -2399,15 +2318,13 @@ struct stat         stat_buffer;
         //buffer projections 
         current_file = top_projection_file_list; 
         current_line = 0; 
-        while (current_file->NextInList () != NULL)  //this let's us stop 1 file before the end--which is a redundant file anyway 
-        { 
+		//this let's us stop 1 file before the end--which is a redundant file anyway
+        while (current_file->NextInList () != NULL) { 
             sprintf (full_file_name, "%s%s", temp_path, current_file->file_name); 
-            if (stat (full_file_name, &stat_buffer) == 0) 
-            { 
+            if (stat (full_file_name, &stat_buffer) == 0) { 
                 data_file.ChangeFile (temp_path, current_file->file_name); 
  
-                if (!data_file.IndexExists(data_group_index)) 
-                { 
+                if (!data_file.IndexExists(data_group_index)) { 
                     sprintf (msg, "ERROR: Data Group Index %s not found in file %s%s!", data_group_index, temp_path, current_file->file_name); 
                     log_file->Message (msg); 
                     error_log->addError (msg, "CreateSinogramsFromHDF ()"); 
@@ -2416,12 +2333,17 @@ struct stat         stat_buffer;
                 data_file.GetDatumSlab (data_group_index, temp_buffer, start_dims, length_dims); 
  
                 for (loop=0;loop<sinograms_to_create;loop++) 
-                    memcpy (&buffer_sinograms[(loop*sinogram_size)+(current_line*recon_info_record.sinogram_xdim)], &temp_buffer[loop*recon_info_record.sinogram_xdim], sizeof(unsigned short int)*recon_info_record.sinogram_xdim); 
+                    memcpy (&buffer_sinograms[(loop*sinogram_size)+(current_line*recon_info_record.sinogram_xdim)], 
+					        &temp_buffer[loop*recon_info_record.sinogram_xdim], 
+							sizeof(unsigned short int)*recon_info_record.sinogram_xdim
+					); 
             } 
-            else 
-            { 
+            else { 
                 for (loop=0;loop<sinograms_to_create;loop++) 
-                    memcpy (&buffer_sinograms[(loop*sinogram_size)+(current_line*recon_info_record.sinogram_xdim)], &buffer_sinograms[(loop*sinogram_size)+((current_line-1)*recon_info_record.sinogram_xdim)], sizeof (unsigned short int) * recon_info_record.sinogram_xdim); 
+                    memcpy (&buffer_sinograms[(loop*sinogram_size)+(current_line*recon_info_record.sinogram_xdim)], 
+					        &buffer_sinograms[(loop*sinogram_size)+((current_line-1)*recon_info_record.sinogram_xdim)], 
+							sizeof (unsigned short int) * recon_info_record.sinogram_xdim
+					); 
  
                 sprintf (msg, "Could not read file %s!", full_file_name); 
                 error_log->addError (msg, "StartTomoMPIServer ()"); 
@@ -2433,18 +2355,15 @@ struct stat         stat_buffer;
         } 
  
         //buffer white fields 
-	memset (white_field_buffer_sinograms, 0, sizeof(float) * recon_info_record.white_size); 
+		memset (white_field_buffer_sinograms, 0, sizeof(float) * recon_info_record.white_size); 
         current_file = top_white_file_list; 
         current_line = 0; 
-        while (current_file != NULL) 
-        { 
+        while (current_file != NULL) { 
             sprintf (full_file_name, "%s%s", temp_path, current_file->file_name); 
-            if (stat (full_file_name, &stat_buffer) == 0) 
-            { 
+            if (stat (full_file_name, &stat_buffer) == 0) { 
                 data_file.ChangeFile (temp_path, current_file->file_name); 
  
-                if (!data_file.IndexExists(data_group_index)) 
-                { 
+                if (!data_file.IndexExists(data_group_index)) { 
                     sprintf (msg, "ERROR: Data Group Index %s not found in file %s%s!", data_group_index, temp_path, current_file->file_name); 
                     log_file->Message (msg); 
                     error_log->addError (msg, "CreateSinogramsFromHDF ()"); 
@@ -2453,12 +2372,17 @@ struct stat         stat_buffer;
                 data_file.GetDatumSlab (data_group_index, temp_buffer, start_dims, length_dims); 
  
                 for (loop=0;loop<sinograms_to_create;loop++) 
-                    memcpy (&white_field_buffer_sinograms[(loop*recon_info_record.white_size)+(current_line*recon_info_record.sinogram_xdim)], &temp_buffer[loop*recon_info_record.sinogram_xdim], sizeof(unsigned short int)*recon_info_record.sinogram_xdim); 
+                    memcpy (&white_field_buffer_sinograms[(loop*recon_info_record.white_size)+(current_line*recon_info_record.sinogram_xdim)], 
+					        &temp_buffer[loop*recon_info_record.sinogram_xdim], 
+							sizeof(unsigned short int)*recon_info_record.sinogram_xdim
+					); 
             } 
-            else 
-            { 
+            else { 
                 for (loop=0;loop<sinograms_to_create;loop++) 
-                    memcpy (&white_field_buffer_sinograms[(loop*recon_info_record.white_size)+(current_line*recon_info_record.sinogram_xdim)], &white_field_buffer_sinograms[(loop*recon_info_record.white_size)+((current_line-1)*recon_info_record.sinogram_xdim)], sizeof (unsigned short int) * recon_info_record.sinogram_xdim); 
+                    memcpy (&white_field_buffer_sinograms[(loop*recon_info_record.white_size)+(current_line*recon_info_record.sinogram_xdim)], 
+					        &white_field_buffer_sinograms[(loop*recon_info_record.white_size)+((current_line-1)*recon_info_record.sinogram_xdim)], 
+							sizeof (unsigned short int) * recon_info_record.sinogram_xdim
+					); 
  
                 sprintf (msg, "Could not read file %s!", full_file_name); 
                 error_log->addError (msg, "StartTomoMPIServer ()"); 
@@ -2474,15 +2398,12 @@ struct stat         stat_buffer;
         memset (dark_field_buffer_sinograms, 0, sizeof(float) * recon_info_record.dark_size); 
         current_file = top_dark_file_list; 
         current_line = 0; 
-        while (current_file != NULL) 
-        { 
+        while (current_file != NULL) { 
             sprintf (full_file_name, "%s%s", temp_path, current_file->file_name); 
-            if (stat (full_file_name, &stat_buffer) == 0) 
-            { 
+            if (stat (full_file_name, &stat_buffer) == 0) { 
                 data_file.ChangeFile (temp_path, current_file->file_name); 
  
-                if (!data_file.IndexExists(data_group_index)) 
-                { 
+                if (!data_file.IndexExists(data_group_index)) { 
                     sprintf (msg, "ERROR: Data Group Index %s not found in file %s%s!", data_group_index, temp_path, current_file->file_name); 
                     log_file->Message (msg); 
                     error_log->addError (msg, "CreateSinogramsFromHDF ()"); 
@@ -2493,8 +2414,7 @@ struct stat         stat_buffer;
                 for (int loop=0;loop<recon_info_record.dark_size;loop++) 
                     dark_field_buffer_sinograms[loop] += (float) temp_buffer[loop] / (float) num_dark_fields; 
             } 
-            else 
-            { 
+            else { 
                 sprintf (msg, "Could not read file %s!", full_file_name); 
                 error_log->addError (msg, "StartTomoMPIServer ()"); 
                 error_log->addAutoResolution ("This dark field will not be averaged in..."); 
@@ -2514,9 +2434,8 @@ struct stat         stat_buffer;
  
 //_____________________________________________________________________________________ 
  
-void *CreateSinograms (void *) 
-{ 
-char    file_name[256]; 
+void *CreateSinograms (void *) { 
+	char    file_name[256]; 
  
     sprintf (file_name, "%s", top_projection_file_list->file_name); 
  
@@ -2530,38 +2449,35 @@ char    file_name[256];
  
 //_____________________________________________________________________________________ 
  
-void InitializeServer (void) 
-{ 
-FileListClass	*current_file = NULL; 
-int				loop, 
-				num_files, 
-				slice_index; 
-char			temp_path[256], 
-				ch, 
-				slice[10], 
-				slices_file[512]; 
-FILE			*slices_list_file = NULL; 
-bool			end_file; 
+void InitializeServer (void) { 
+
+	FileListClass	*current_file = NULL; 
+	int				loop, 
+					num_files, 
+					slice_index; 
+	char			temp_path[256], 
+					ch, 
+					slice[10], 
+					slices_file[512]; 
+	FILE			*slices_list_file = NULL; 
+	bool			end_file; 
  
-    if (sinogram_list != NULL) 
-    { 
+    if (sinogram_list != NULL) { 
         free (sinogram_list); 
         sinogram_list = NULL; 
     } 
+
 	sinogram_list = (SINOGRAMINFO *) malloc (sizeof (SINOGRAMINFO) * data_ydim); 
-    if (sinogram_list == NULL) 
-    { 
+    if (sinogram_list == NULL) { 
         sprintf (msg, "Could not allocat memory for sinogram_list."); 
         error_log->addError (msg, "InitializeServer ()"); 
     } 
  
-	if (recon_info_record.use_slices_file) 
-	{ 
+	if (recon_info_record.use_slices_file) { 
 		log_file->Message ("I will be reconstructing only the files listed in slices.list."); 
  
 		sprintf (slices_file, "%s%s", exp_file_path, "slices.list"); 
-		if ((slices_list_file = fopen (slices_file, "rt")) == NULL) 
-		{ 
+		if ((slices_list_file = fopen (slices_file, "rt")) == NULL) { 
 			sprintf(msg, "%s%s", slices_file, " could not be opened."); 
 			log_file->ErrorMessage (msg, "ReadConfigFile"); 
 			log_file->Message ("...Ooops--I guess I will be reconstructing the entire data set after all..."); 
@@ -2573,16 +2489,14 @@ bool			end_file;
 		num_sinograms = 0; 
 		ch = ' '; 
 		end_file = false; 
-		while (!end_file) 
-		{ 
+		while (!end_file) { 
 			while (ch != '<') 
 				ch = fgetc (slices_list_file); 
  
 			ch = fgetc (slices_list_file); 
  
 			slice_index = 0; 
-			while (ch != '>') 
-			{ 
+			while (ch != '>') { 
 				slice[slice_index] = ch; 
 				slice_index++; 
  
@@ -2592,8 +2506,7 @@ bool			end_file;
  
 			if (strcmp (slice, "END") == 0) 
 				end_file = true; 
-			else 
-			{ 
+			else { 
 				sinogram_list[num_sinograms].sinogram_number = atoi (slice); 
 				sinogram_list[num_sinograms].status = NOT_DONE_YET; 
 				sinogram_list[num_sinograms].processing_client = my_id; 
@@ -2608,8 +2521,7 @@ bool			end_file;
 		log_file->Message (msg); 
  
 		//If an odd number of slices--boost to an even number by doing the last slice twice 
-		if ((num_sinograms % 2) == 1) 
-		{ 
+		if ((num_sinograms % 2) == 1) { 
 			sprintf(msg, "Number of slices found is odd--I will do the last slice twice..."); 
 			log_file->Message (msg); 
  
@@ -2625,13 +2537,11 @@ bool			end_file;
  
 	} 
  
-	if (!recon_info_record.use_slices_file) 
-	{ 
+	if (!recon_info_record.use_slices_file) { 
 		log_file->Message ("I will be reconstructing the entire data set."); 
 		num_sinograms = data_ydim; 
  
-		for (loop=0;loop<num_sinograms;loop++) 
-		{ 
+		for (loop=0;loop<num_sinograms;loop++) { 
 			sinogram_list[loop].sinogram_number = loop; 
 			sinogram_list[loop].status = NOT_DONE_YET; 
 			sinogram_list[loop].processing_client = my_id; 
@@ -2641,14 +2551,12 @@ bool			end_file;
 		recon_info_record.end_fixed_shift = recon_info_record.fixed_shift_value; 
 	} 
  
-    if (temp_buffer != NULL) 
-    { 
+    if (temp_buffer != NULL) { 
         free (temp_buffer); 
         temp_buffer = NULL; 
     } 
 	temp_buffer = (unsigned short int *) malloc (sizeof(unsigned short int)*files_per_pass*data_xdim); 
-    if (temp_buffer == NULL) 
-    { 
+    if (temp_buffer == NULL) { 
         sprintf (msg, "Could not allocat memory for temp_buffer."); 
         error_log->addError (msg, "InitializeServer ()"); 
     } 
@@ -2656,8 +2564,7 @@ bool			end_file;
  
 	num_files = 0; 
 	current_file = top_projection_file_list; 
-	while (current_file != NULL) 
-	{ 
+	while (current_file != NULL) { 
 		num_files++; 
 		current_file = (FileListClass *) current_file->NextInList (); 
 	} 
@@ -2671,27 +2578,23 @@ bool			end_file;
 	recon_info_record.reconstruction_ydim = data_xdim;  //Reconstruction should be square--for now. 
 	reconstruction_size = recon_info_record.reconstruction_xdim * recon_info_record.reconstruction_ydim; 
  
-    if (sino_buf1 != NULL) 
-    { 
+    if (sino_buf1 != NULL) { 
         free (sino_buf1); 
         sino_buf1 = NULL; 
     } 
 	sino_buf1 = (unsigned short int *) malloc (sizeof(unsigned short int)*files_per_pass*(sinogram_size+1)); 
-    if (sino_buf1 == NULL) 
-    { 
+    if (sino_buf1 == NULL) { 
         sprintf (msg, "Could not allocat memory for sino_buf1"); 
         error_log->addError (msg, "InitializeServer ()"); 
     } 
     memset (sino_buf1, 0, sizeof(unsigned short int)*files_per_pass*(sinogram_size+1)); 
  
-    if (sino_buf2 != NULL) 
-    { 
+    if (sino_buf2 != NULL) { 
         free (sino_buf2); 
         sino_buf2 = NULL; 
     } 
 	sino_buf2 = (unsigned short int *) malloc (sizeof(unsigned short int)*files_per_pass*(sinogram_size+1)); 
-    if (sino_buf2 == NULL) 
-    { 
+    if (sino_buf2 == NULL) { 
         sprintf (msg, "Could not allocat memory for sino_buf2"); 
         error_log->addError (msg, "InitializeServer ()"); 
     } 
@@ -2699,54 +2602,46 @@ bool			end_file;
  
 	recon_info_record.num_white_fields = num_white_fields; 
 	recon_info_record.white_size = num_white_fields * recon_info_record.sinogram_xdim; 
-    if (white_field_sino_buf1 != NULL) 
-    { 
+    if (white_field_sino_buf1 != NULL) { 
         free (white_field_sino_buf1); 
         white_field_sino_buf1 = NULL; 
     } 
 	white_field_sino_buf1 = (unsigned short int *) malloc (files_per_pass*sizeof(unsigned short int)*recon_info_record.white_size); 
-    if (white_field_sino_buf1 == NULL) 
-    { 
+    if (white_field_sino_buf1 == NULL) { 
         sprintf (msg, "Could not allocat memory for white_field_sino_buf1"); 
         error_log->addError (msg, "InitializeServer ()"); 
     } 
     memset (white_field_sino_buf1, 0, files_per_pass*sizeof(unsigned short int)*recon_info_record.white_size); 
  
-    if (white_field_sino_buf2 != NULL) 
-    { 
+    if (white_field_sino_buf2 != NULL) { 
         free (white_field_sino_buf2); 
         white_field_sino_buf2 = NULL; 
     } 
 	white_field_sino_buf2 = (unsigned short int *) malloc (files_per_pass*sizeof(unsigned short int)*recon_info_record.white_size); 
-    if (white_field_sino_buf2 == NULL) 
-    { 
+    if (white_field_sino_buf2 == NULL) { 
         sprintf (msg, "Could not allocat memory for white_field_sino_buf2"); 
         error_log->addError (msg, "InitializeServer ()"); 
     } 
     memset (white_field_sino_buf2, 0, files_per_pass*sizeof(unsigned short int)*recon_info_record.white_size); 
  
 	recon_info_record.dark_size = files_per_pass * recon_info_record.sinogram_xdim; 
-    if (dark_field_sino_ave_buf1 != NULL) 
-    { 
+    if (dark_field_sino_ave_buf1 != NULL) { 
         free (dark_field_sino_ave_buf1); 
         dark_field_sino_ave_buf1 = NULL; 
     } 
 	dark_field_sino_ave_buf1 = (float *) malloc (recon_info_record.dark_size*sizeof(float)); 
-    if (dark_field_sino_ave_buf1 == NULL) 
-    { 
+    if (dark_field_sino_ave_buf1 == NULL) { 
         sprintf (msg, "Could not allocat memory for dark_field_sino_ave_buf1"); 
         error_log->addError (msg, "InitializeServer ()"); 
     } 
     memset (dark_field_sino_ave_buf1, 0, recon_info_record.dark_size*sizeof(float)); 
  
-    if (dark_field_sino_ave_buf2 != NULL) 
-    { 
+    if (dark_field_sino_ave_buf2 != NULL) { 
         free (dark_field_sino_ave_buf2); 
         dark_field_sino_ave_buf2 = NULL; 
     } 
 	dark_field_sino_ave_buf2 = (float *) malloc (recon_info_record.dark_size*sizeof(float)); 
-    if (dark_field_sino_ave_buf2 == NULL) 
-    { 
+    if (dark_field_sino_ave_buf2 == NULL) { 
         sprintf (msg, "Could not allocat memory for dark_field_sino_ave_buf2"); 
         error_log->addError (msg, "InitializeServer ()"); 
     } 
@@ -2756,33 +2651,28 @@ bool			end_file;
  
 //_____________________________________________________________________________________ 
  
-void MakeFirstContact (void) 
-{ 
-int		    loop, 
-			temp; 
+void MakeFirstContact (void) { 
+	int	loop, 
+		temp; 
  
 	log_file->Message ("Attempting first contact."); 
  
-	for (loop=0;loop<num_processes;loop++) 
-	{ 
-		if (loop != my_id) 
-		{ 
+	for (loop=0;loop<num_processes;loop++) { 
+		if (loop != my_id) { 
 			//Send each client the following info 
 			sprintf (msg, "Trying to contact %d.", loop); 
 			log_file->Message (msg); 
  
-			recon_info_record.sinogram_set_size = sizeof (int); //sinogram_number 
+			recon_info_record.sinogram_set_size  = sizeof (int); //sinogram_number 
 			recon_info_record.sinogram_set_size += sizeof (short) * sinogram_size; //sinogram size 
 			recon_info_record.sinogram_set_size += sizeof (short) * sinogram_size; //white field size 
 			recon_info_record.sinogram_set_size += sizeof (float) * recon_info_record.sinogram_xdim; //dark field size 
-            if (sinogram_data_set != NULL) 
-            { 
+            if (sinogram_data_set != NULL) { 
                 free (sinogram_data_set); 
                 sinogram_data_set = NULL; 
             } 
 			sinogram_data_set = (char *) malloc (recon_info_record.sinogram_set_size); 
-            if (sinogram_data_set == NULL) 
-            { 
+            if (sinogram_data_set == NULL) { 
                 sprintf (msg, "Could not allocat memory for sinogram_data_set"); 
                 error_log->addError (msg, "MakeFirstcontact ()"); 
             } 
@@ -2801,27 +2691,28 @@ int		    loop,
  
 //_____________________________________________________________________________________ 
 
-void MPIRequestingSinograms (int process_id, int sino_pass_number, int *current_sinogram, float current_shift) 
-{ 
-int			sinogram_number, 
-			num_sinograms_requested, 
-			send_command, 
-			sinogram_to_send, 
-			slot, 
-			num_sinos_loop, 
-			offset; 
-unsigned short int		*sinogram_to_send_ptr = NULL, 
+void MPIRequestingSinograms (int process_id, int sino_pass_number, int *current_sinogram, float current_shift) { 
+
+	int	sinogram_number, 
+		num_sinograms_requested, 
+		send_command, 
+		sinogram_to_send, 
+		slot, 
+		num_sinos_loop, 
+		offset;
+
+	unsigned short int	*sinogram_to_send_ptr    = NULL, 
 						*white_field_to_send_ptr = NULL; 
-float           		*dark_field_to_send_ptr = NULL; 
-MPI_Status	status; 
+
+	float	*dark_field_to_send_ptr = NULL; 
+			MPI_Status	status; 
  
 //	log_file->ResetTimer (waiting_on_MPI_timer); 
 	log_file->StartTimer (waiting_on_MPI_timer); 
  
 	MPI_Recv (&num_sinograms_requested, 1, MPI_INT, process_id, 0, MPI_COMM_WORLD, &status); 
  
-	for (num_sinos_loop=0;num_sinos_loop<num_sinograms_requested;num_sinos_loop++) 
-	{ 
+	for (num_sinos_loop=0;num_sinos_loop<num_sinograms_requested;num_sinos_loop++) { 
 	  sinogram_number = sinogram_list[sino_pass_number*files_per_pass+(*current_sinogram)].sinogram_number; 
  
 	  sinogram_to_send = sinogram_number; 
@@ -2872,10 +2763,9 @@ MPI_Status	status;
  
 //_____________________________________________________________________________________ 
  
-int MPIWaitForCommand (int *process_id) 
-{ 
-int			recieve_command; 
-MPI_Status	status; 
+int MPIWaitForCommand (int *process_id) { 
+	int			recieve_command; 
+	MPI_Status	status; 
  
 //	log_file->ResetTimer (waiting_on_clients_timer); 
 	log_file->StartTimer (waiting_on_clients_timer); 
@@ -2892,324 +2782,303 @@ MPI_Status	status;
  
 //_____________________________________________________________________________________ 
  
-void Reconstruct (void) 
-{ 
-  int 			current_sinogram, 
-    process_id, 
-    send_command, 
-    process_count, 
-    mpi_command, 
-    requested_slice, 
-    slot, 
-    num_passes, 
-    temp;
- 
-  float current_shift;
+void Reconstruct (void) { 
 
-  pthread_t       sinogram_thread_handle; 
-  MPI_Status	    status; 
+	int	current_sinogram, 
+    	process_id, 
+    	send_command, 
+    	process_count, 
+    	mpi_command, 
+    	requested_slice, 
+    	slot, 
+    	num_passes, 
+    	temp;
  
-  sinogram_thread_running = false; 
- 
-  pass_number = 0; 
- 
-  buffer_sinograms = sino_buf1; 
-  server_sinograms = sino_buf2; 
-  white_field_buffer_sinograms = white_field_sino_buf1; 
-  dark_field_buffer_sinograms = dark_field_sino_ave_buf1; 
- 
-  sinograms_to_create = files_per_pass; 
-  CreateSinograms (NULL); 
- 
-  server_sinograms = sino_buf1; 
-  buffer_sinograms = sino_buf2; 
-  white_field_server_sinograms = white_field_sino_buf1; 
-  dark_field_server_sinograms = dark_field_sino_ave_buf1; 
-  sinogram_buffer = 1; 
- 
-  if ((num_sinograms % files_per_pass) == 0) {
-    
-    num_passes = (num_sinograms/files_per_pass); 
- 
-    sprintf (msg, "num_sinograms is a multiple of files_per_pass.  Num_passes: %d", num_passes); 
-    log_file->Message (msg); 
-  } 
-  else { 
-    num_passes = (num_sinograms/files_per_pass)+1;	//1 extra pass to clean up extra files 
- 
-    sprintf (msg, "num_sinograms is not a multiple of files_per_pass.  Num_passes: %d", num_passes); 
-    log_file->Message (msg); 
-  } 
- 
-  for (pass_number=1;pass_number<=num_passes;pass_number++) {
-    
-    if (sinogram_thread_running) {
-	
-      pthread_join (sinogram_thread_handle, NULL);
-      sinogram_thread_running = false;
-    }
- 
-    if (sinogram_buffer == 1) {
-	
-      server_sinograms = sino_buf1; 
-      white_field_server_sinograms = white_field_sino_buf1; 
-      dark_field_server_sinograms = dark_field_sino_ave_buf1; 
- 
-      buffer_sinograms = sino_buf2; 
-      white_field_buffer_sinograms = white_field_sino_buf2; 
-      dark_field_buffer_sinograms = dark_field_sino_ave_buf2; 
- 
-      sinogram_buffer = 2; 
-    } 
-    else { 
-      server_sinograms = sino_buf2; 
-      white_field_server_sinograms = white_field_sino_buf2; 
-      dark_field_server_sinograms = dark_field_sino_ave_buf2; 
- 
-      buffer_sinograms = sino_buf1; 
-      white_field_buffer_sinograms = white_field_sino_buf1; 
-      dark_field_buffer_sinograms = dark_field_sino_ave_buf1; 
- 
-      sinogram_buffer = 1; 
-    } 
- 
-    if (pass_number < num_passes) { //these should be full passes guaranteed 
-	
-      sinograms_to_create = files_per_pass; 
- 
-      sinogram_thread_running = true; 
-      pthread_create (&sinogram_thread_handle, NULL, CreateSinograms, NULL); 
-    } 
-    else if (pass_number = num_passes) { //maybe a full pass/maybe not 
-	  
-      sinograms_to_create = num_sinograms - ((pass_number-1) * files_per_pass); 
- 
-      sprintf (msg, "Handling extra files.  files_per_pass: %d", files_per_pass); 
-      log_file->Message (msg); 
-    } 
- 
-    current_shift = recon_info_record.start_fixed_shift; 
+	float current_shift;
 
-    // Note: be sure to set recon_info_record.fixed_shift_interval positive for full reconstruction
-    while (current_shift <= recon_info_record.end_fixed_shift + recon_info_record.fixed_shift_interval / 2.0) { 
-	
-      current_sinogram = 0; 
-      while (current_sinogram < sinograms_to_create) {
-	    
-	mpi_command = MPIWaitForCommand (&process_id); 
+	pthread_t	sinogram_thread_handle;
+
+	MPI_Status	status; 
+
+	sinogram_thread_running = false; 
+
+	pass_number = 0; 
+
+	buffer_sinograms = sino_buf1; 
+	server_sinograms = sino_buf2; 
+	white_field_buffer_sinograms = white_field_sino_buf1; 
+	dark_field_buffer_sinograms = dark_field_sino_ave_buf1; 
+
+	sinograms_to_create = files_per_pass; 
+	CreateSinograms (NULL); 
+
+	server_sinograms = sino_buf1; 
+	buffer_sinograms = sino_buf2; 
+	white_field_server_sinograms = white_field_sino_buf1; 
+	dark_field_server_sinograms = dark_field_sino_ave_buf1; 
+	sinogram_buffer = 1; 
  
-	switch (mpi_command) {
+	if ((num_sinograms % files_per_pass) == 0) {
+		num_passes = (num_sinograms/files_per_pass); 
+		sprintf (msg, "num_sinograms is a multiple of files_per_pass.  Num_passes: %d", num_passes); 
+		log_file->Message (msg); 
+	} 
+	else { 
+		num_passes = (num_sinograms/files_per_pass)+1;	//1 extra pass to clean up extra files 
+		sprintf (msg, "num_sinograms is not a multiple of files_per_pass.  Num_passes: %d", num_passes); 
+		log_file->Message (msg); 
+	} 
+ 
+	for (pass_number=1;pass_number<=num_passes;pass_number++) {
+		if (sinogram_thread_running) {
+			pthread_join (sinogram_thread_handle, NULL);
+			sinogram_thread_running = false;
+		}
+	
+		if (sinogram_buffer == 1) {
+			server_sinograms = sino_buf1; 
+			white_field_server_sinograms = white_field_sino_buf1; 
+			dark_field_server_sinograms = dark_field_sino_ave_buf1; 
+	
+			buffer_sinograms = sino_buf2; 
+			white_field_buffer_sinograms = white_field_sino_buf2; 
+			dark_field_buffer_sinograms = dark_field_sino_ave_buf2; 
+	
+			sinogram_buffer = 2; 
+		} 
+		else { 
+			server_sinograms = sino_buf2; 
+			white_field_server_sinograms = white_field_sino_buf2; 
+			dark_field_server_sinograms = dark_field_sino_ave_buf2; 
+	
+			buffer_sinograms = sino_buf1; 
+			white_field_buffer_sinograms = white_field_sino_buf1; 
+			dark_field_buffer_sinograms = dark_field_sino_ave_buf1; 
+	
+			sinogram_buffer = 1; 
+		} 
+
+		//these should be full passes guaranteed
+		if (pass_number < num_passes) {  
 		
-	case CLIENT__Request_New_Sinogram : { 
-	  MPIRequestingSinograms (process_id, (pass_number-1), &current_sinogram, current_shift); 
+			sinograms_to_create = files_per_pass; 
+	
+			sinogram_thread_running = true; 
+			pthread_create (&sinogram_thread_handle, NULL, CreateSinograms, NULL); 
+		} 
+		else if (pass_number = num_passes) { //maybe a full pass/maybe not 
+		
+			sinograms_to_create = num_sinograms - ((pass_number-1) * files_per_pass); 
+	
+			sprintf (msg, "Handling extra files.  files_per_pass: %d", files_per_pass); 
+			log_file->Message (msg); 
+		} 
+	
+		current_shift = recon_info_record.start_fixed_shift; 
 
-	  sprintf (msg, "MPIRequestingSinograms called! current_shift is %f", current_shift);  // test
-	  log_file->Message (msg); 
+		// Note: be sure to set recon_info_record.fixed_shift_interval positive for full reconstruction
+		while (current_shift <= recon_info_record.end_fixed_shift + recon_info_record.fixed_shift_interval / 2.0) { 
+		
+			current_sinogram = 0; 
+			while (current_sinogram < sinograms_to_create) {
+				mpi_command = MPIWaitForCommand (&process_id); 
+				switch (mpi_command) {
 
-	}; 
-	  break; 
- 
-	default : { 
-	  sprintf (msg, "Recieved invalid command %d", mpi_command); 
-	  log_file->TimeStamp (msg); 
-	}; break; 
+					case CLIENT__Request_New_Sinogram : { 
+						MPIRequestingSinograms (process_id, (pass_number-1), &current_sinogram, current_shift); 
+						sprintf (msg, "MPIRequestingSinograms called! current_shift is %f", current_shift);  // test
+						log_file->Message (msg);
+					}; break; 
+					
+					default : {
+						sprintf (msg, "Recieved invalid command %d", mpi_command); 
+						log_file->TimeStamp (msg);
+					}; break; 
+
+				} 
+			} 
+	
+			current_shift += recon_info_record.fixed_shift_interval;   
+		} 
 	} 
  
-      } 
- 
-      current_shift += recon_info_record.fixed_shift_interval;   
-    } 
-  } 
- 
-  log_file->TimeStamp ("Sent last sinogram."); 
+	log_file->TimeStamp ("Sent last sinogram."); 
 } 
  
 //_____________________________________________________________________________________ 
  
-void DestroyServer (void) 
-{ 
-  int	    		process_id, 
-    send_command, 
-    process_count, 
-    mpi_command, 
-    requested_slice, 
-    slot, 
-    temp; 
-  float			temp_data_range_min, 
-    temp_data_range_max; 
-  MPI_Status	    status; 
+void DestroyServer (void) {
+
+	int	process_id, 
+		send_command, 
+		process_count, 
+		mpi_command, 
+		requested_slice, 
+		slot, 
+		temp;
+
+	float	temp_data_range_min, 
+			temp_data_range_max;
+
+	MPI_Status	status; 
+
+	data_range_min =  1000000.0; 
+	data_range_max = -1000000.0; 
  
-  data_range_min = 1000000.0; 
-  data_range_max = -1000000.0; 
- 
-  //Wait for everyone to be told to stop. 
-  process_count = num_processes - 1; //subtract 1 for the sinogram server 
- 
-  while (process_count != 0) 
-    { 
-      mpi_command = MPIWaitForCommand (&process_id); 
- 
-      switch (mpi_command) 
-	{ 
-	case CLIENT__Exiting : { 
-	  MPI_Recv (&temp_data_range_min, 1, MPI_FLOAT, process_id, 0, MPI_COMM_WORLD, &status); 
-	  MPI_Recv (&temp_data_range_max, 1, MPI_FLOAT, process_id, 0, MPI_COMM_WORLD, &status); 
- 
-	  if (temp_data_range_min < data_range_min) 
-	    data_range_min = temp_data_range_min; 
-	  if (temp_data_range_max > data_range_max) 
-	    data_range_max = temp_data_range_max; 
- 
-	  process_count--; 
- 
-	  sprintf (msg, "Process %d is exiting--process count = %d", process_id, process_count); 
-	  log_file->TimeStamp (msg); 
-	} break; 
- 
-	case CLIENT__Request_New_Sinogram : { 
-	  MPI_Recv (&temp, 1, MPI_INT, process_id, 0, MPI_COMM_WORLD, &status); 
- 
-	  send_command = STOP; 
-	  MPI_Send (&send_command, 1, MPI_INT, process_id, 0, MPI_COMM_WORLD); 
- 
-	  sprintf (msg, "Requested process %d to exit", process_id); 
-	  log_file->TimeStamp (msg); 
-	}; break; 
- 
-	default : { 
-	  sprintf (msg, "Recieved invalid command %d from %d", mpi_command, process_id); 
-	  log_file->TimeStamp (msg); 
-	}; break; 
+	//Wait for everyone to be told to stop. 
+	process_count = num_processes - 1; //subtract 1 for the sinogram server 
+
+	while (process_count != 0) { 
+		mpi_command = MPIWaitForCommand (&process_id); 
+
+		switch (mpi_command) { 
+			case CLIENT__Exiting : { 
+				MPI_Recv (&temp_data_range_min, 1, MPI_FLOAT, process_id, 0, MPI_COMM_WORLD, &status); 
+				MPI_Recv (&temp_data_range_max, 1, MPI_FLOAT, process_id, 0, MPI_COMM_WORLD, &status); 
+
+				if (temp_data_range_min < data_range_min) 
+					data_range_min = temp_data_range_min; 
+		
+				if (temp_data_range_max > data_range_max) 
+					data_range_max = temp_data_range_max; 
+
+				process_count--; 
+
+				sprintf (msg, "Process %d is exiting--process count = %d", process_id, process_count); 
+				log_file->TimeStamp (msg); 
+			}; break; 
+
+			case CLIENT__Request_New_Sinogram : { 
+				MPI_Recv (&temp, 1, MPI_INT, process_id, 0, MPI_COMM_WORLD, &status); 
+
+				send_command = STOP; 
+				MPI_Send (&send_command, 1, MPI_INT, process_id, 0, MPI_COMM_WORLD); 
+
+				sprintf (msg, "Requested process %d to exit", process_id); 
+				log_file->TimeStamp (msg); 
+			}; break; 
+
+			default : { 
+				sprintf (msg, "Recieved invalid command %d from %d", mpi_command, process_id); 
+				log_file->TimeStamp (msg); 
+			}; break; 
+		} 
+
+	} 
+
+	sprintf (msg, "Min data range: %e", data_range_min); 
+	log_file->TimeStamp (msg); 
+	sprintf (msg, "Max data range: %e", data_range_max); 
+	log_file->TimeStamp (msg); 
+
+	UpdateExpFile (); 
+
+	if (sino_buf1 != NULL) { 
+		free (sino_buf1); 
+		sino_buf1 = NULL; 
+	} 
+
+	if (sino_buf2 != NULL) { 
+		free (sino_buf2); 
+		sino_buf2 = NULL; 
+	} 
+
+	if (sinogram_list != NULL) { 
+		free (sinogram_list); 
+		sinogram_list = NULL; 
+	} 
+
+	if (temp_buffer != NULL) { 
+		free (temp_buffer); 
+		temp_buffer = NULL; 
+	} 
+
+	if (recon_info_record.theta_list != NULL) { 
+		free (recon_info_record.theta_list); 
+		recon_info_record.theta_list = NULL; 
+	} 
+
+	if (white_field_sino_buf2 != NULL) { 
+		free (white_field_sino_buf1); 
+		white_field_sino_buf1 = NULL; 
+	} 
+	if (white_field_sino_buf2 != NULL) { 
+		free (white_field_sino_buf2); 
+		white_field_sino_buf2 = NULL; 
+	} 
+
+	if (dark_field_sino_ave_buf1 != NULL) { 
+		free (dark_field_sino_ave_buf1); 
+		dark_field_sino_ave_buf1 = NULL; 
+	} 
+	if (dark_field_sino_ave_buf2 != NULL) { 
+		free (dark_field_sino_ave_buf2); 
+		dark_field_sino_ave_buf2 = NULL; 
+	} 
+
+	if (sinogram_data_set != NULL); { 
+	free (sinogram_data_set); 
+	sinogram_data_set = NULL; 
+	} 
+
+	if (top_projection_file_list != NULL) { 
+		delete (top_projection_file_list); 
+		top_projection_file_list = NULL; 
+	} 
+	if (top_white_file_list != NULL) { 
+		delete (top_white_file_list); 
+		top_white_file_list = NULL; 
+	} 
+	if (top_dark_file_list != NULL) { 
+		delete (top_dark_file_list); 
+		top_dark_file_list = NULL; 
 	} 
  
-    } 
+} 
  
-  sprintf (msg, "Min data range: %e", data_range_min); 
-  log_file->TimeStamp (msg); 
-  sprintf (msg, "Max data range: %e", data_range_max); 
-  log_file->TimeStamp (msg); 
+//_____________________________________________________________________________________ 
  
-  UpdateExpFile (); 
- 
-  if (sino_buf1 != NULL) 
-    { 
-      free (sino_buf1); 
-      sino_buf1 = NULL; 
-    } 
- 
-  if (sino_buf2 != NULL) 
-    { 
-      free (sino_buf2); 
-      sino_buf2 = NULL; 
-    } 
- 
-  if (sinogram_list != NULL) 
-    { 
-      free (sinogram_list); 
-      sinogram_list = NULL; 
-    } 
- 
-  if (temp_buffer != NULL) 
-    { 
-      free (temp_buffer); 
-      temp_buffer = NULL; 
-    } 
- 
-  if (recon_info_record.theta_list != NULL) 
-    { 
-      free (recon_info_record.theta_list); 
-      recon_info_record.theta_list = NULL; 
-    } 
- 
-  if (white_field_sino_buf2 != NULL) 
-    { 
-      free (white_field_sino_buf1); 
-      white_field_sino_buf1 = NULL; 
-    } 
-  if (white_field_sino_buf2 != NULL) 
-    { 
-      free (white_field_sino_buf2); 
-      white_field_sino_buf2 = NULL; 
-    } 
- 
-  if (dark_field_sino_ave_buf1 != NULL) 
-    { 
-      free (dark_field_sino_ave_buf1); 
-      dark_field_sino_ave_buf1 = NULL; 
-    } 
-  if (dark_field_sino_ave_buf2 != NULL) 
-    { 
-      free (dark_field_sino_ave_buf2); 
-      dark_field_sino_ave_buf2 = NULL; 
-    } 
- 
-  if (sinogram_data_set != NULL); 
-  { 
-    free (sinogram_data_set); 
-    sinogram_data_set = NULL; 
-  } 
- 
-  if (top_projection_file_list != NULL) 
-    { 
-      delete (top_projection_file_list); 
-      top_projection_file_list = NULL; 
-    } 
-  if (top_white_file_list != NULL) 
-    { 
-      delete (top_white_file_list); 
-      top_white_file_list = NULL; 
-    } 
-  if (top_dark_file_list != NULL) 
-    { 
-      delete (top_dark_file_list); 
-      top_dark_file_list = NULL; 
-    } 
+void ServerProcess (int argc, char *argv[]) {
+
+	log_file->ResetTimer (total_reconstruction_timer); 
+	log_file->StartTimer (total_reconstruction_timer); 
+
+	sprintf (msg, "I am processor %s with id %d", processor_name, my_id); 
+	log_file->Message (msg); 
+	log_file->Message ("I am in control of your reconstruction..."); 
+
+	InitSampleLocation (argc, argv); 
+
+	sprintf (msg, "Today we will be trying to reconstruct %s%s.", exp_file_path, exp_file_name); 
+	log_file->Message (msg); 
+
+	num_files_handled = 0; 
+	log_file->Message ("Starting to initialize..."); 
+	ReadExpFile(); 
+	ReadOverrideConfigFile(); 
+	InitializeServer (); 
+
+	WriteConfigFile (); 
+
+	log_file->Message ("Initialization complete--starting to make first contact..."); 
+	log_file->Message(" "); 
+
+	MakeFirstContact (); 
+
+	log_file->Message ("First contact made--starting to perform reconstruction..."); 
+	Reconstruct (); 
+
+	log_file->StopTimer (total_reconstruction_timer); 
+	log_file->AccumulateTimer (total_reconstruction_timer); 
+
+	DestroyServer (); 
  
 } 
  
 //_____________________________________________________________________________________ 
  
-void ServerProcess (int argc, char *argv[]) 
-{ 
-  log_file->ResetTimer (total_reconstruction_timer); 
-  log_file->StartTimer (total_reconstruction_timer); 
- 
-  sprintf (msg, "I am processor %s with id %d", processor_name, my_id); 
-  log_file->Message (msg); 
-  log_file->Message ("I am in control of your reconstruction..."); 
- 
-  InitSampleLocation (argc, argv); 
- 
-  sprintf (msg, "Today we will be trying to reconstruct %s%s.", exp_file_path, exp_file_name); 
-  log_file->Message (msg); 
- 
-  num_files_handled = 0; 
-  log_file->Message ("Starting to initialize..."); 
-  ReadExpFile(); 
-  ReadOverrideConfigFile(); 
-  InitializeServer (); 
- 
-  WriteConfigFile (); 
- 
-  log_file->Message ("Initialization complete--starting to make first contact..."); 
-  log_file->Message(" "); 
- 
-  MakeFirstContact (); 
- 
-  log_file->Message ("First contact made--starting to perform reconstruction..."); 
-  Reconstruct (); 
- 
-  log_file->StopTimer (total_reconstruction_timer); 
-  log_file->AccumulateTimer (total_reconstruction_timer); 
- 
-  DestroyServer (); 
- 
-} 
- 
-//_____________________________________________________________________________________ 
- 
-void CreateServerTimers (void) 
-{ 
+void CreateServerTimers (void) {
+
 	total_reconstruction_timer = log_file->CreateTimer ("Full_Reconstruction"); 
 	log_file->ResetTimer (total_reconstruction_timer); 
  
@@ -3225,8 +3094,8 @@ void CreateServerTimers (void)
  
 //_____________________________________________________________________________________ 
  
-void DestroyServerTimers (void) 
-{ 
+void DestroyServerTimers (void) {
+
 	log_file->DestroyTimer(total_reconstruction_timer); 
 	log_file->DestroyTimer(sinogram_pass_timer); 
 	log_file->DestroyTimer(waiting_on_clients_timer); 
@@ -3235,85 +3104,83 @@ void DestroyServerTimers (void)
  
 //_____________________________________________________________________________________ 
  
-int StartTomoMPIServer (int argc, char* argv[], char *log_path) 
-{ 
- 
-  log_file->TimeStamp ("Server process starting"); 
-  sprintf (msg, "<Number_of_Processes>%d", num_processes); 
-  log_file->Message(msg); 
- 
-  log_file->Message (""); 
-  log_file->Message ("Command line arguments:"); 
-  for (int loop=0;loop<argc;loop++) {
-    log_file->Message (argv[loop]); 
-  }
+int StartTomoMPIServer (int argc, char* argv[], char *log_path) { 
 
-  log_file->Message (""); 
- 
-  ServerAcknowledgements (); 
- 
-  temp_buffer = NULL; 
-  sino_buf1 = NULL; 
-  sino_buf2 = NULL; 
-  sinogram_list = NULL; 
-  white_field_sino_buf1 = NULL; 
-  white_field_sino_buf2 = NULL; 
-  dark_field_sino_ave_buf1 = NULL; 
-  dark_field_sino_ave_buf2 = NULL; 
- 
-  recon_info_record.mayor_id = my_id; 
- 
-  //set defaults 
-  strcpy (recon_info_record.log_path, log_path); 
-  recon_info_record.recon_algorithm = RECONSTRUCTION_GRIDREC; 
-  recon_info_record.gridrec_padding = GRIDREC_PADDING_HALF;  
-  recon_info_record.filter = FILTER_NONE; 
-  recon_info_record.use_slices_file = false; 
-  files_per_pass = DEFAULT_FILES_PER_PASS; 
+	log_file->TimeStamp ("Server process starting"); 
+	sprintf (msg, "<Number_of_Processes>%d", num_processes); 
+	log_file->Message(msg); 
 
-  recon_info_record.start_fixed_shift = 0.0f; 
-  recon_info_record.end_fixed_shift = 0.0f; 
-  recon_info_record.fixed_shift_interval = 1.0f;   
-  recon_info_record.fixed_shift_value = 0.0f; 
+	log_file->Message (""); 
+	log_file->Message ("Command line arguments:"); 
+	for (int loop=0;loop<argc;loop++)  
+	log_file->Message (argv[loop]); 
 
-  recon_info_record.centering = 0; 
-  recon_info_record.use_ring_removal = 1; 
-  recon_info_record.ring_removal_coeff = 1; 
-  recon_info_record.average_white_fields = false; 
-  strcpy (data_group_index, ";entry1;data;data"); 
-  recon_info_record.file_format = HDF5; 
-  recon_info_record.compression_type = NX_COMP_NONE; 
-  recon_info_record.debug = DEBUG_NONE; 
- 
-  recon_info_record.sinogram_xdim = 0; 
-  recon_info_record.sinogram_ydim =0; 
-  recon_info_record.white_size = 0; 
-  recon_info_record.dark_size = 0; 
-  recon_info_record.whitedark_interval = 0; 
-  recon_info_record.reconstruction_xdim = 0; 
-  recon_info_record.reconstruction_ydim = 0; 
-  recon_info_record.theta_list_size = 0; 
-  sprintf (recon_info_record.reconstruction_path, "empty"); 
-  sprintf (recon_info_record.base_name, "empty"); 
-  recon_info_record.theta_list = NULL; 
- 
-  CreateServerTimers (); 
- 
-  ServerProcess (argc, argv); 
- 
-  log_file->TimerMessage(total_reconstruction_timer); 
-  log_file->TimerMessage(sinogram_pass_timer); 
-  log_file->TimerMessage(waiting_on_clients_timer); 
-  log_file->TimerMessage(waiting_on_MPI_timer); 
- 
-  DestroyServerTimers (); 
- 
-  sprintf (msg, "Process %d exiting.", my_id); 
-  log_file->Message (msg); 
- 
-  log_file->TimeStamp ("Server process exiting"); 
- 
-  return 0; 
+	log_file->Message (""); 
+
+	ServerAcknowledgements (); 
+
+	temp_buffer              = NULL; 
+	sino_buf1                = NULL; 
+	sino_buf2                = NULL; 
+	sinogram_list            = NULL; 
+	white_field_sino_buf1    = NULL; 
+	white_field_sino_buf2    = NULL; 
+	dark_field_sino_ave_buf1 = NULL; 
+	dark_field_sino_ave_buf2 = NULL; 
+
+	recon_info_record.mayor_id = my_id; 
+
+	//set defaults 
+	strcpy (recon_info_record.log_path, log_path); 
+	recon_info_record.recon_algorithm = RECONSTRUCTION_GRIDREC; 
+	recon_info_record.gridrec_padding = GRIDREC_PADDING_HALF;  
+	recon_info_record.filter = FILTER_NONE; 
+	recon_info_record.use_slices_file = false; 
+	files_per_pass = DEFAULT_FILES_PER_PASS; 
+
+	recon_info_record.start_fixed_shift = 0.0f; 
+	recon_info_record.end_fixed_shift = 0.0f; 
+	recon_info_record.fixed_shift_interval = 1.0f;   
+	recon_info_record.fixed_shift_value = 0.0f; 
+
+	recon_info_record.centering = 0; 
+	recon_info_record.use_ring_removal = 1; 
+	recon_info_record.ring_removal_coeff = 1; 
+	recon_info_record.average_white_fields = false; 
+	strcpy (data_group_index, ";entry1;data;data"); 
+	recon_info_record.file_format = HDF5; 
+	recon_info_record.compression_type = NX_COMP_NONE; 
+	recon_info_record.debug = DEBUG_NONE; 
+
+	recon_info_record.sinogram_xdim = 0; 
+	recon_info_record.sinogram_ydim =0; 
+	recon_info_record.white_size = 0; 
+	recon_info_record.dark_size = 0; 
+	recon_info_record.whitedark_interval = 0; 
+	recon_info_record.reconstruction_xdim = 0; 
+	recon_info_record.reconstruction_ydim = 0; 
+	recon_info_record.theta_list_size = 0; 
+	sprintf (recon_info_record.reconstruction_path, "empty"); 
+	sprintf (recon_info_record.base_name, "empty"); 
+	recon_info_record.theta_list = NULL; 
+
+	CreateServerTimers (); 
+
+	ServerProcess (argc, argv); 
+
+	log_file->TimerMessage(total_reconstruction_timer); 
+	log_file->TimerMessage(sinogram_pass_timer); 
+	log_file->TimerMessage(waiting_on_clients_timer); 
+	log_file->TimerMessage(waiting_on_MPI_timer); 
+
+	DestroyServerTimers (); 
+
+	sprintf (msg, "Process %d exiting.", my_id); 
+	log_file->Message (msg); 
+
+	log_file->TimeStamp ("Server process exiting"); 
+
+	return 0; 
 } 
 //_____________________________________________________________________________________ 
  
