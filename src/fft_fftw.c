@@ -33,8 +33,7 @@ static fftwf_plan 		forward_plan_2d,
 
 //_______________________________________________________________________________________________________________
 
-void initFFTMemoryStructures (void)
-{
+void initFFTMemoryStructures (void){
 	n_prev = 0;
 	in_1d = NULL;
 	out_1d = NULL;
@@ -47,31 +46,29 @@ void initFFTMemoryStructures (void)
 
 //_______________________________________________________________________________________________________________
 
-void destroyFFTMemoryStructures (void)
-{
-	if (in_1d != NULL)
-		fftwf_free (in_1d);
-	fftwf_destroy_plan (forward_plan_1d);
-	fftwf_destroy_plan (backward_plan_1d);
+void destroyFFTMemoryStructures (void){
 
-	if (in_2d != NULL)
-		fftwf_free (in_2d);
-	fftwf_destroy_plan (forward_plan_2d);
-	fftwf_destroy_plan (backward_plan_2d);
+	if (in_1d != NULL) fftwf_free (in_1d);
+	fftwf_destroy_plan(forward_plan_1d);
+	fftwf_destroy_plan(backward_plan_1d);
+
+	if (in_2d != NULL) fftwf_free (in_2d);
+	fftwf_destroy_plan(forward_plan_2d);
+	fftwf_destroy_plan(backward_plan_2d);
 
 }
 
 //_______________________________________________________________________________________________________________
 
-void four1(float data[], unsigned long nn, int isign)
-{
+void four1(float         data[], 
+           unsigned long nn, 
+		   int           isign){
    int n = nn;
 
-   if (n != n_prev)
-   {
+   if (n != n_prev){
 	  /* Create plans */
-	  if (n_prev != 0)
-	    fftwf_free(in_1d);
+	  if (n_prev != 0) 
+	  	fftwf_free(in_1d);
 
 	  in_1d = fftwf_malloc(sizeof(fftwf_complex)*n);
 	  out_1d = in_1d;
@@ -92,20 +89,20 @@ void four1(float data[], unsigned long nn, int isign)
 
 //_______________________________________________________________________________________________________________
 
-void fourn(float data[], unsigned long nn[], int ndim, int isign)
-{
+void fourn(float         data[], 
+           unsigned long nn[], 
+		   int           ndim, 
+		   int isign){
    int nx = nn[2];
    int ny = nn[1];
 
    /* NOTE: This function only works for ndim=2 */
-   if (ndim != 2)
-   {
+   if (ndim != 2){
 	  printf("fourn only works with ndim=2\n");
 	  return;
    }
 
-   if ((nx != nx_prev) || (ny != ny_prev))
-   {
+   if ((nx != nx_prev) || (ny != ny_prev)){
 	  /* Create plans */
 	  if (nx_prev != 0)
 		fftwf_free(in_1d);
