@@ -55,7 +55,9 @@ public:
 
     GridRec (void);
 
-    void setSinoAndReconBuffers (int number, float *sinogram_address, float *reconstruction_address);
+    void setSinoAndReconBuffers (int   number, 
+                                float *sinogram_address, 
+                                float *reconstruction_address);
 
     void init (void);
     void reconstruct (void);
@@ -64,32 +66,38 @@ public:
     static void acknowledgements (LogFileClass *acknowledge_file);
 
 private:
-int     flag;
-long    pdim, 
-        M, 
-        M0, 
-        M02, 
-        ltbl, 
-        imgsiz; 
-float   sampl, 
-        scale, 
-        L, 
-        X0, 
-        Y0; 
-float   *SINE, 
-        *COSE, 
-        *wtbl, 
-        *dwtbl, 
-        *work, 
-        *winv; 
-complex *cproj, 
-        *filphase, 
-        *H; 
-float   **G1, 
-        **G2, 
-        **S1, 
-        **S2; 
-pswf_struct pswf_db[NO_PSWFS]; 
+    int     flag;
+
+    long    pdim, 
+            M, 
+            M0, 
+            M02, 
+            ltbl, 
+            imgsiz; 
+
+    float   sampl, 
+            scale, 
+            L, 
+            X0, 
+            Y0; 
+
+    float   *SINE, 
+            *COSE, 
+            *wtbl, 
+            *dwtbl, 
+            *work, 
+            *winv;
+
+    complex *cproj, 
+            *filphase, 
+            *H;
+
+    float   **G1, 
+            **G2, 
+            **S1, 
+            **S2;
+
+    pswf_struct pswf_db[NO_PSWFS]; 
  
     void phase1 (void);
     void phase2 (void);

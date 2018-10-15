@@ -137,8 +137,7 @@ GridRec::GridRec (void)
 
 //---------------------------------------------------------------------------
 
-void GridRec::acknowledgements (LogFileClass *acknowledge_file)
-{
+void GridRec::acknowledgements (LogFileClass *acknowledge_file){
   acknowledge_file->Message ("__________________________________________________________________");
   acknowledge_file->Message ("GridRec class");
   acknowledge_file->Message ("");
@@ -159,8 +158,7 @@ void GridRec::acknowledgements (LogFileClass *acknowledge_file)
 
 //---------------------------------------------------------------------------
 
-void GridRec::setSinoAndReconBuffers (int number, float *sinogram_address, float *reconstruction_address)
-{
+void GridRec::setSinoAndReconBuffers (int number, float *sinogram_address, float *reconstruction_address){
   int     loop;
 
   if (G1 == NULL)
@@ -173,42 +171,39 @@ void GridRec::setSinoAndReconBuffers (int number, float *sinogram_address, float
   if (S2 == NULL)
     S2 = (float **) malloc((size_t) (imgsiz * sizeof(float *)));
 
-  if (number == 1)
-    {
-      sinogram1 = sinogram_address;
-      reconstruction1 = reconstruction_address;
+  if (number == 1){
+    sinogram1 = sinogram_address;
+    reconstruction1 = reconstruction_address;
 
-      for (loop=0;loop<theta_list_size;loop++)
-	G1[loop] = &sinogram1[loop*sinogram_x_dim];
+    for (loop=0;loop<theta_list_size;loop++)
+	    G1[loop] = &sinogram1[loop*sinogram_x_dim];
 
-      for (loop=0;loop<imgsiz;loop++)
-	S1[loop] = &reconstruction1[loop*sinogram_x_dim];
-    }
+    for (loop=0;loop<imgsiz;loop++)
+	    S1[loop] = &reconstruction1[loop*sinogram_x_dim];
+  }
 
-  if (number == 2)
-    {
-      sinogram2 = sinogram_address;
-      reconstruction2 = reconstruction_address;
+  if (number == 2){
+    sinogram2 = sinogram_address;
+    reconstruction2 = reconstruction_address;
 
-      for (loop=0;loop<theta_list_size;loop++)
-	G2[loop] = &sinogram2[loop*sinogram_x_dim];
+    for (loop=0;loop<theta_list_size;loop++)
+	    G2[loop] = &sinogram2[loop*sinogram_x_dim];
 
-      for (loop=0;loop<imgsiz;loop++)
-	S2[loop] = &reconstruction2[loop*sinogram_x_dim];
-    }
+    for (loop=0;loop<imgsiz;loop++)
+	    S2[loop] = &reconstruction2[loop*sinogram_x_dim];
+  }
 
 }
 
 //---------------------------------------------------------------------------
 
-void GridRec::init (void)
-{
+void GridRec::init (void){
   float           center,
-    C,
-    MaxPixSiz,
-    R,
-    D0,
-    D1;
+                  C,
+                  MaxPixSiz,
+                  R,
+                  D0,
+                  D1;
   long            itmp;
   pswf_struct     *pswf;
 
@@ -230,22 +225,20 @@ void GridRec::init (void)
 
   pdim = 1;
   itmp = sinogram_x_dim-1;
-  while (itmp)
-    {
-      pdim<<=1;
-      itmp>>=1;
-    }
+  while (itmp){
+    pdim<<=1;
+    itmp>>=1;
+  }
 
   D0 = R*sinogram_x_dim;
   D1 = sampl*D0;
 
   M = 1;
   itmp = (long int) (D1/MaxPixSiz-1);
-  while (itmp)
-    {
-      M<<=1;
-      itmp>>=1;
-    }
+  while (itmp){
+    M<<=1;
+    itmp>>=1;
+  }
 
   M02 = (long int) (floor(M/2/sampl-0.5));
   M0 = 2*M02+1;
@@ -258,9 +251,11 @@ void GridRec::init (void)
   cproj = (complex *) malloc ((pdim+1) * sizeof(complex));
   filphase = (complex *) malloc (((pdim/2)+1) * sizeof(complex));
   wtbl = (float *) malloc ((ltbl+1) * sizeof(float));
+
 #ifdef INTERP
   dwtbl = (float *) malloc ((ltbl+1) * sizeof(float));
 #endif
+
   winv = (float *) malloc (M0 * sizeof(float));
   work = (float *) malloc (((int) L+1) * sizeof(float));
 
@@ -282,9 +277,9 @@ void GridRec::init (void)
 
 //---------------------------------------------------------------------------
 
-void GridRec::reconstruct (void)
-{
+void GridRec::reconstruct (void){
   memset (H, 0, (M+1)*(M+1)*sizeof(complex));
+
   /*    for (long iu=0;iu<M+1;iu++)
 	for (long iv=0;iv<M+1;iv++)
 	H[iu*M+iv].r = H[iu*M+iv].i = 0.0;
@@ -299,8 +294,7 @@ void GridRec::reconstruct (void)
 
 //---------------------------------------------------------------------------
 
-void GridRec::destroy (void)
-{
+void GridRec::destroy (void){
   destroyFFTMemoryStructures ();
 
   if (SINE != NULL)
@@ -315,10 +309,12 @@ void GridRec::destroy (void)
     free (filphase);
   if (wtbl != NULL)
     free (wtbl);
+
 #ifdef INTERP
   if (dwtbl != NULL)
     free (dwtbl);
 #endif
+
   if (winv != NULL)
     free (winv);
   if (work != NULL)
@@ -344,8 +340,7 @@ void GridRec::destroy (void)
 //---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
 
-void GridRec::phase1 (void)
-{
+void GridRec::phase1 (void){
   /***Phase 1 ***************************************
 
       Loop over the n_ang projection angles. For each angle, do
@@ -395,114 +390,110 @@ void GridRec::phase1 (void)
   **********************************************************************/
 
   complex     Cdata1,
-    Cdata2,
-    Ctmp;
+              Cdata2,
+              Ctmp;
   float       U,
-    V,
-    rtmp,
-    L2 = L/2.0,
-    convolv,
-    tblspcg = 2*ltbl/L;
+              V,
+              rtmp,
+              L2 = L/2.0,
+              convolv,
+              tblspcg = 2*ltbl/L;
   long        pdim2=pdim>>1,
-    M2=M>>1,
-    iul,
-    iuh,
-    iu,
-    ivl,
-    ivh,
-    iv,
-    n;
+              M2=M>>1,
+              iul,
+              iuh,
+              iu,
+              ivl,
+              ivh,
+              iv,
+              n;
   /* Following are to handle offset ROI case */
   float       offset=0.0;    // !!!!!!!!!!!!!!!!! =0.0 l'ho aggiunto io. !!!!!!!!!!!!!!!!!!!!!!!!!!
   complex     phfac;
 
-  for (n=0;n<theta_list_size;n++)     /*** Start loop on angles */
-    {
-      int    j,
-	k;
+  // Start loop on angles
+  for (n=0;n<theta_list_size;n++){     
+    int    j,
+           k;
 
-      if (flag)
-	offset=(X0*COSE[n]+Y0*SINE[n])*PI;
+    if (flag)
+	     offset=(X0*COSE[n]+Y0*SINE[n])*PI;
 
-      j=1;
-      while (j < sinogram_x_dim+1)
-	{
-	  cproj[j].r=G1[n][j-1];
-	  cproj[j].i=G2[n][j-1];
-	  j++;
-	}
+    j=1;
+    while (j < sinogram_x_dim+1){
+	    cproj[j].r=G1[n][j-1];
+	    cproj[j].i=G2[n][j-1];
+	    j++;
+	  }
 
-      while (j < pdim)	/** Zero fill the rest of array **/
-	{
-	  cproj[j].r = cproj[j].i = 0.0;
-	  j++;
-	}
+    // padding??
+    while (j < pdim){ 	/** Zero fill the rest of array **/
+      cproj[j].r = cproj[j].i = 0.0;
+	    j++;
+	  }
 
-      four1 ((float *) cproj+1, pdim, 1);
+    four1 ((float *) cproj+1, pdim, 1);
 
-      for (j=1;j<pdim2;j++)
-	{  	/* Start loop on transform data */
-	  if (!flag)
-	    {
+    for (j=1;j<pdim2;j++){  	/* Start loop on transform data */
+	    if (!flag){
 	      Ctmp.r=filphase[j].r;
 	      Ctmp.i=filphase[j].i;
 	    }
-	  else
-	    {
+	    else{
 	      phfac.r = cos(j*offset);
 	      phfac.i = -sin(j*offset);
 	      Cmult (Ctmp,filphase[j],phfac);
-	    }
-	  Cmult (Cdata1,Ctmp,cproj[j+1])
-	    Ctmp.i=-Ctmp.i;
-	  Cmult (Cdata2,Ctmp,cproj[(pdim-j)+1])
+      }
 
-	    U=(rtmp=scale*j)*COSE[n]+M2; /* X direction*/
-	  V=rtmp*SINE[n]+M2;	      /* Y direction*/
+	    Cmult (Cdata1,Ctmp,cproj[j+1])
+	    Ctmp.i=-Ctmp.i;
+	    Cmult (Cdata2,Ctmp,cproj[(pdim-j)+1])
+
+	    U=(rtmp=scale*j)*COSE[n]+M2; /* X direction */
+	    V=rtmp*SINE[n]+M2;	         /* Y direction */
 
 	  /* Note freq space origin is at (M2,M2), but we
 	     offset the indices U, V, etc. to range from 0 to M-1 */
 
-	  iul = (long int) (ceil(U-L2));
-	  iuh = (long int) (floor(U+L2));
-	  ivl = (long int) (ceil(V-L2));
-	  ivh = (long int) (floor(V+L2));
+	    iul = (long int) (ceil(U-L2));
+	    iuh = (long int) (floor(U+L2));
+	    ivl = (long int) (ceil(V-L2));
+	    ivh = (long int) (floor(V+L2));
 
-	  if (iul<1)
-	    iul=1;
-	  if (iuh>=M)
-	    iuh=M-1;
-	  if (ivl<1)
-	    ivl=1;
-	  if (ivh>=M)
-	    ivh=M-1;
+	    if (iul<1)
+	      iul=1;
+	    if (iuh>=M)
+	      iuh=M-1;
+	    if (ivl<1)
+	      ivl=1;
+	    if (ivh>=M)
+	      ivh=M-1;
 
 	  /* Note aliasing value (at index=0) is forced to zero */
 
-	  for (iv=ivl,k=0;iv<=ivh;iv++,k++)
-	    work[k] = Cnvlvnt (abs (V-iv) * tblspcg);
-	  for (iu=iul;iu<=iuh;iu++)
-	    {
-	      rtmp=Cnvlvnt (abs(U-iu)*tblspcg);
-	      for (iv=ivl,k=0;iv<=ivh;iv++,k++)
-		{
-		  convolv = rtmp*work[k];
-		  H[iu*M+iv+1].r += convolv*Cdata1.r;
-		  H[iu*M+iv+1].i += convolv*Cdata1.i;
-		  H[(M-iu)*M+(M-iv)+1].r += convolv*Cdata2.r;
-		  H[(M-iu)*M+(M-iv)+1].i += convolv*Cdata2.i;
+	    for (iv=ivl,k=0;iv<=ivh;iv++,k++)
+	      work[k] = Cnvlvnt (abs (V-iv) * tblspcg);
 
-		}
+	    for (iu=iul;iu<=iuh;iu++){
+	      rtmp=Cnvlvnt (abs(U-iu)*tblspcg);
+	        for (iv=ivl,k=0;iv<=ivh;iv++,k++){
+		        convolv = rtmp*work[k];
+		        H[iu*M+iv+1].r += convolv*Cdata1.r;
+		        H[iu*M+iv+1].i += convolv*Cdata1.i;
+		        H[(M-iu)*M+(M-iv)+1].r += convolv*Cdata2.r;
+		        H[(M-iu)*M+(M-iv)+1].i += convolv*Cdata2.i;
+          }
 	    }
-	} /*** End loop on transform data */
-    } /*** End loop on angles */
+
+	  } /*** End loop on transform data */
+    
+  } /*** End loop on angles */
 
 }
 
 //---------------------------------------------------------------------------
 
-void GridRec::phase2 (void)
-{
+void GridRec::phase2 (void){
   /*** Phase 2 ********************************************
 
        Carry out a 2D inverse FFT on the array H.
@@ -528,8 +519,7 @@ void GridRec::phase2 (void)
 
 //---------------------------------------------------------------------------
 
-void GridRec::phase3 (void)
-{
+void GridRec::phase3 (void){
   /*** Phase 3 ******************************************************
 
        Copy the real and imaginary parts of the complex data from H[][],
@@ -568,83 +558,79 @@ void GridRec::phase3 (void)
   *********************************************************************/
 
   long    iu,
-    iv,
-    j,
-    k,
-    ustart,
-    vstart,
-    ufin,
-    vfin;
+          iv,
+          j,
+          k,
+          ustart,
+          vstart,
+          ufin,
+          vfin;
   float   corrn_u,
-    corrn;
+          corrn;
 
   j=0;
   ustart=(M-M02);
   ufin=M;
-  while (j<M0)
-    {
-      for (iu=ustart;iu<ufin;j++,iu++)
-        {
-	  corrn_u=winv[j];
-	  k=0;
-	  vstart=(M-M02);
-	  vfin=M;
-	  while (k<M0)
-	    {
-	      for (iv=vstart;iv<vfin;k++,iv++)
-		{
-		  corrn=corrn_u*winv[k];
-		  S1[j][k]=corrn*H[iu*M+iv+1].r;
-		  S2[j][k]=corrn*H[iu*M+iv+1].i;
-		}
-	      if (k<M0)
-		(vstart=0,vfin=M02+1);
+  while (j<M0){
+    for (iu=ustart;iu<ufin;j++,iu++){
+	    corrn_u=winv[j];
+	    k=0;
+	    vstart=(M-M02);
+	    vfin=M;
+	  
+      while (k<M0){
+	      for (iv=vstart;iv<vfin;k++,iv++){
+		      corrn=corrn_u*winv[k];
+		      S1[j][k]=corrn*H[iu*M+iv+1].r;
+		      S2[j][k]=corrn*H[iu*M+iv+1].i;
+		    }
+	      
+        if (k<M0)
+		      (vstart=0,vfin=M02+1);
 	    }
-	}
-      if (j<M0)
-	(ustart=0,ufin=M02+1);
-    }
+	  }
+    
+    if (j<M0)
+	    (ustart=0,ufin=M02+1);
+  }
 }
 
 //---------------------------------------------------------------------------
 
-void GridRec::trig_su (int geom, int n_ang)
-{
+void GridRec::trig_su (int geom, int n_ang){
   /*********** Set up tables of sines and cosines. ***********/
 
   int     j;
 
-  switch (geom)
-    {
+  switch (geom){
     case 0 : {
       float   theta,
-	degtorad = PI/180,
-	*angle = theta_list;
+	    degtorad = PI/180,
+	    *angle = theta_list;
 
-      for (j=0;j<n_ang;j++)
-	{
-	  theta = degtorad*angle[j];
-	  SINE[j] = sin(theta);
-	  COSE[j] = cos(theta);
-	}
+      for (j=0;j<n_ang;j++){
+	      theta = degtorad*angle[j];
+	      SINE[j] = sin(theta);
+	      COSE[j] = cos(theta);
+	    }
       break;
     }
 
     case 1 :
     case 2 : {
       float   dtheta = geom*PI/n_ang,
-	dcos,
-	dsin;
+	            dcos,
+	            dsin;
 
       dcos = cos (dtheta);
       dsin = sin (dtheta);
       SINE[0] = 0.0;
       COSE[0] = 1.0;
-      for(j=1;j<n_ang;j++)
-	{
-	  SINE[j] = dcos*SINE[j-1]+dsin*COSE[j-1];
-	  COSE[j] = dcos*COSE[j-1]-dsin*SINE[j-1];
-	}
+
+      for(j=1;j<n_ang;j++){
+	      SINE[j] = dcos*SINE[j-1]+dsin*COSE[j-1];
+	      COSE[j] = dcos*COSE[j-1]-dsin*SINE[j-1];
+	    }
       break;
     }
 
@@ -652,14 +638,13 @@ void GridRec::trig_su (int geom, int n_ang)
       fprintf (stderr, "Illegal value for angle geometry indicator.\n");
       exit(2);
     }
-    }
+  }
 
 }
 
 //---------------------------------------------------------------------------
 
-void GridRec::filphase_su (long pd, float center, complex *A)
-{
+void GridRec::filphase_su (long pd, float center, complex *A){
   /******************************************************************/
   /* Set up the complex array, filphase[], each element of which    */
   /* consists of a real filter factor [obtained from the function,  */
@@ -668,26 +653,29 @@ void GridRec::filphase_su (long pd, float center, complex *A)
   /******************************************************************/
 
   long    j,
-    pd2=pd>>1;
+          pd2=pd>>1;
   float   x,
-    rtmp1=2*PI*center/pd,
-    rtmp2;
+          rtmp1=2*PI*center/pd,
+          rtmp2;
   float   norm=PI/pd/theta_list_size;	/* Normalization factor for back transform  7/7/98  */
 
-  for (j=0;j<pd2;j++)
-    {
-      x = j*rtmp1;
-      rtmp2 = filter.filterData ((float)j/pd) * norm;
-      A[j].r = rtmp2*cos(x);
-      A[j].i = -rtmp2*sin(x);
-    }
+  for (j=0;j<pd2;j++){
+    x = j*rtmp1;
+    rtmp2 = filter.filterData ((float)j/pd) * norm;
+    A[j].r = rtmp2*cos(x);
+    A[j].i = -rtmp2*sin(x);
+  }
 
 }
 
 //---------------------------------------------------------------------------
 
-void GridRec::pswf_su (pswf_struct *pswf, long ltbl, long linv, float* wtbl, float* dwtbl, float* winv)
-{
+void GridRec::pswf_su (pswf_struct *pswf, 
+                       long         ltbl, 
+                       long         linv, 
+                       float*       wtbl, 
+                       float*       dwtbl, 
+                       float*       winv ){
   /*************************************************************/
   /* Set up lookup tables for convolvent (used in Phase 1 of   */
   /* do_recon()), and for the final correction factor (used in */
@@ -695,10 +683,10 @@ void GridRec::pswf_su (pswf_struct *pswf, long ltbl, long linv, float* wtbl, flo
   /*************************************************************/
 
   float   C,
-    *coefs,
-    lmbda,
-    polyz,
-    norm,fac;
+          *coefs,
+          lmbda,
+          polyz,
+          norm,fac;
   long    i;
   int     nt;
 
@@ -709,13 +697,14 @@ void GridRec::pswf_su (pswf_struct *pswf, long ltbl, long linv, float* wtbl, flo
   polyz=legendre(nt,coefs,0.);
 
   wtbl[0]=1.0;
-  for (i=1;i<=ltbl;i++)
-    {
-      wtbl[i]=legendre(nt,coefs,(float)i/ltbl)/polyz;
-#ifdef INTERP
+  for (i=1;i<=ltbl;i++){
+    wtbl[i]=legendre(nt,coefs,(float)i/ltbl)/polyz;
+  
+  #ifdef INTERP
       dwtbl[i]=wtbl[i]-wtbl[i-1];
-#endif
-    }
+  #endif
+  
+  }
 
   fac=(float)ltbl/(linv+0.5);
   norm=sqrt (PI/2/C/lmbda)/sampl;	/* 7/7/98 */
@@ -727,21 +716,21 @@ void GridRec::pswf_su (pswf_struct *pswf, long ltbl, long linv, float* wtbl, flo
      7/7/98 			*/
 
   winv[linv]=norm/Cnvlvnt(0.);
-  for (i=1;i<=linv;i++)
-    {
-      norm=-norm;
-      /* Minus sign for alternate entries
-	 corrects for "natural" data layout
-	 in array H at end of Phase 1.  */
+  for (i=1;i<=linv;i++){
+    norm=-norm;
+    /* 
+    Minus sign for alternate entries corrects for "natural" data layout
+	  in array H at end of Phase 1.  
+    */
 
-      winv[linv+i] = winv[linv-i] = norm/Cnvlvnt(i*fac);
-    }
+    winv[linv+i] = winv[linv-i] = norm/Cnvlvnt(i*fac);
+  }
+
 }
 
 //---------------------------------------------------------------------------
 
-float GridRec::legendre (int n, float *coefs, float x)
-{
+float GridRec::legendre (int n, float *coefs, float x){
   /***************************************************
    *                                                  *
    *    Compute SUM(coefs(k)*P(2*k,x), for k=0,n/2)   *
@@ -751,39 +740,36 @@ float GridRec::legendre (int n, float *coefs, float x)
    ***************************************************/
 
   float   penult,
-    last,
-    newer,
-    y;
+          last,
+          newer,
+          y;
   int     j,
-    k,
-    even;
+          k,
+          even;
 
-  if (x>1||x<-1)
-    {
-      fprintf(stderr, "\nInvalid argument to legendre()");
-      exit(2);
-    }
+  if (x>1||x<-1){
+    fprintf(stderr, "\nInvalid argument to legendre()");
+    exit(2);
+  }
 
   y=coefs[0];
   penult=1.;
   last=x;
   even=1;
   k=1;
-  for (j=2;j<=n;j++)
-    {
-      newer=(x*(2*j-1)*last-(j-1)*penult)/j;
-      if (even)
-    	{
-	  y+=newer*coefs[k];
-	  even=0;
-	  k++;
-        }
-      else
-	even=1;
-
-      penult=last;
-      last=newer;
+  for (j=2;j<=n;j++){
+    newer=(x*(2*j-1)*last-(j-1)*penult)/j;
+    if (even){
+	    y+=newer*coefs[k];
+	    even=0;
+	    k++;
     }
+    else
+	    even=1;
+
+    penult=last;
+    last=newer;
+  }
 
   return y;
 
@@ -791,18 +777,16 @@ float GridRec::legendre (int n, float *coefs, float x)
 
 //---------------------------------------------------------------------------
 
-void GridRec::get_pswf (float C, pswf_struct **P)
-{
+void GridRec::get_pswf (float C, pswf_struct **P){
   int i=0;
 
   while (i<NO_PSWFS && abs(C-pswf_db[i].C)>0.01)
     i++;
 
-  if (i>=NO_PSWFS)
-    {
-      fprintf(stderr, "Prolate parameter, C = %f not in data base\n",C);
-      exit(2);
-    }
+  if (i>=NO_PSWFS){
+    fprintf(stderr, "Prolate parameter, C = %f not in data base\n",C);
+    exit(2);
+  }
 
   *P = &pswf_db[i];
 
