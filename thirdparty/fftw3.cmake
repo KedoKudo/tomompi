@@ -17,12 +17,11 @@ set(FFTW_URL_MD5  8aac833c943d8e90d51b697b27d4384d)
 set(BUILD_FFTW_EXAMPLES FALSE) 
 set(FFTW_EXAMPLES_STEP ${FFTW_PREFIX}_examples)
 
-# make system
-set(FFTW_MAKE make)
-set(NCPU      4   )
-
-set(FFTW_DIR ${CMAKE_SOURCE_DIR}/build/)
-set(FFTW_SRC ${FFTW_DIR}/${FFTW_PREFIX}/src/${FFTW_PREFIX})
+# build system
+set(FFTW_MAKE       make)
+set(NCPU            4   )
+set(FFTW_DIR        ${CMAKE_SOURCE_DIR}/build/)
+set(FFTW_SRC        ${FFTW_DIR}/${FFTW_PREFIX}/src/${FFTW_PREFIX})
 set(FFTW_CONFIG_OPT "--enable-float --enable-mpi --prefix=${FFTW_DIR}")
 # add instructions to build the FFTW source
 # -- build float precision (required by napi)
@@ -49,8 +48,8 @@ set(FFTW_LIBS fftw3f)
 set(FFTW_LIBRARY_DIRS ${FFTW_LIBRARY_DIRS})
 
 # display info
-message("Build FFTW in ${FFTW_SRC} with CMD:")
-message(">> ${FFTW_CONFIG_CMD}")
+message("Build FFTW in ${FFTW_SRC} with CONFIGURE OPTS:")
+message(">> ${FFTW_CONFIG_OPT}")
 message("FFTW_INCLUDE_DIRS=${FFTW_INCLUDE_DIRS}")
 message("FFTW_LIBRARY_DIRS=${FFTW_LIBRARY_DIRS}")
 
