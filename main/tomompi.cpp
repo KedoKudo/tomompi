@@ -57,6 +57,9 @@ int main (int argc, char* argv[])
 
     //create new log directory
     log_index = 1;
+    
+    fprintf (stderr, "%s%s%02d", sample_path, "logs_", log_index);
+    
     sprintf (check_log_dir, "%s%s%02d", sample_path, "logs_", log_index);
     while (stat (check_log_dir, &stat_buffer) == 0){
       
@@ -81,6 +84,9 @@ int main (int argc, char* argv[])
   else {
     sprintf (log_file_name, "%s_%d.log", processor_name, my_id);
     sprintf (err_file_name, "%s_%d.log", processor_name, my_id);
+    
+    fprintf (stderr, "%s_%d.log", processor_name, my_id);
+    fprintf (stderr, "%s_%d.log", processor_name, my_id);
         
     StartTomoMPIClient (argc, argv, log_file_name, err_file_name);
   }

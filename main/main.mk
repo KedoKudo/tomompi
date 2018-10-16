@@ -11,36 +11,66 @@ INSTALL_PROGS = install
 install: $(install)
 	cp ./main/tomompi ./bin/tomompi
 	cp ./main/tomosolo ./bin/tomosolo
-
+	
 link_tomompi: $(link_tomompi)
 	@echo 'Linking tomompi...'
-	$(CCLINKER) -static \
-	$(OTHER_LIBS) \
-	$(NEXUS_LIBS) $(FFTW_LIBS) \
-	$(UTILITY_OBJS) $(NAPI_OBJS) \
-	$(FFT_OBJS) $(SUPPORT_OBJS) $(RECON_OBJS) \
-	$(HDF_LIBS) $(HDF5_LIBS) $(XML_LIBS) \
+	$(CCLINKER)   -static \
 	./main/tomompi_sinogramserver.o \
 	./main/tomompi_client.o \
 	./main/tomompi.o \
+	$(SUPPORT_OBJS) \
+	$(UTILITY_OBJS) \
+	$(FFT_OBJS)     \
+	$(RECON_OBJS)   \
+	$(OTHER_LIBS)   \
+	$(NEXUS_LIBS)   \
+	$(NAPI_LIBS)    \
+	$(HDF5_LIBS)    \
+	$(FFTW_LIBS)    \
+	$(XML_LIBS)     \
+	$(HDF_LIBS)     \
 	-o ./main/tomompi \
 	$(OPTFLAGS)
 	@echo '...link completed'
 	@echo ' '
 #	./compress.o \  not needed on tomo but not on blacklab?
 
+
 link_tomosolo: $(link_tomosolo)
 	@echo 'Linking tomosolo...'
-	$(CCLINKER) $(HDF_LIBS) $(HDF5_LIBS) $(XML_LIBS) \
-	$(OTHER_LIBS) \
-	$(NEXUS_LIBS) $(FFTW_LIBS) \
-	$(UTILITY_OBJS) $(NAPI_OBJS) \
-	$(FFT_OBJS) $(SUPPORT_OBJS) $(RECON_OBJS) \
+	$(CCLINKER) \
 	./main/tomosolo.o \
+	$(SUPPORT_OBJS) \
+	$(UTILITY_OBJS) \
+	$(FFT_OBJS)     \
+	$(RECON_OBJS)   \
+	$(OTHER_LIBS)   \
+	$(NEXUS_LIBS)   \
+	$(NAPI_LIBS)    \
+	$(HDF5_LIBS)    \
+	$(FFTW_LIBS)    \
+	$(XML_LIBS)     \
+	$(HDF_LIBS)     \
 	-o ./main/tomosolo \
 	$(OPTFLAGS)
 	@echo '...link completed'
 	@echo ' '
+	
+	
+# link_tomosolo: $(link_tomosolo)
+# 	@echo 'Linking tomosolo...'
+# 	$(CCLINKER) $(HDF_LIBS) $(HDF5_LIBS) $(XML_LIBS) \
+# 	$(OTHER_LIBS) \
+# 	$(NEXUS_LIBS) $(FFTW_LIBS) \
+# 	$(UTILITY_OBJS) $(NAPI_OBJS) \
+# 	$(FFT_OBJS) $(SUPPORT_OBJS) $(RECON_OBJS) \
+# 	./main/tomosolo.o \
+# 	-o ./main/tomosolo \
+# 	$(OPTFLAGS)
+# 	@echo '...link completed'
+# 	@echo ' '
+# 	
+
 		
 tomompi: $(tomompi)
 	$(CCC) $(TOMOMPI_INC) $(NAPI_INC) $(HDF_INC) $(NEXUSLIB_INC) \

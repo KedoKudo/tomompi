@@ -36,7 +36,7 @@ static fftwf_plan 		forward_plan_2d,
 void initFFTMemoryStructures (void)
 {
 	n_prev = 0;
-	in_1d = NULL;
+	in_1d = NULL; 
 	out_1d = NULL;
 
 	nx_prev = 0;

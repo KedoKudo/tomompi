@@ -4,16 +4,18 @@ reconsolo : fft recon support tomosolo link_tomosolo
 
 ##### User configurable options #####
 
-MPI_ROOT    = /clhome/aps_tools/mpi/mpi
-USR_HOME		= /clhome/B224538
-SYS_HOME		= /clhome/aps_tools
+# MPI_ROOT            = /clhome/B224538/opt/mpich
+USR_HOME		    = /clhome/B224538
+SYS_HOME		    = /clhome/aps_tools
 USR_LOCAL_SHARED	= /clhome/aps_tools/shared
+MPI_ROOT            = ${SYS_HOME}/mpi/mpi
+
 
 # sys env
 SHELL       = /bin/sh
 ARCH        = linux
-CC          = $(MPI_ROOT)/bin/mpicc 
-CCC         = $(MPI_ROOT)/bin/mpiCC 
+CC          = $(MPI_ROOT)/bin/mpicc  
+CCC         = $(MPI_ROOT)/bin/mpic++ 
 CLINKER     = $(CCC)
 CCLINKER    = $(CCC)
 AR          = ar crl
@@ -29,53 +31,52 @@ HDF_FLAGS = -D__unix__ -DHDF4 -DHDF5
 # TOMOMPI_ROOT 	= 	$(USR_HOME)/workspace/TomoMPI
 TOMOMPI_ROOT 	= 	$(USR_HOME)/tomompi
 # NEXUSLIB_ROOT	=	$(USR_HOME)/workspace/NexusLibrary
-NEXUSLIB_ROOT	=	$(USR_HOME)/workspace/NexusLibrary/trunk
+NEXUSLIB_ROOT	=	$(USR_HOME)/opt/NexusLibrary
 
 HDF_ROOT	=	$(USR_LOCAL_SHARED)
-HDF5_ROOT	=	$(USR_LOCAL_SHARED)
+HDF5_ROOT	=	$(USR_HOME)/opt/hdf5
 XML_ROOT	=	$(USR_LOCAL_SHARED)
 
 # UTILITY_ROOT	=	$(USR_HOME)/workspace/utility
-UTILITY_ROOT	=	$(USR_HOME)/workspace/Utility/trunk
+UTILITY_ROOT	=	$(USR_HOME)/opt/TIEMANutility
 
-NAPI_ROOT	=	$(SYS_HOME)/nexus-4.1.0
+NAPI_ROOT	=	$(USR_HOME)/opt/napi
 
 #Include directories for various code modules
 TOMOMPI_INC 	= 	-I$(TOMOMPI_ROOT)/include
-MPI_INC 	= 	-I$(MPI_ROOT)/include
+MPI_INC 	    = 	-I$(MPI_ROOT)/include
 NEXUSLIB_INC	=	-I$(NEXUSLIB_ROOT)/include
-NAPI_INC	=	-I$(NAPI_ROOT)/include
-HDF_INC		=	-I$(HDF_ROOT)/include
-HDF5_INC	=	-I$(HDF5_ROOT)/include
-XML_INC		=	-I$(XML_ROOT)
-UTILITY_INC	=	-I$(UTILITY_ROOT)
-FFTW_INC	=	-I$(SYS_ROOT)/fftw-3.1.2/include
+NAPI_INC	    =	-I$(USR_HOME)/include/nexus
+HDF_INC		    =	-I$(HDF_ROOT)/include
+HDF5_INC	    =	-I$(HDF5_ROOT)/include
+XML_INC		    =	-I$(XML_ROOT)
+UTILITY_INC	    =	-I$(UTILITY_ROOT)
+FFTW_INC        =   -I$(USR_HOME)/include
+#FFTW_INC	    =	-I$(USR_LOCAL_SHARED)/include
 
 #Library directories of various code modules
 HDF_LIBS	=	-L$(HDF_ROOT)/lib -lmfhdf -ldf -ljpeg -lz \
 			-L/usr/local/szip/szip/lib -lsz
-HDF5_LIBS	=	-L$(HDF5_ROOT)/lib -lhdf5
-XML_LIBS	=	-L$(XML_ROOT) -lmxml
+HDF5_LIBS	=	-L$(HDF5_ROOT)/lib -lhdf5 -lhdf5_hl
+XML_LIBS	=	-L$(XML_ROOT)/lib -lmxml
 NEXUS_LIBS	=	-L$(NEXUSLIB_ROOT)/lib -lnexuslibrary
-FFTW_LIBS	= 	-L$(USR_LOCAL_SHARED)/lib -lfftw3f
+#FFTW_LIBS	= 	-L$(USR_LOCAL_SHARED)/lib -lfftw3f
+FFTW_LIBS   =   -L$(USR_HOME)/lib -lfftw3f
+NAPI_LIBS   =   -L$(USR_HOME)/lib64 -lNeXus
+
 PROF_LIBS   	= 	-L$(MPE_ROOT)/lib -lmpe 
 LOG_LIBS    	= 	-L$(MPE_ROOT)/lib -llmpe -lmpe 
+
 TRACE_LIBS 	= 	-L$(MPE_ROOT)/lib -ltmpe 
 OTHER_LIBS 	= 	-L/usr/lib64 -lpthread -lm
+
 #OTHER_LIBS	=	-L/usr/lib -lpthread -lm
 
 #Additional Object references
 UTILITY_OBJS	=	$(UTILITY_ROOT)/logfileclass.o \
 				$(UTILITY_ROOT)/linkedlistclass.o
-NAPI_OBJS		=	$(NAPI_ROOT)/src/napi.o \
-				$(NAPI_ROOT)/src/napi4.o \
-				$(NAPI_ROOT)/src/napi5.o \
-				$(NAPI_ROOT)/src/nxdataset.o \
-				$(NAPI_ROOT)/src/nxio.o \
-				$(NAPI_ROOT)/src/nxxml.o \
-				$(NAPI_ROOT)/src/nxstack.o \
-				$(NAPI_ROOT)/src/stptok.o \
-				$(NAPI_ROOT)/src/napiu.o 
+NAPI_OBJS		=	$(USR_HOME)/lib64/libNeXus.a
+NEXUS_OBJS	    =	$(NEXUSLIB_ROOT)/lib/libnexuslibrary.a
 
 ### End User configurable options ###
 
