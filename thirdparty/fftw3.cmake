@@ -22,8 +22,8 @@ set(FFTW_MAKE make)
 set(NCPU      4   )
 
 set(FFTW_DIR ${CMAKE_SOURCE_DIR}/build/)
-set(FFTW_SRC ${FFTW_DIR}/src/${FFTW_PREFIX})
-set(FFTW_CONFIG_CMD "${FFTW_SRC}/configure --enable-float --enable-mpi --prefix=${FFTW_DIR}")
+set(FFTW_SRC ${FFTW_DIR}/${FFTW_PREFIX}/src/${FFTW_PREFIX})
+set(FFTW_CONFIG_OPT "--enable-float --enable-mpi --prefix=${FFTW_DIR}")
 # add instructions to build the FFTW source
 # -- build float precision (required by napi)
 ExternalProject_Add(${FFTW_PREFIX}
