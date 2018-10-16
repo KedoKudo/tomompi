@@ -32,3 +32,6 @@
 *.app
 .vscode/sftp.json
 .DS_Store
+
+# do not track build
+build/*
