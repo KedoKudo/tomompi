@@ -21,67 +21,37 @@ set(FFTW_EXAMPLES_STEP ${FFTW_PREFIX}_examples)
 set(FFTW_MAKE make)
 set(NCPU      4   )
 
-set(FFTW_SRC ${CMAKE_SOURCE_DIR}/build/${FFTW_PREFIX}/src/${FFTW_PREFIX})
+set(FFTW_DIR ${CMAKE_SOURCE_DIR}/build/)
+set(FFTW_SRC ${FFTW_DIR}/src/${FFTW_PREFIX})
+set(FFTW_CONFIG_CMD "${FFTW_SRC}/configure --enable-float --enable-mpi --prefix=${FFTW_DIR}")
 # add instructions to build the FFTW source
 # -- build float precision (required by napi)
 ExternalProject_Add(${FFTW_PREFIX}
     PREFIX              ${FFTW_PREFIX}
     URL                 ${FFTW_URL}
     URL_MD5             ${FFTW_URL_MD5}
-    CONFIGURE_COMMAND   ${FFTW_SRC}/configure --enable-float --enable-mpi
+    CONFIGURE_COMMAND   ${FFTW_SRC}/configure --enable-float --enable-mpi --prefix=${FFTW_DIR}
     BUILD_COMMAND       ${FFTW_MAKE} -j${NCPU}
 	BUILD_IN_SOURCE     1
-	INSTALL_COMMAND     ""
+	INSTALL_COMMAND     ${FFTW_MAKE} install
 	LOG_DOWNLOAD        1
 	LOG_BUILD           1
 )
 
-# get the unpacked source directory path
-ExternalProject_Get_Property(${FFTW_PREFIX} SOURCE_DIR)
-message(STATUS "Source directory of ${FFTW_PREFIX} ${SOURCE_DIR}")
-
-# build example
-if (BUILD_FFTW_EXAMPLES)
-    ExternalProject_Add_Step(${FFTW_PREFIX} 
-        ${FFTW_PREFIX}_examples
-	    COMMAND make -j${NCPU} examples fftw_build_prefix=${FFTW_PREFIX}
-	    DEPENDEES build
-	    WORKING_DIRECTORY ${SOURCE_DIR}
-	    LOG 1
-	)
-endif (BUILD_FFTW_EXAMPLES)
-
-# build both debug and release
-set(FFTW_DEBUG_DIR      ${SOURCE_DIR}/build/${FFTW_PREFIX}_debug)
-set(FFTW_RELEASE_DIR    ${SOURCE_DIR}/build/${FFTW_PREFIX}_release)
-message(STATUS "FFTW Debug directory ${FFTW_DEBUG_DIR}")
-message(STATUS "FFTW Release directory ${FFTW_RELEASE_DIR}")
-
 # set the include directory variable and include it
-set(FFTW_INCLUDE_DIRS ${SOURCE_DIR}/include)
+set(FFTW_INCLUDE_DIRS ${FFTW_DIR}/include)
 include_directories(${FFTW_INCLUDE_DIRS})
 
-# link the correct FFTW directory when the project is 
-# in Debug or Release mode
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    link_directories(${FFTW_RELEASE_DIR})
-	set(FFTW_LIBS fftw_debug fftwmalloc_debug)
-	set(FFTW_LIBRARY_DIRS ${FFTW_DEBUG_DIR})
-else (CMAKE_BUILD_TYPE STREQUAL "Debug")
-	# in Release mode
-	link_directories(${FFTW_RELEASE_DIR})
-	set(FFTW_LIBS fftw fftwmalloc)
-	set(FFTW_LIBRARY_DIRS ${FFTW_RELEASE_DIR})
-endif (CMAKE_BUILD_TYPE STREQUAL "Debug")
+# set the library directory variable and link it
+set(FFTW_LIBRARY_DIRS ${FFTW_DIR}/lib)
+link_directories(${FFTW_LIBRARY_DIRS})
+set(FFTW_LIBS fftw3f)
+set(FFTW_LIBRARY_DIRS ${FFTW_LIBRARY_DIRS})
 
-# verify that the FFTW header files can be included
-set(CMAKE_REQUIRED_INCLUDES_SAVE ${CMAKE_REQUIRED_INCLUDES})
-set(CMAKE_REQUIRED_INCLUDES      ${CMAKE_REQUIRED_INCLUDES} ${FFTW_INCLUDE_DIRS})
-check_include_file_cxx("fftw/fftw.h" HAVE_FFTW)
-set(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES_SAVE})
-if (NOT HAVE_FFTW)
-	message(STATUS "Did not build FFTW correctly as cannot find fftw.h. Will build it.")
-	set(HAVE_FFTW 1)
-endif (NOT HAVE_FFTW)
+# display info
+message("Build FFTW in ${FFTW_SRC} with CMD:")
+message(">> ${FFTW_CONFIG_CMD}")
+message("FFTW_INCLUDE_DIRS=${FFTW_INCLUDE_DIRS}")
+message("FFTW_LIBRARY_DIRS=${FFTW_LIBRARY_DIRS}")
 
 message("")
