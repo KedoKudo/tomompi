@@ -33,8 +33,7 @@ include(thirdparty/hdf4.cmake)
 # while compiling all the source code header files
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-# Add the sub-directories that we want CMake to scan
+# add the sub-directories that we want CMake to scan
 add_subdirectory(include)
 add_subdirectory(thirdparty)
 add_subdirectory(src)
-
