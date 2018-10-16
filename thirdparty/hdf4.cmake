@@ -26,12 +26,28 @@ ExternalProject_Add(${HDF4_PREFIX}
     PREFIX              ${HDF4_PREFIX}
     URL                 ${HDF4_URL}
     URL_MD5             ${HDF4_URL_MD5}
-    CONFIGURE_COMMAND   ${HDF4_SRC}/configure --with-szlib=${HDF4_DIR}/lib --enable-cxx --prefix=${HDF4_DIR}
+    CONFIGURE_COMMAND   ${HDF4_SRC}/configure --with-szlib=${HDF4_DIR}/lib --prefix=${HDF4_DIR}
     BUILD_COMMAND       ${HDF4_MAKE} -j${NCPU}
 	BUILD_IN_SOURCE     1
 	INSTALL_COMMAND     ${HDF4_MAKE} install
 	LOG_DOWNLOAD        1
 	LOG_BUILD           1
 )
+
+# post-build setup
+set(HDF4_INCLUDE_DIRS ${HDF4_DIR}/include)
+include_directories(${HDF4_INCLUDE_DIRS})
+
+# set the library directory variable and link it
+set(HDF4_LIBRARY_DIRS ${HDF4_DIR}/lib)
+link_directories(${HDF4_LIBRARY_DIRS})
+set(HDF4_LIBS mxml)
+set(HDF4_LIBRARY_DIRS ${HDF4_LIBRARY_DIRS})
+
+# display info
+message("Build HDF4 in ${HDF4_SRC} with CONFIGURE OPTS:")
+message(">> ${HDF4_CONFIG_OPT}")
+message("HDF4_INCLUDE_DIRS=${HDF4_INCLUDE_DIRS}")
+message("HDF4_LIBRARY_DIRS=${HDF4_LIBRARY_DIRS}")
 
 message("")
