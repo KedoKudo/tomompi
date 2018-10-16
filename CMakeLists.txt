@@ -14,6 +14,9 @@ include(CheckIncludeFileCXX)
 include(CheckIncludeFiles)
 include(ExternalProject)
 
+# build type release by defualt
+set(CMAKE_BUILD_TYPE "Release")
+
 # External Dependencies 
 # -- MPI
 find_package(MPI REQUIRED)

@@ -1,4 +1,4 @@
-# FFTW build info
+# FFTW Build Info
 message("****************")
 message("-- BUILD FFTW --")
 message("****************")
@@ -13,21 +13,23 @@ set(FFTW_URL ${CMAKE_CURRENT_LIST_DIR}/fftw-3.3.8.tar.gz)
 set(FFTW_URL_MD5  8aac833c943d8e90d51b697b27d4384d)
 
 # FFTW examples
-set(BUILD_FFTW_EXAMPLES TRUE)
+# -- somehow the examples are not in the tarball
+set(BUILD_FFTW_EXAMPLES FALSE) 
 set(FFTW_EXAMPLES_STEP ${FFTW_PREFIX}_examples)
 
 # make system
 set(FFTW_MAKE make)
 set(NCPU      4   )
 
+set(FFTW_SRC ${CMAKE_SOURCE_DIR}/build/${FFTW_PREFIX}/src/${FFTW_PREFIX})
 # add instructions to build the FFTW source
 # -- build float precision (required by napi)
 ExternalProject_Add(${FFTW_PREFIX}
     PREFIX              ${FFTW_PREFIX}
     URL                 ${FFTW_URL}
     URL_MD5             ${FFTW_URL_MD5}
-    CONFIGURE_COMMAND   ""
-    BUILD_COMMAND       ${FFTW_MAKE}
+    CONFIGURE_COMMAND   ${FFTW_SRC}/configure --enable-float --enable-mpi
+    BUILD_COMMAND       ${FFTW_MAKE} -j${NCPU}
 	BUILD_IN_SOURCE     1
 	INSTALL_COMMAND     ""
 	LOG_DOWNLOAD        1
