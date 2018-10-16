@@ -20,7 +20,7 @@ set(FFTW_EXAMPLES_STEP ${FFTW_PREFIX}_examples)
 # build system
 set(FFTW_MAKE       make)
 set(NCPU            4   )
-set(FFTW_DIR        ${CMAKE_SOURCE_DIR}/build/)
+set(FFTW_DIR        ${CMAKE_SOURCE_DIR}/build)
 set(FFTW_SRC        ${FFTW_DIR}/${FFTW_PREFIX}/src/${FFTW_PREFIX})
 set(FFTW_CONFIG_OPT "--enable-float --enable-mpi --prefix=${FFTW_DIR}")
 # add instructions to build the FFTW source

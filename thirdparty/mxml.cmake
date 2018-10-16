@@ -13,8 +13,7 @@ set(MXML_URL_MD5  83f7494458b67e4514c8a005b77ef90a)
 
 # build system
 set(MXML_MAKE       make)
-set(NCPU            4   )
-set(MXML_DIR        ${CMAKE_SOURCE_DIR}/build/)
+set(MXML_DIR        ${CMAKE_SOURCE_DIR}/build)
 set(MXML_SRC        ${MXML_DIR}/${MXML_PREFIX}/src/${MXML_PREFIX})
 set(MXML_CONFIG_OPT "--prefix=${MXML_DIR}")
 ExternalProject_Add(${MXML_PREFIX}
@@ -24,7 +23,8 @@ ExternalProject_Add(${MXML_PREFIX}
     CONFIGURE_COMMAND   ${MXML_SRC}/configure --prefix=${MXML_DIR}
     BUILD_COMMAND       ${MXML_MAKE} -j${NCPU}
 	BUILD_IN_SOURCE     1
-	INSTALL_COMMAND     ${MXML_MAKE} install
+    INSTALL_COMMAND     ${MXML_MAKE} install
+    DEPENDS             ${FFTW_PREFIX}
 	LOG_DOWNLOAD        1
 	LOG_BUILD           1
 )

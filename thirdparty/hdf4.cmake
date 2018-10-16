@@ -18,8 +18,7 @@ set(HDF4_URL_MD5  2c1b6c7fdf97738251154680b37bd86a)
 
 # build system
 set(HDF4_MAKE       make)
-set(NCPU            4   )
-set(HDF4_DIR        ${CMAKE_SOURCE_DIR}/build/)
+set(HDF4_DIR        ${CMAKE_SOURCE_DIR}/build)
 set(HDF4_SRC        ${HDF4_DIR}/${HDF4_PREFIX}/src/${HDF4_PREFIX})
 set(HDF4_CONFIG_OPT "--with-szlib=${HDF4_DIR}/lib --prefix=${HDF4_DIR}")
 ExternalProject_Add(${HDF4_PREFIX}
@@ -29,7 +28,8 @@ ExternalProject_Add(${HDF4_PREFIX}
     CONFIGURE_COMMAND   ${HDF4_SRC}/configure --with-szlib=${HDF4_DIR}/lib --prefix=${HDF4_DIR}
     BUILD_COMMAND       ${HDF4_MAKE} -j${NCPU}
 	BUILD_IN_SOURCE     1
-	INSTALL_COMMAND     ${HDF4_MAKE} install
+    INSTALL_COMMAND     ${HDF4_MAKE} install
+    DEPENDS             ${SZLIB_PREFIX}
 	LOG_DOWNLOAD        1
 	LOG_BUILD           1
 )

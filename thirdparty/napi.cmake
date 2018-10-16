@@ -2,4 +2,55 @@ message("****************")
 message("-- BUILD NAPI --")
 message("****************")
 
+# the folder where to compile mxml-2.12
+set(NAPI_PREFIX napi)
+
+# set the source location
+set(NAPI_URL ${CMAKE_CURRENT_LIST_DIR}/napi_v4.4.3.tar.gz)
+
+# check MD5
+set(NAPI_URL_MD5  51016616c0af18d14b34018da476c326)
+
+# build system
+set(NAPI_MAKE       make)
+set(NAPI_DIR        ${CMAKE_SOURCE_DIR}/build)
+set(NAPI_SRC        ${NAPI_DIR}/${NAPI_PREFIX}/src/${NAPI_PREFIX})
+set(NAPI_CMAKE_ARGS "${NAPI_CMAKE_ARGS} -DENABLE_HDF4:BOOL=ON")
+set(NAPI_CMAKE_ARGS "${NAPI_CMAKE_ARGS} -DENABLE_HDF5:BOOL=ON")
+set(NAPI_CMAKE_ARGS "${NAPI_CMAKE_ARGS} -DHDF5_C_COMPILER_EXECUTABLE:FILEPATH=${NAPI_DIR}/bin/h5cc")
+ExternalProject_Add(${NAPI_PREFIX}
+    PREFIX              ${NAPI_PREFIX}
+    URL                 ${NAPI_URL}
+    URL_MD5             ${NAPI_URL_MD5}
+    CMAKE_ARGS          
+        -DENABLE_HDF4:BOOL=ON
+        -DENABLE_HDF5:BOOL=ON
+        -DENABLE_MXML:BOOL=OFF
+        -DHDF5_C_COMPILER_EXECUTABLE:FILEPATH=${NAPI_DIR}/bin/h5cc
+        -DCMAKE_INSTALL_PREFIX=${NAPI_DIR}
+    INSTALL_DIR         ${NAPI_DIR}
+    BUILD_IN_SOURCE     1
+    INSTALL_COMMAND     ${NAPI_MAKE} install
+    DEPENDS             ${HDF5_PREFIX}
+	LOG_DOWNLOAD        1
+	LOG_BUILD           1
+)
+
+# post-build setup
+set(NAPI_INCLUDE_DIRS ${NAPI_DIR}/include)
+include_directories(${NAPI_INCLUDE_DIRS})
+
+# set the library directory variable and link it
+set(NAPI_LIBRARY_DIRS ${NAPI_DIR}/lib)
+link_directories(${NAPI_LIBRARY_DIRS})
+set(NAPI_LIBS mxml)
+set(NAPI_LIBRARY_DIRS ${NAPI_LIBRARY_DIRS})
+
+# display info
+message("Build NAPI in ${NAPI_SRC} with CMAKE OPTS:")
+message(">> ${NAPI_CMAKE_ARGS}")
+message("NAPI_INCLUDE_DIRS=${NAPI_INCLUDE_DIRS}")
+message("NAPI_LIBRARY_DIRS=${NAPI_LIBRARY_DIRS}")
+
+
 message("")

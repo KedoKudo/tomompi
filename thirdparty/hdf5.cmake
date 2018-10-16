@@ -13,8 +13,7 @@ set(HDF5_URL_MD5  710aa9fb61a51d61a7e2c09bf0052157)
 
 # build system
 set(HDF5_MAKE       make)
-set(NCPU            4   )
-set(HDF5_DIR        ${CMAKE_SOURCE_DIR}/build/)
+set(HDF5_DIR        ${CMAKE_SOURCE_DIR}/build)
 set(HDF5_SRC        ${HDF5_DIR}/${HDF5_PREFIX}/src/${HDF5_PREFIX})
 set(HDF5_CONFIG_OPT "--with-szlib=${HDF5_DIR}/lib --enable-cxx --prefix=${HDF5_DIR}")
 ExternalProject_Add(${HDF5_PREFIX}
@@ -24,7 +23,8 @@ ExternalProject_Add(${HDF5_PREFIX}
     CONFIGURE_COMMAND   ${HDF5_SRC}/configure --with-szlib=${HDF5_DIR}/lib --enable-cxx --prefix=${HDF5_DIR}
     BUILD_COMMAND       ${HDF5_MAKE} -j${NCPU}
 	BUILD_IN_SOURCE     1
-	INSTALL_COMMAND     ${HDF5_MAKE} install
+    INSTALL_COMMAND     ${HDF5_MAKE} install
+    DEPENDS             ${HDF4_PREFIX}
 	LOG_DOWNLOAD        1
 	LOG_BUILD           1
 )

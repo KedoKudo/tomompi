@@ -1,6 +1,15 @@
 # -- CMAKE Config for TOMOMPI -- #
 
 cmake_minimum_required (VERSION 2.8.8 FATAL_ERROR)
+
+# force to use Homebrew GNU compiler
+if(APPLE)
+    set(CMAKE_C_COMPILER   "gcc-7")
+    set(CMAKE_CXX_COMPILER "g++-7")
+    set(CMAKE_LINKER       "gcc-7")
+endif(APPLE)
+
+# project def
 project (TomoMPI)
 
 # The version number.
@@ -26,6 +35,8 @@ set(CMAKE_BUILD_TYPE "Release")
 # -- MPI
 find_package(MPI REQUIRED)
 include_directories(${MPI_INCLUDE_PATH})
+# -- Parallel built CPU number 
+set(NCPU 1)
 # -- FFTW
 include(thirdparty/fftw3.cmake)
 # -- MXML
