@@ -14,6 +14,11 @@ include(CheckIncludeFileCXX)
 include(CheckIncludeFiles)
 include(ExternalProject)
 
+# add the sub-directories that we want CMake to scan
+add_subdirectory(include)
+add_subdirectory(thirdparty)
+add_subdirectory(src)
+
 # build type release by defualt
 set(CMAKE_BUILD_TYPE "Release")
 
@@ -23,20 +28,17 @@ find_package(MPI REQUIRED)
 include_directories(${MPI_INCLUDE_PATH})
 # -- FFTW
 include(thirdparty/fftw3.cmake)
-# -- NAPI
-include(thirdparty/napi.cmake)
 # -- MXML
 include(thirdparty/mxml.cmake)
-# -- HDF5
-include(thirdparty/hdf5.cmake)
 # -- HDF4
 include(thirdparty/hdf4.cmake)
+# -- HDF5
+include(thirdparty/hdf5.cmake)
+# -- NAPI
+include(thirdparty/napi.cmake)
+
 
 # Add the files in the include directory to be included
 # while compiling all the source code header files
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-# add the sub-directories that we want CMake to scan
-add_subdirectory(include)
-add_subdirectory(thirdparty)
-add_subdirectory(src)
