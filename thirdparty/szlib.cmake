@@ -1,6 +1,6 @@
-message("\t****************")
-message("\t-- BUILD SZLB --")
-message("\t****************")
+message("****************")
+message("-- BUILD SZLB --")
+message("****************")
 
 # the folder where to compile mxml-2.12
 set(SZLIB_PREFIX szlib)
@@ -40,9 +40,9 @@ set(SZLIB_LIBS mxml)
 set(SZLIB_LIBRARY_DIRS ${SZLIB_LIBRARY_DIRS})
 
 # display info
-message("\tBuild SZLIB in ${SZLIB_SRC} with CONFIGURE OPTS:")
-message("\t>> ${SZLIB_CONFIG_OPT}")
-message("\tSZLIB_INCLUDE_DIRS=${SZLIB_INCLUDE_DIRS}")
-message("\tSZLIB_LIBRARY_DIRS=${SZLIB_LIBRARY_DIRS}")
+message("Build SZLIB in ${SZLIB_SRC} with CONFIGURE OPTS:")
+message(">> ${SZLIB_CONFIG_OPT}")
+message("SZLIB_INCLUDE_DIRS=${SZLIB_INCLUDE_DIRS}")
+message("SZLIB_LIBRARY_DIRS=${SZLIB_LIBRARY_DIRS}")
 
 message("")

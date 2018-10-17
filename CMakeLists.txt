@@ -2,11 +2,12 @@
 
 cmake_minimum_required (VERSION 2.8.8 FATAL_ERROR)
 
-# force to use Homebrew GNU compiler
+# force to use Homebrew GNU compiler on MacOS
 if(APPLE)
-    set(CMAKE_C_COMPILER   "gcc-7")
-    set(CMAKE_CXX_COMPILER "g++-7")
-    set(CMAKE_LINKER       "gcc-7")
+    SET (CMAKE_C_COMPILER   "gcc-8")
+    SET (CMAKE_CXX_COMPILER "g++-8")
+    SET (CMAKE_LINKER       "gcc-8")
+    SET (MACOSX_RPATH        FALSE )
 endif(APPLE)
 
 # project def
@@ -16,6 +17,9 @@ project (TomoMPI)
 SET (TomoMPI_VERSION_MAJOR "2")
 SET (TomoMPI_VERSION_MINOR "0")
 SET (TomoMPI_VERSION_PATCH "0")
+
+# stop build shared libraries
+SET (BUILD_SHARED_LIBS OFF)
 
 # Auto check
 include(CheckIncludeFile)
@@ -29,18 +33,20 @@ add_subdirectory(thirdparty)
 add_subdirectory(src)
 
 # build type release by defualt
-set(CMAKE_BUILD_TYPE "Release")
+SET (CMAKE_BUILD_TYPE "Release")
 
 # External Dependencies 
 # -- MPI
 find_package(MPI REQUIRED)
 include_directories(${MPI_INCLUDE_PATH})
 # -- Parallel built CPU number 
-set(NCPU 1)
+set(NCPU 4)
 # -- FFTW
 include(thirdparty/fftw3.cmake)
 # -- MXML
 include(thirdparty/mxml.cmake)
+# -- szlib
+include(thirdparty/szlib.cmake)
 # -- HDF4
 include(thirdparty/hdf4.cmake)
 # -- HDF5

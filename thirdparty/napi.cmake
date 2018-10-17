@@ -22,14 +22,19 @@ ExternalProject_Add(${NAPI_PREFIX}
     PREFIX              ${NAPI_PREFIX}
     URL                 ${NAPI_URL}
     URL_MD5             ${NAPI_URL_MD5}
-    CMAKE_ARGS          
+    CMAKE_ARGS
+        -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+        -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+        -DCMAKE_LINKER=${CMAKE_LINKER}      
+        -DCMAKE_BUILD_TYPE="Release"          
         -DENABLE_HDF4:BOOL=ON
         -DENABLE_HDF5:BOOL=ON
-        -DENABLE_MXML:BOOL=OFF
+        -DENABLE_MXML:BOOL=ON
+        -DCMAKE_MACOSX_RPATH:BOOL=OFF
+        -DBUILD_SHARED_LIBS=OFF 
         -DHDF5_C_COMPILER_EXECUTABLE:FILEPATH=${NAPI_DIR}/bin/h5cc
         -DCMAKE_INSTALL_PREFIX=${NAPI_DIR}
     INSTALL_DIR         ${NAPI_DIR}
-    BUILD_IN_SOURCE     1
     INSTALL_COMMAND     ${NAPI_MAKE} install
     DEPENDS             ${HDF5_PREFIX}
 	LOG_DOWNLOAD        1
