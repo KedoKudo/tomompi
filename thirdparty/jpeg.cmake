@@ -23,7 +23,7 @@ ExternalProject_Add(${JPEG_PREFIX}
     BUILD_COMMAND       ${JPEG_MAKE} -j${NCPU}
 	BUILD_IN_SOURCE     1
     INSTALL_COMMAND     ${JPEG_MAKE} install
-    DEPENDS             ${ZLIB_PREFIX}
+    DEPENDS             ${MXML_PREFIX}
 	LOG_DOWNLOAD        1
 	LOG_BUILD           1
 )
