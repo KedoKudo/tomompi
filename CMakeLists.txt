@@ -36,7 +36,7 @@ add_subdirectory(src)
 # build type release by defualt
 SET (CMAKE_BUILD_TYPE "Release")
 
-# External Dependencies 
+# -- External Dependencies -- # 
 # -- MPI
 find_package(MPI REQUIRED)
 include_directories(${MPI_INCLUDE_PATH})
@@ -59,7 +59,7 @@ include(thirdparty/hdf5.cmake)
 # -- NAPI
 include(thirdparty/napi.cmake)
 
-
+# -- BUILD TOMOMPI -- #
 # Add the files in the include directory to be included
 # while compiling all the source code header files
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
