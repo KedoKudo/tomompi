@@ -24,7 +24,7 @@ ExternalProject_Add(${SZLIB_PREFIX}
     BUILD_COMMAND       ${SZLIB_MAKE} -j${NCPU}
 	BUILD_IN_SOURCE     1
     INSTALL_COMMAND     ${SZLIB_MAKE} install
-    DEPENDS             ${MXML_PREFIX}
+    DEPENDS             ${JPEG_PREFIX}
 	LOG_DOWNLOAD        1
 	LOG_BUILD           1
 )
