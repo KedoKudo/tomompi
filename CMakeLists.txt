@@ -46,6 +46,8 @@ set(NCPU 4)
 include(thirdparty/fftw3.cmake)
 # -- MXML
 include(thirdparty/mxml.cmake)
+# -- ZLIB
+include(thirdparty/zlib.cmake)
 # -- JPEG
 include(thirdparty/jpeg.cmake)
 # -- szlib
