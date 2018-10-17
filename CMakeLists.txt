@@ -4,9 +4,9 @@ cmake_minimum_required (VERSION 2.8.8 FATAL_ERROR)
 
 # force to use Homebrew GNU compiler on MacOS
 if(APPLE)
-    SET (CMAKE_C_COMPILER   "gcc-6")
-    SET (CMAKE_CXX_COMPILER "g++-6")
-    SET (CMAKE_LINKER       "gcc-6")
+    # SET (CMAKE_C_COMPILER   "gcc-6")
+    # SET (CMAKE_CXX_COMPILER "g++-6")
+    # SET (CMAKE_LINKER       "gcc-6")
     SET (MACOSX_RPATH        FALSE )
     SET (CMAKE_MACOSX_RPATH  OFF   )
 endif(APPLE)
@@ -46,6 +46,8 @@ set(NCPU 4)
 include(thirdparty/fftw3.cmake)
 # -- MXML
 include(thirdparty/mxml.cmake)
+# -- JPEG
+include(thirdparty/jpeg.cmake)
 # -- szlib
 include(thirdparty/szlib.cmake)
 # -- HDF4
