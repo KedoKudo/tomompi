@@ -35,6 +35,10 @@
 
 # do not track build
 build/*
+share/*
+man/*
+lib/*
+bin/*
 
 # prevent icloud messing aroud
 *.icloud
