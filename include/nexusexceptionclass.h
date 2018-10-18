@@ -22,9 +22,9 @@ public:
 	    strcpy (error_type, type);
     };
 
-    char *getErrorString (void){};
+    char *getErrorString (void);
 
-    char *getErrorType (void){};
+    char *getErrorType (void);
 
 private:
     char	error_string[256],
