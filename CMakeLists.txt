@@ -60,10 +60,11 @@ include(thirdparty/napi.cmake)
 # Add the files in the include directory to be included
 # while compiling all the source code header files
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/nexus)
 
 # -- build Nexuslibrary
-# add_library(nexuslibrary STATIC 
-#     src/nexusbox.cpp include/nexusbox.h
-#     src/nexusapi.cpp include/nexusapi.h
-# )
-# target_include_directories(nexuslibrary PUBLIC build/include)
+add_library(nexuslibrary STATIC 
+    src/nexusbox.cpp 
+    src/nexusapi.cpp
+    src/nexusattribute.cpp
+)
