@@ -35,3 +35,6 @@
 
 # do not track build
 build/*
+
+# prevent icloud messing aroud
+*.icloud
