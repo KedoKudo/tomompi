@@ -316,11 +316,12 @@ void NexusData::GetDataVal (void *get_data){
         case NX_FLOAT64 : element_size = sizeof (double); break;
     }
 
-    if (data != NULL)
+    if (data != NULL){
         if (data_type == NX_CHAR)
             memcpy (get_data, data, (size+1)*element_size);
         else
             memcpy (get_data, data, size*element_size);
+    }
 
 }
 
