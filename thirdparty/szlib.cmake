@@ -13,8 +13,8 @@ set(SZLIB_URL_MD5  5addbf2a5b1bf928b92c47286e921f72)
 
 # build system
 set(SZLIB_MAKE       make)
-set(SZLIB_DIR        ${CMAKE_SOURCE_DIR}/build)
-set(SZLIB_SRC        ${SZLIB_DIR}/${SZLIB_PREFIX}/src/${SZLIB_PREFIX})
+set(SZLIB_DIR        ${CMAKE_SOURCE_DIR})
+set(SZLIB_SRC        ${SZLIB_DIR}/build/${SZLIB_PREFIX}/src/${SZLIB_PREFIX})
 set(SZLIB_CONFIG_OPT "--prefix=${SZLIB_DIR}")
 ExternalProject_Add(${SZLIB_PREFIX}
     PREFIX              ${SZLIB_PREFIX}
