@@ -19,7 +19,7 @@ SET (TomoMPI_VERSION_PATCH "0")
 # stop build shared libraries
 SET (BUILD_SHARED_LIBS OFF)
 
-# Auto check
+# Auto check and Exteral project building support
 include(CheckIncludeFile)
 include(CheckIncludeFileCXX)
 include(CheckIncludeFiles)
@@ -61,3 +61,9 @@ include(thirdparty/napi.cmake)
 # while compiling all the source code header files
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
+# -- build Nexuslibrary
+# add_library(nexuslibrary STATIC 
+#     src/nexusbox.cpp include/nexusbox.h
+#     src/nexusapi.cpp include/nexusapi.h
+# )
+# target_include_directories(nexuslibrary PUBLIC build/include)
