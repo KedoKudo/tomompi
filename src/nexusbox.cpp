@@ -134,7 +134,7 @@ NexusFileDirectory *NexusFileDirectory::FindByIndex (char *search_index){
     NexusFileDirectory 		*current_entry;
 
 	current_entry = this;
-   	while (stricmp (current_entry->directory_entry, search_index)){    
+   	while (strcasecmp (current_entry->directory_entry, search_index)){    
         current_entry = (NexusFileDirectory *) current_entry->NextInList ();
        	if (current_entry == NULL)
             return (NULL);

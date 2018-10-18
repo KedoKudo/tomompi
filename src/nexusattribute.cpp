@@ -155,7 +155,7 @@ void NexusAttribute::PutConstInfo (char *attrib_name,
 		throw (new NexusExceptionClass ((char *) "Error in method NexusAttribute::PutConstInfo!", (char *) "Memory allocation error!"));
     strcpy (type, attrib_type);
 
-    if (!strcasecmp (attrib_type, "NX_CHAR")){
+    if (!stricmp (attrib_type, "NX_CHAR")){
         size = strlen (attrib_value);
         arr_dims[0] = size;
         arr_dims[1] = 0;
@@ -168,7 +168,7 @@ void NexusAttribute::PutConstInfo (char *attrib_name,
         data_type = NX_CHAR;
     }
 
-    if (!strcasecmp (attrib_type, "NX_UINT8")){
+    if (!stricmp (attrib_type, "NX_UINT8")){
         data = (unsigned char *) malloc (sizeof (unsigned char) * size);
         if (data == NULL)
 			throw (new NexusExceptionClass ((char *) "Error in method NexusAttribute::PutConstInfo!", (char *) "Memory allocation error!"));
@@ -178,7 +178,7 @@ void NexusAttribute::PutConstInfo (char *attrib_name,
         data_type = NX_UINT8;
     }
 
-    if (!strcasecmp (attrib_type, "NX_INT8")){
+    if (!stricmp (attrib_type, "NX_INT8")){
         data = (char *) malloc (sizeof (char) * size);
         if (data == NULL)
 			throw (new NexusExceptionClass ((char *) "Error in method NexusAttribute::PutConstInfo!", (char *) "Memory allocation error!"));
@@ -188,7 +188,7 @@ void NexusAttribute::PutConstInfo (char *attrib_name,
         data_type = NX_INT8;
     }
 
-    if (!strcasecmp (attrib_type, "NX_UINT16")){
+    if (!stricmp (attrib_type, "NX_UINT16")){
         data = (unsigned short *) malloc (sizeof (unsigned short int) * size);
         if (data == NULL)
 			throw (new NexusExceptionClass ((char *) "Error in method NexusAttribute::PutConstInfo!", (char *) "Memory allocation error!"));
@@ -198,7 +198,7 @@ void NexusAttribute::PutConstInfo (char *attrib_name,
         data_type = NX_UINT16;
     }
 
-    if (!strcasecmp (attrib_type, "NX_INT16")){
+    if (!stricmp (attrib_type, "NX_INT16")){
         data = (short *) malloc (sizeof (short int) * size);
         if (data == NULL)
 			throw (new NexusExceptionClass ((char *) "Error in method NexusAttribute::PutConstInfo!", (char *) "Memory allocation error!"));
@@ -208,7 +208,7 @@ void NexusAttribute::PutConstInfo (char *attrib_name,
         data_type = NX_INT16;
     }
 
-    if (!strcasecmp (attrib_type, "NX_UINT32")){
+    if (!stricmp (attrib_type, "NX_UINT32")){
         data = (unsigned long *) malloc (sizeof (unsigned int) * size);
         if (data == NULL)
 			throw (new NexusExceptionClass ((char *) "Error in method NexusAttribute::PutConstInfo!", (char *) "Memory allocation error!"));
@@ -218,7 +218,7 @@ void NexusAttribute::PutConstInfo (char *attrib_name,
         data_type = NX_UINT32;
     }
 
-    if (!strcasecmp (attrib_type, "NX_INT32")){
+    if (!stricmp (attrib_type, "NX_INT32")){
         data = (long *) malloc (sizeof (int) * size);
         if (data == NULL)
 			throw (new NexusExceptionClass ((char *) "Error in method NexusAttribute::PutConstInfo!", (char *) "Memory allocation error!"));
@@ -228,7 +228,7 @@ void NexusAttribute::PutConstInfo (char *attrib_name,
         data_type = NX_INT32;
     }
 
-    if (!strcasecmp (attrib_type, "NX_FLOAT32")){
+    if (!stricmp (attrib_type, "NX_FLOAT32")){
         data = (float *) malloc (sizeof (float) * size);
         if (data == NULL)
 			throw (new NexusExceptionClass ((char *) "Error in method NexusAttribute::PutConstInfo!", (char *) "Memory allocation error!"));
@@ -238,7 +238,7 @@ void NexusAttribute::PutConstInfo (char *attrib_name,
         data_type = NX_FLOAT32;
     }
 
-    if (!strcasecmp (attrib_type, "NX_FLOAT64")){
+    if (!stricmp (attrib_type, "NX_FLOAT64")){
         data = (double *) malloc (sizeof (double) * size);
         if (data == NULL)
 			throw (new NexusExceptionClass ((char *) "Error in method NexusAttribute::PutConstInfo!", (char *) "Memory allocation error!"));

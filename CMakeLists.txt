@@ -64,7 +64,15 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/nexus)
 
 # -- build Nexuslibrary
 add_library(nexuslibrary STATIC 
+    src/nexusattribute.cpp
     src/nexusbox.cpp 
     src/nexusapi.cpp
-    src/nexusattribute.cpp
+    src/nexusdata.cpp
+    src/nexusexceptionclass.cpp
+    src/nexusfield.cpp
+    src/nexusgroup.cpp
+)
+set_property(
+    TARGET nexuslibrary 
+    PROPERTY COMPILE_FLAGS "-D__unix__"
 )
