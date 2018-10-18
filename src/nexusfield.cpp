@@ -164,7 +164,7 @@ void NexusField::PutSDSInfo (char *field_name,
 
     size = 1;
     if (rank > 1)
-        for (loop=0;loop<rank;loop++)
+        for (int loop=0;loop<rank;loop++)
             size = size * arr_dims[loop];
     else{
         size = arr_dims[0];
