@@ -74,9 +74,22 @@ add_library(nexuslibrary STATIC
 )
 set_property(
     TARGET nexuslibrary 
-    PROPERTY COMPILE_FLAGS "-D__unix__"
+    PROPERTY COMPILE_FLAGS "-fPIC -D__unix__ -DHDF4 -DHDF5"
 )
 add_dependencies(nexuslibrary ${NAPI_PREFIX})
-add_custom_command(TARGET nexuslibrary POST_BUILD
+add_custom_command(
+    TARGET nexuslibrary POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:nexuslibrary> "${CMAKE_CURRENT_SOURCE_DIR}/lib/${targetfile}"
+)
+
+# -- build utility support
+add_library(support STATIC
+    src/filelistclass.cpp
+    src/centeringclass.cpp
+    src/errorlogclass.cpp
+)
+add_dependencies(support nexuslibrary)
+add_custom_command(
+    TARGET support POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:support> "${CMAKE_CURRENT_SOURCE_DIR}/lib/${targetfile}"
 )
