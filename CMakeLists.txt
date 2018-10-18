@@ -76,3 +76,7 @@ set_property(
     TARGET nexuslibrary 
     PROPERTY COMPILE_FLAGS "-D__unix__"
 )
+add_dependencies(nexuslibrary ${NAPI_PREFIX})
+add_custom_command(TARGET nexuslibrary POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:nexuslibrary> "${CMAKE_CURRENT_SOURCE_DIR}/lib/${targetfile}"
+)
