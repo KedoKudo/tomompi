@@ -129,17 +129,17 @@ private:
 class NexusAttribute : public NexusData
 {
 public:
-    NexusAttribute : next_attribute(NULL) (void);
+    NexusAttribute (void);
 
     void PutSDSInfo (char *attrib_name, int attrib_length, int attrib_type, void *attrib_data);
 
     void PutConstInfo (char *attrib_name, char *attrib_type, char *attrib_value);
     void PutVarInfo (char *attrib_name, int attrib_length, int attrib_type, void *attrib_data);
 
-#ifdef USECAPV
+    #ifdef USECAPV
     void PutPVInfo (char *attrib_name, char *attrib_type, char *attrib_value);
     void PVUpdate (void);
-#endif
+    #endif
 
 	void UpdateVarInfo (int attrib_length, void *var_address);
 
