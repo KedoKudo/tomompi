@@ -3,6 +3,10 @@ message("-- BUILD JPEG --")
 message("****************")
 
 # the folder where to compile jpeg
+# NOTE:
+#  Although it is recommended to use system JPEG, building HDF4 on Orthros 
+#  using system JPEG somehow leads to strange linking error.  Therefore we 
+#  use a customized JPEG build here.
 set(JPEG_PREFIX jpeg)
 
 # set the source location

@@ -2,16 +2,21 @@ message("****************")
 message("-- BUILD NAPI --")
 message("****************")
 
-# the folder where to compile mxml-2.12
+# the folder where to compile napi
 set(NAPI_PREFIX napi)
 
 # set the source location
+# NOTE: 
+#  The original napi project is no longer supported, which leaves some 
+#  broken cmake options. 
+#  The tar ball used here has been modified to address this issue, and 
+#  building process has been tested and passed on both MacOS (local) and 
+#  CentOS7 (Orthros).
 set(NAPI_URL ${CMAKE_CURRENT_LIST_DIR}/napi-v4.4.3.tar.gz) 
 
 
 # check MD5
-# set(NAPI_URL_MD5  51016616c0af18d14b34018da476c326)
-set(NAPI_URL_MD5 d609b5c4b668bca72b3e319d3bcd9942)
+set(NAPI_URL_MD5 ddd8886196f37b3b067c1b80ec7e2e7d)
 
 # build system
 set(NAPI_MAKE       make)
@@ -20,12 +25,9 @@ set(NAPI_SRC        ${NAPI_DIR}/${NAPI_PREFIX}/src/${NAPI_PREFIX})
 ExternalProject_Add(${NAPI_PREFIX}
     PREFIX              ${NAPI_PREFIX}
     URL                 ${NAPI_URL}
-    # URL_MD5             ${NAPI_URL_MD5}
+    URL_MD5             ${NAPI_URL_MD5}
     CMAKE_ARGS
-        -DBUILD_SHARED_LIBS=OFF
-        # -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
-        # -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
-        # -DCMAKE_LINKER=${CMAKE_LINKER}     
+        -DBUILD_SHARED_LIBS=OFF    
         -DCMAKE_BUILD_TYPE="Release"          
         -DENABLE_HDF4:BOOL=ON
         -DENABLE_HDF5:BOOL=ON

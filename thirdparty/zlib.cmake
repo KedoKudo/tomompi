@@ -2,7 +2,9 @@ message("****************")
 message("-- BUILD ZLIB --")
 message("****************")
 
-# the folder where to compile jpeg
+# the folder where to compile zlib
+# NOTE:
+#  it is recommended to use the system zlib, so this is just a backup plan
 set(ZLIB_PREFIX zlib)
 
 # set the source location

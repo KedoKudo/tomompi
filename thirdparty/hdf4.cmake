@@ -2,7 +2,11 @@ message("****************")
 message("-- BUILD HDF4 --")
 message("****************")
 
-# the folder where to compile mxml-2.12
+# the folder where to compile HDF4-4.2.13
+# NOTE:
+#  Building with szlib for HDF4 can leads to some strange linking error on 
+#  Orthros (CentOS_7), therefore we disable the szlib option when building 
+#  HDF4.
 set(HDF4_PREFIX hdf4)
 
 # set the source location
@@ -15,9 +19,7 @@ set(HDF4_URL_MD5  2c1b6c7fdf97738251154680b37bd86a)
 set(HDF4_MAKE       make)
 set(HDF4_DIR        ${CMAKE_SOURCE_DIR}/build)
 set(HDF4_SRC        ${HDF4_DIR}/${HDF4_PREFIX}/src/${HDF4_PREFIX})
-set(HDF4_CONFIG_OPT "--with-szlib=${HDF4_DIR}/lib --prefix=${HDF4_DIR}")
-set(HDF4_CFLAGS     "-O3 -fPIC")
-set(HDF4_CPPFLAGS   "-I${HDF4_DIR}/include -DBIG_LONGS -DSWAP")
+set(HDF4_CONFIG_OPT "--with-pic --enable-production --prefix=${HDF4_DIR}")
 ExternalProject_Add(${HDF4_PREFIX}
     PREFIX              ${HDF4_PREFIX}
     URL                 ${HDF4_URL}

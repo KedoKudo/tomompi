@@ -2,7 +2,7 @@ message("****************")
 message("-- BUILD SZLB --")
 message("****************")
 
-# the folder where to compile mxml-2.12
+# the folder where to compile szlib
 set(SZLIB_PREFIX szlib)
 
 # set the source location

@@ -2,7 +2,10 @@ message("****************")
 message("-- BUILD HDF5 --")
 message("****************")
 
-# the folder where to compile mxml-2.12
+# the folder where to compile HDF5-1.8.10
+# NOTE:
+#   TomoMPI is using some deprecated API when calling HDF5, therefore we need
+#   to use a relatively older version of HDF5 here.
 set(HDF5_PREFIX hdf5)
 
 # set the source location

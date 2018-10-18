@@ -4,6 +4,9 @@ message("-- BUILD FFTW --")
 message("****************")
 
 # the folder where to compile FFTW3.3.8
+# NOTE:
+#  Only the float precision of FFTW is called from TomoMPI, therefore we only
+#  build the float precision here.
 set(FFTW_PREFIX fftw)
 
 # set the source location
