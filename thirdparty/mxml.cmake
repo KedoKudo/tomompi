@@ -13,8 +13,8 @@ set(MXML_URL_MD5  83f7494458b67e4514c8a005b77ef90a)
 
 # build system
 set(MXML_MAKE       make)
-set(MXML_DIR        ${CMAKE_SOURCE_DIR}/build)
-set(MXML_SRC        ${MXML_DIR}/${MXML_PREFIX}/src/${MXML_PREFIX})
+set(MXML_DIR        ${CMAKE_SOURCE_DIR})
+set(MXML_SRC        ${MXML_DIR}/build/${MXML_PREFIX}/src/${MXML_PREFIX})
 set(MXML_CONFIG_OPT "--prefix=${MXML_DIR}")
 ExternalProject_Add(${MXML_PREFIX}
     PREFIX              ${MXML_PREFIX}

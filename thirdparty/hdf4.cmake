@@ -17,8 +17,8 @@ set(HDF4_URL_MD5  2c1b6c7fdf97738251154680b37bd86a)
 
 # build system
 set(HDF4_MAKE       make)
-set(HDF4_DIR        ${CMAKE_SOURCE_DIR}/build)
-set(HDF4_SRC        ${HDF4_DIR}/${HDF4_PREFIX}/src/${HDF4_PREFIX})
+set(HDF4_DIR        ${CMAKE_SOURCE_DIR})
+set(HDF4_SRC        ${HDF4_DIR}/build/${HDF4_PREFIX}/src/${HDF4_PREFIX})
 set(HDF4_CONFIG_OPT "--with-pic --enable-production --prefix=${HDF4_DIR}")
 ExternalProject_Add(${HDF4_PREFIX}
     PREFIX              ${HDF4_PREFIX}

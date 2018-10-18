@@ -16,8 +16,8 @@ set(HDF5_URL_MD5  710aa9fb61a51d61a7e2c09bf0052157)
 
 # build system
 set(HDF5_MAKE       make)
-set(HDF5_DIR        ${CMAKE_SOURCE_DIR}/build)
-set(HDF5_SRC        ${HDF5_DIR}/${HDF5_PREFIX}/src/${HDF5_PREFIX})
+set(HDF5_DIR        ${CMAKE_SOURCE_DIR})
+set(HDF5_SRC        ${HDF5_DIR}/build/${HDF5_PREFIX}/src/${HDF5_PREFIX})
 set(HDF5_CONFIG_OPT "--with-szlib=${HDF5_DIR}/lib --enable-cxx --prefix=${HDF5_DIR}")
 ExternalProject_Add(${HDF5_PREFIX}
     PREFIX              ${HDF5_PREFIX}

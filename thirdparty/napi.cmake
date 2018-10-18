@@ -20,8 +20,8 @@ set(NAPI_URL_MD5 ddd8886196f37b3b067c1b80ec7e2e7d)
 
 # build system
 set(NAPI_MAKE       make)
-set(NAPI_DIR        ${CMAKE_SOURCE_DIR}/build)
-set(NAPI_SRC        ${NAPI_DIR}/${NAPI_PREFIX}/src/${NAPI_PREFIX})
+set(NAPI_DIR        ${CMAKE_SOURCE_DIR})
+set(NAPI_SRC        ${NAPI_DIR}/build/${NAPI_PREFIX}/src/${NAPI_PREFIX})
 ExternalProject_Add(${NAPI_PREFIX}
     PREFIX              ${NAPI_PREFIX}
     URL                 ${NAPI_URL}

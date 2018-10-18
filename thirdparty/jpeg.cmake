@@ -17,8 +17,8 @@ set(JPEG_URL_MD5  fae140877c90c3b58dfb7b4ed4814b4a)
 
 # build system
 set(JPEG_MAKE       make)
-set(JPEG_DIR        ${CMAKE_SOURCE_DIR}/build)
-set(JPEG_SRC        ${JPEG_DIR}/${JPEG_PREFIX}/src/${JPEG_PREFIX})
+set(JPEG_DIR        ${CMAKE_SOURCE_DIR})
+set(JPEG_SRC        ${JPEG_DIR}/build/${JPEG_PREFIX}/src/${JPEG_PREFIX})
 ExternalProject_Add(${JPEG_PREFIX}
     PREFIX              ${JPEG_PREFIX}
     URL                 ${JPEG_URL}

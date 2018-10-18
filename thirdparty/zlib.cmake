@@ -15,8 +15,8 @@ set(ZLIB_URL_MD5  8efb9889dfcc5c7f083b90013f70d942)
 
 # build system
 set(ZLIB_MAKE       make)
-set(ZLIB_DIR        ${CMAKE_SOURCE_DIR}/build)
-set(ZLIB_SRC        ${ZLIB_DIR}/${ZLIB_PREFIX}/src/${ZLIB_PREFIX})
+set(ZLIB_DIR        ${CMAKE_SOURCE_DIR})
+set(ZLIB_SRC        ${ZLIB_DIR}/build/${ZLIB_PREFIX}/src/${ZLIB_PREFIX})
 ExternalProject_Add(${ZLIB_PREFIX}
     PREFIX              ${ZLIB_PREFIX}
     URL                 ${ZLIB_URL}
