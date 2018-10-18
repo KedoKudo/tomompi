@@ -39,6 +39,7 @@ share/*
 man/*
 lib/*
 bin/*
+include/*
 
 # prevent icloud messing aroud
 *.icloud
