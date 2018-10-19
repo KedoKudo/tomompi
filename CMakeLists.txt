@@ -16,8 +16,9 @@ SET (TomoMPI_VERSION_MAJOR "2")
 SET (TomoMPI_VERSION_MINOR "0")
 SET (TomoMPI_VERSION_PATCH "0")
 
-# stop build shared libraries
+# prefer static libraries over shared ones
 SET (BUILD_SHARED_LIBS OFF)
+SET (CMAKE_FIND_LIBRARY_SUFFIXES "${CMAKE_STATIC_LIBRARY_SUFFIX} ${CMAKE_SHARED_LIBRARY_SUFFIX} ${CMAKE_SHARED_MODULE_SUFFIX}")
 
 # Auto check and Exteral project building support
 include(CheckIncludeFile)
@@ -36,7 +37,8 @@ SET (CMAKE_BUILD_TYPE "Release")
 # -- External Dependencies -- # 
 # -- MPI
 find_package(MPI REQUIRED)
-include_directories(${MPI_INCLUDE_PATH})
+include_directories(${MPI_CXX_INCLUDE_DIRS})
+
 # -- Parallel built CPU number 
 set(NCPU 4)
 # -- FFTW
@@ -61,20 +63,31 @@ include(thirdparty/napi.cmake)
 # while compiling all the source code header files
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/nexus)
+link_directories(
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib
+    /usr/lib64
+    /usr/lib
+)
 
-# -- build Nexuslibrary
-add_library(nexuslibrary STATIC 
+# -- compiler flags
+set (CMAKE_CXX_FLAGS 
+    "-fPIC -D__unix__ -DHDF4 -DHDF5"
+)
+# -- linker flags
+set (CMAKE_EXE_LINKER_FLAGS
+    "-lNeXus -lpthread -lm  -lfftw3f -lmfhdf -ldf -lhdf5 -lmxml"
+)
+
+message(${CMAKE_EXE_LINKER_FLAGS})
+
+add_library(nexuslibrary STATIC
+    src/nexusapi.cpp    
     src/nexusattribute.cpp
     src/nexusbox.cpp 
-    src/nexusapi.cpp
     src/nexusdata.cpp
     src/nexusexceptionclass.cpp
     src/nexusfield.cpp
     src/nexusgroup.cpp
-)
-set_property(
-    TARGET nexuslibrary 
-    PROPERTY COMPILE_FLAGS "-fPIC -D__unix__ -DHDF4 -DHDF5"
 )
 add_dependencies(nexuslibrary ${NAPI_PREFIX})
 add_custom_command(
@@ -82,14 +95,21 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:nexuslibrary> "${CMAKE_CURRENT_SOURCE_DIR}/lib/${targetfile}"
 )
 
-# -- build utility support
-add_library(support STATIC
-    src/filelistclass.cpp
+add_executable(tomompi
+    src/tomompi.cpp
+    src/tomompi_client.cpp
+    src/tomompi_sinogramserver.cpp
     src/centeringclass.cpp
     src/errorlogclass.cpp
+    src/filteredbackprojection.cpp
+    src/gridrec.cpp
+    src/linkedlistclass.cpp
+    src/logfileclass.cpp
+    src/recon_algorithm.cpp
+    src/fft_fftw.c
 )
-add_dependencies(support nexuslibrary)
-add_custom_command(
-    TARGET support POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:support> "${CMAKE_CURRENT_SOURCE_DIR}/lib/${targetfile}"
+add_dependencies(tomompi nexuslibrary)
+target_link_libraries(tomompi 
+    nexuslibrary
+    ${MPI_CXX_LIBRARIES}
 )

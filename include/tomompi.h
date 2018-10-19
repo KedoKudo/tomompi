@@ -110,7 +110,7 @@ public:
 		printf ("Found file %s\n", file_name);
 	};
 
-    ~FileListClass (void);
+    ~FileListClass (void){};
 };
 
 //_____________________________________________________________________________________

@@ -20,7 +20,7 @@ class NexusAPI
 #endif
 {
 public:
-	NexusAPI ();
+	NexusAPI(){};
 
 	void OpenFile (NXaccess access_mode, char *file_path, char *file_name, NXhandle *file_handle);
 	void CloseFile (NXhandle *file_handle);
