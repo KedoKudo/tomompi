@@ -72,8 +72,9 @@ set (CMAKE_CXX_FLAGS
     "-fPIC -D__unix__ -DHDF4 -DHDF5"
 )
 # -- linker flags
+set (THIRDPARTY_LIBS "-L${CMAKE_CURRENT_SOURCE_DIR}/lib -lNeXus -lmfhdf -ldf -lhdf5 -lmxml -lfftw3f")
 set (CMAKE_EXE_LINKER_FLAGS
-    "-lNeXus -lpthread -lm  -lfftw3f -lmfhdf -ldf -lhdf5 -lmxml"
+    "-lpthread -lm  ${THIRDPARTY_LIBS}"
 )
 
 message(${CMAKE_EXE_LINKER_FLAGS})
