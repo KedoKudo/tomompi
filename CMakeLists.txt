@@ -81,17 +81,21 @@ if(APPLE)
     set (NAPI_LINKER_FLAGS "-L${CMAKE_CURRENT_SOURCE_DIR}/lib -lNeXus")
 endif(APPLE)
 set (HDF4_LINKER_FLAGS "-L${CMAKE_CURRENT_SOURCE_DIR}/lib -lmfhdf -ldf")
+set (JPEG_LINKER_FLAGS "-L${CMAKE_CURRENT_SOURCE_DIR}/lib -ljpeg")
+set (SZLB_LINKER_FLAGS "-L${CMAKE_CURRENT_SOURCE_DIR}/lib -lsz")
 set (HDF5_LINKER_FLAGS "-L${CMAKE_CURRENT_SOURCE_DIR}/lib -lhdf5")
 set (MXML_LINKER_FLAGS "-L${CMAKE_CURRENT_SOURCE_DIR}/lib -lmxml")
 set (FFTW_LINKER_FLAGS "-L${CMAKE_CURRENT_SOURCE_DIR}/lib -lfftw3f")
-string (CONCAT THIRDPARTY_LIBS   "${NAPI_LINKER_FLAGS} "
-                                 "${HDF4_LINKER_FLAGS} "
-                                 "${HDF5_LINKER_FLAGS} "
-                                 "${MXML_LINKER_FLAGS} "
-                                 "${FFTW_LINKER_FLAGS} "
+string (CONCAT THIRDPARTY_LIBS  "${NAPI_LINKER_FLAGS} "
+                                "${HDF4_LINKER_FLAGS} "
+                                "${JPEG_LINKER_FLAGS} "
+                                "${SZLB_LINKER_FLAGS} "
+                                "${HDF5_LINKER_FLAGS} "
+                                "${MXML_LINKER_FLAGS} "
+                                "${FFTW_LINKER_FLAGS} "
 )
 # set the actual linker flags
-set (CMAKE_EXE_LINKER_FLAGS "-lpthread -lm  ${THIRDPARTY_LIBS}")
+set (CMAKE_EXE_LINKER_FLAGS "-lpthread -lm -lz ${THIRDPARTY_LIBS}")
 
 message(${CMAKE_EXE_LINKER_FLAGS})
 
@@ -114,7 +118,9 @@ add_library(fft_wrapper STATIC
     src/fft_fftw.c
 )
 add_dependencies(fft_wrapper ${FFTW_PREFIX})
-target_link_libraries(fft_wrapper ${CMAKE_CURRENT_SOURCE_DIR}/lib/libfftw3f.a)
+target_link_libraries(fft_wrapper 
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/libfftw3f.a
+)
 
 add_executable(tomompi
     src/tomompi.cpp
