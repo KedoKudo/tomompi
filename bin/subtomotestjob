@@ -1,8 +1,0 @@
-#!/bin/sh
-
-# Adjust MPICH procgroup to ensure smooth shutdown
-MPICH_PROCESS_GROUP=no; export MPICH_PROCESS_GROUP
-
-qsub -N testjob -cwd -j y -pe tomo 16 -S /bin/csh ./qtomo /data/tomo2/tomo/2010_02/commissioning/Sam02 Sam02_exp.hdf
-
-

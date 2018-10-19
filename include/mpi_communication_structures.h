@@ -35,11 +35,12 @@ float   fixed_shift_value,
 
 char	reconstruction_path[256],
         log_path[256],
-		base_name[256]; 
+	base_name[256];
+
 float	*theta_list, 
-		ring_removal_coeff, 
-		scale_data_range_min,
-		scale_data_range_max;
+	ring_removal_coeff, 
+	scale_data_range_min,
+	scale_data_range_max;
 };
 
 //________________________________________________________________________________________

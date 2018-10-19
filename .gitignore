@@ -31,3 +31,15 @@
 *.out
 *.app
 .vscode/sftp.json
+.DS_Store
+
+# do not track build
+build/*
+share/*
+man/*
+lib/*
+bin/*
+include/*
+
+# prevent icloud messing aroud
+*.icloud
