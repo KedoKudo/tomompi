@@ -110,6 +110,12 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:nexuslibrary> "${CMAKE_CURRENT_SOURCE_DIR}/lib/${targetfile}"
 )
 
+add_library(fft_wrapper STATIC
+    src/fft_fftw.c
+)
+add_dependencies(fft_wrapper ${FFTW_PREFIX})
+target_link_libraries(fft_wrapper ${CMAKE_CURRENT_SOURCE_DIR}/lib/libfftw3f.a)
+
 add_executable(tomompi
     src/tomompi.cpp
     src/tomompi_client.cpp
@@ -121,11 +127,11 @@ add_executable(tomompi
     src/linkedlistclass.cpp
     src/logfileclass.cpp
     src/recon_algorithm.cpp
-    src/fft_fftw.c
 )
-add_dependencies(tomompi nexuslibrary)
+add_dependencies(tomompi nexuslibrary fft_wrapper)
 target_link_libraries(tomompi 
     nexuslibrary
+    fft_wrapper
     ${MPI_CXX_LIBRARIES}
 )
 
