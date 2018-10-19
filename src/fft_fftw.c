@@ -12,7 +12,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <fftw3.h>
+#include "fftw3.h"
 
 /* Note that we are using the routines designed for
  * COMPLEX data type.  C does not normally support COMPLEX, but Gridrec uses

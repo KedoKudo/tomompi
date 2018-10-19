@@ -29,8 +29,8 @@ add_subdirectory(thirdparty)
 add_subdirectory(src)
 
 # build type release by defualt
-SET (CMAKE_BUILD_TYPE "Release")
-SET (CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+SET (CMAKE_BUILD_TYPE                  "Release")
+SET (CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE     )
 
 # -- External Dependencies -- # 
 # -- MPI
@@ -68,8 +68,11 @@ link_directories(
 )
 
 # -- compiler flags
+# NOTE:
+#  Not the best way to set include directory, but somehow Orthros just keep
+#  breaks at the linking for fftw...
 set (CMAKE_CXX_FLAGS 
-    "-fPIC -D__unix__ -DHDF4 -DHDF5"
+    "-fPIC -D__unix__ -DHDF4 -DHDF5 -I${CMAKE_CURRENT_SOURCE_DIR}/include"
 )
 # -- linker flags
 set (THIRDPARTY_LIBS "-L${CMAKE_CURRENT_SOURCE_DIR}/lib -lNeXus -lmfhdf -ldf -lhdf5 -lmxml -lfftw3f")
