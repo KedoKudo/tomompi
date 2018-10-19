@@ -4,8 +4,8 @@ cmake_minimum_required (VERSION 2.8.8 FATAL_ERROR)
 
 # force to use Homebrew GNU compiler on MacOS
 if(APPLE)
-    SET (MACOSX_RPATH        FALSE )
-    SET (CMAKE_MACOSX_RPATH  OFF   )
+    set (MACOSX_RPATH        FALSE )
+    set (CMAKE_MACOSX_RPATH  OFF   )
 endif(APPLE)
 
 
@@ -13,9 +13,9 @@ endif(APPLE)
 project (TomoMPI)
 
 # The version number.
-SET (TomoMPI_VERSION_MAJOR "2")
-SET (TomoMPI_VERSION_MINOR "0")
-SET (TomoMPI_VERSION_PATCH "0")
+set (TomoMPI_VERSION_MAJOR "2")
+set (TomoMPI_VERSION_MINOR "0")
+set (TomoMPI_VERSION_PATCH "0")
 
 # Auto check and Exteral project building support
 include(CheckIncludeFile)
@@ -29,8 +29,8 @@ add_subdirectory(thirdparty)
 add_subdirectory(src)
 
 # build type release by defualt
-SET (CMAKE_BUILD_TYPE                  "Release")
-SET (CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE     )
+set (CMAKE_BUILD_TYPE                  "Release")
+set (CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE     )
 
 # -- External Dependencies -- # 
 # -- MPI
@@ -75,10 +75,23 @@ set (CMAKE_CXX_FLAGS
     "-fPIC -D__unix__ -DHDF4 -DHDF5 -I${CMAKE_CURRENT_SOURCE_DIR}/include"
 )
 # -- linker flags
-set (THIRDPARTY_LIBS "-L${CMAKE_CURRENT_SOURCE_DIR}/lib -lNeXus -lmfhdf -ldf -lhdf5 -lmxml -lfftw3f")
-set (CMAKE_EXE_LINKER_FLAGS
-    "-lpthread -lm  ${THIRDPARTY_LIBS}"
+# package specific
+set (NAPI_LINKER_FLAGS "-L${CMAKE_CURRENT_SOURCE_DIR}/lib64 -lNeXus")
+if(APPLE)
+    set (NAPI_LINKER_FLAGS "-L${CMAKE_CURRENT_SOURCE_DIR}/lib -lNeXus")
+endif(APPLE)
+set (HDF4_LINKER_FLAGS "-L${CMAKE_CURRENT_SOURCE_DIR}/lib -lmfhdf -ldf")
+set (HDF5_LINKER_FLAGS "-L${CMAKE_CURRENT_SOURCE_DIR}/lib -lhdf5")
+set (MXML_LINKER_FLAGS "-L${CMAKE_CURRENT_SOURCE_DIR}/lib -lmxml")
+set (FFTW_LINKER_FLAGS "-L${CMAKE_CURRENT_SOURCE_DIR}/lib -lfftw3f")
+string (CONCAT THIRDPARTY_LIBS   "${NAPI_LINKER_FLAGS} "
+                                 "${HDF4_LINKER_FLAGS} "
+                                 "${HDF5_LINKER_FLAGS} "
+                                 "${MXML_LINKER_FLAGS} "
+                                 "${FFTW_LINKER_FLAGS} "
 )
+# set the actual linker flags
+set (CMAKE_EXE_LINKER_FLAGS "-lpthread -lm  ${THIRDPARTY_LIBS}")
 
 message(${CMAKE_EXE_LINKER_FLAGS})
 
