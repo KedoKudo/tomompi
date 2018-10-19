@@ -4,7 +4,8 @@
             "name": "Mac",
             "includePath": [
                 "${workspaceFolder}/include",
-                "${workspaceFolder}/build/include/nexus"
+                "${workspaceFolder}/build/include/nexus",
+                "${workspaceFolder}/include/nexus"
             ],
             "defines": [],
             "macFrameworkPath": [
