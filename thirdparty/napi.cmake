@@ -51,8 +51,6 @@ include_directories(${NAPI_INCLUDE_DIRS})
 # set the library directory variable and link it
 set(NAPI_LIBRARY_DIRS ${NAPI_DIR}/lib)
 link_directories(${NAPI_LIBRARY_DIRS})
-set(NAPI_LIBS mxml)
-set(NAPI_LIBRARY_DIRS ${NAPI_LIBRARY_DIRS})
 
 # display info
 message("Build NAPI in ${NAPI_SRC} with CMAKE")
