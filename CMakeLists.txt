@@ -107,8 +107,10 @@ set (MXML_LINKER_FLAGS "-L${CMAKE_CURRENT_SOURCE_DIR}/lib -lmxml")
 set (MXML_LIB "${CMAKE_CURRENT_SOURCE_DIR}/lib/libmxml.a")
 
 if(EXISTS ${HOME}/lib/libz.a)
+    set (ZLIB_LINKER_FLAGS "-L${HOME}/lib -lz")
     set (ZLIB_LIB "${HOME}/lib/libz.a")
 else()
+    set (ZLIB_LINKER_FLAGS " ")
     set (ZLIB_LIB " ")
 endif()
 
@@ -119,7 +121,7 @@ string (CONCAT THIRDPARTY_LIBS  "${NAPI_LINKER_FLAGS} "
                                 "${SZLB_LINKER_FLAGS} "
                                 "${HDF5_LINKER_FLAGS} "
                                 "${MXML_LINKER_FLAGS} "
-                                "${ZLIB_LIB} "
+                                "${ZLIB_LINKER_FLAGS} "
                                 "${FFTW_LINKER_FLAGS} "
 )
 # set the actual linker flags
@@ -145,6 +147,7 @@ target_link_libraries(nexuslibrary
     ${SZLB_LIB}
     ${HDF5_LIB}
     ${MXML_LIB}
+    ${ZLIB_LIB}
     )
 add_custom_command(
     TARGET nexuslibrary POST_BUILD
