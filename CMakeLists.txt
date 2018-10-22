@@ -88,10 +88,21 @@ else()
 endif()
 
 set (HDF4_LINKER_FLAGS "-L${CMAKE_CURRENT_SOURCE_DIR}/lib -lmfhdf -ldf")
+set (MFHDF4_LIB "${CMAKE_CURRENT_SOURCE_DIR}/lib/libmfhdf.a")
+set (HDF4_LIB   "${CMAKE_CURRENT_SOURCE_DIR}/lib/libdf.a")
+
 set (JPEG_LINKER_FLAGS "-L${CMAKE_CURRENT_SOURCE_DIR}/lib -ljpeg")
+set (JPEG_LIB "${CMAKE_CURRENT_SOURCE_DIR}/lib/libjpeg.a")
+
 set (SZLB_LINKER_FLAGS "-L${CMAKE_CURRENT_SOURCE_DIR}/lib -lsz")
+set (SZLB_LIB "${CMAKE_CURRENT_SOURCE_DIR}/lib/libsz.a")
+
 set (HDF5_LINKER_FLAGS "-L${CMAKE_CURRENT_SOURCE_DIR}/lib -lhdf5")
+set (HDF5_LIB "${CMAKE_CURRENT_SOURCE_DIR}/lib/libhdf5.a")
+
 set (MXML_LINKER_FLAGS "-L${CMAKE_CURRENT_SOURCE_DIR}/lib -lmxml")
+set (MXML_LIB "${CMAKE_CURRENT_SOURCE_DIR}/lib/libmxml.a")
+
 set (FFTW_LINKER_FLAGS "-L${CMAKE_CURRENT_SOURCE_DIR}/lib -lfftw3f")
 string (CONCAT THIRDPARTY_LIBS  "${NAPI_LINKER_FLAGS} "
                                 "${HDF4_LINKER_FLAGS} "
@@ -116,7 +127,15 @@ add_library(nexuslibrary STATIC
     src/nexusgroup.cpp
 )
 add_dependencies(nexuslibrary ${NAPI_PREFIX})
-# target_link_libraries(nexuslibrary ${NAPI_LIB})
+target_link_libraries(nexuslibrary 
+    ${NAPI_LIB}
+    ${MFHDF4_LIB}
+    ${HDF4_LIB}
+    ${JPEG_LIB}
+    ${SZLB_LIB}
+    ${HDF5_LIB}
+    ${MXML_LIB}
+    )
 add_custom_command(
     TARGET nexuslibrary POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:nexuslibrary> "${CMAKE_CURRENT_SOURCE_DIR}/lib/${targetfile}"
@@ -144,9 +163,9 @@ add_executable(tomompi
 )
 add_dependencies(tomompi nexuslibrary fft_wrapper)
 target_link_libraries(tomompi 
+    nexuslibrary
     fft_wrapper
     ${MPI_CXX_LIBRARIES}
-    nexuslibrary
 )
 
 install(TARGETS tomompi nexuslibrary
