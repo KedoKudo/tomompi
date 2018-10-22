@@ -76,7 +76,7 @@ link_directories(
 #  Not the best way to set include directory, but somehow Orthros just keep
 #  breaks at the linking for fftw...
 set (CMAKE_CXX_FLAGS 
-    "-fPIC -std=c++11 -pthread -ldl \
+    "-fPIC -std=c++11 -pthread \
     -D__unix__ -DHDF4 -DHDF5 \
     -I${CMAKE_CURRENT_SOURCE_DIR}/include"
 )
@@ -126,7 +126,7 @@ string (CONCAT THIRDPARTY_LIBS  "${NAPI_LINKER_FLAGS} "
                                 "${FFTW_LINKER_FLAGS} "
 )
 # set the actual linker flags
-set (CMAKE_EXE_LINKER_FLAGS "-lpthread -lm -lz ${THIRDPARTY_LIBS}")
+set (CMAKE_EXE_LINKER_FLAGS "-lpthread -lm -lz -ldl ${THIRDPARTY_LIBS}")
 
 message(${CMAKE_EXE_LINKER_FLAGS})
 
