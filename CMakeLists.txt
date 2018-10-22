@@ -138,9 +138,9 @@ add_executable(tomompi
 )
 add_dependencies(tomompi nexuslibrary fft_wrapper)
 target_link_libraries(tomompi 
-    nexuslibrary
     fft_wrapper
     ${MPI_CXX_LIBRARIES}
+    nexuslibrary
 )
 
 install(TARGETS tomompi nexuslibrary
