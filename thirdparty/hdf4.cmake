@@ -24,7 +24,7 @@ ExternalProject_Add(${HDF4_PREFIX}
     PREFIX              ${HDF4_PREFIX}
     URL                 ${HDF4_URL}
     URL_MD5             ${HDF4_URL_MD5}
-    CONFIGURE_COMMAND   ${HDF4_SRC}/configure --with-pic --enable-production --prefix=${HDF4_DIR}
+    CONFIGURE_COMMAND   ${HDF4_SRC}/configure --with-pic --enable-production --with-jpeg=${HDF4_DIR} --prefix=${HDF4_DIR}
     BUILD_COMMAND       ${HDF4_MAKE} -j${NCPU}
 	BUILD_IN_SOURCE     1
     INSTALL_COMMAND     ${HDF4_MAKE} install
