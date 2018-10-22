@@ -106,6 +106,12 @@ set (HDF5_LIB "${CMAKE_CURRENT_SOURCE_DIR}/lib/libhdf5.a")
 set (MXML_LINKER_FLAGS "-L${CMAKE_CURRENT_SOURCE_DIR}/lib -lmxml")
 set (MXML_LIB "${CMAKE_CURRENT_SOURCE_DIR}/lib/libmxml.a")
 
+if(EXISTS ${HOME}/lib/libz.a)
+    set (ZLIB_LIB "${HOME}/lib/libz.a")
+else()
+    set (ZLIB_LIB " ")
+endif()
+
 set (FFTW_LINKER_FLAGS "-L${CMAKE_CURRENT_SOURCE_DIR}/lib -lfftw3f")
 string (CONCAT THIRDPARTY_LIBS  "${NAPI_LINKER_FLAGS} "
                                 "${HDF4_LINKER_FLAGS} "
@@ -113,6 +119,7 @@ string (CONCAT THIRDPARTY_LIBS  "${NAPI_LINKER_FLAGS} "
                                 "${SZLB_LINKER_FLAGS} "
                                 "${HDF5_LINKER_FLAGS} "
                                 "${MXML_LINKER_FLAGS} "
+                                "${ZLIB_LIB} "
                                 "${FFTW_LINKER_FLAGS} "
 )
 # set the actual linker flags
