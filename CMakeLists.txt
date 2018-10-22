@@ -116,7 +116,7 @@ add_library(nexuslibrary STATIC
     src/nexusgroup.cpp
 )
 add_dependencies(nexuslibrary ${NAPI_PREFIX})
-target_link_libraries(nexuslibrary ${NAPI_LIB})
+# target_link_libraries(nexuslibrary ${NAPI_LIB})
 add_custom_command(
     TARGET nexuslibrary POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:nexuslibrary> "${CMAKE_CURRENT_SOURCE_DIR}/lib/${targetfile}"
