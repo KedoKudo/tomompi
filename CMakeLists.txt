@@ -106,7 +106,7 @@ set (HDF5_LIB "${CMAKE_CURRENT_SOURCE_DIR}/lib/libhdf5.a")
 set (MXML_LINKER_FLAGS "-L${CMAKE_CURRENT_SOURCE_DIR}/lib -lmxml")
 set (MXML_LIB "${CMAKE_CURRENT_SOURCE_DIR}/lib/libmxml.a")
 
-if(EXISTS ${HOME}/lib/libz.a)
+if(EXISTS "${HOME}/lib/libz.a")
     set (ZLIB_LINKER_FLAGS "-L${HOME}/lib -lz")
     set (ZLIB_LIB "${HOME}/lib/libz.a")
 else()
