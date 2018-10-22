@@ -79,9 +79,14 @@ set (CMAKE_CXX_FLAGS
 )
 # -- linker flags
 # package specific
-set (NAPI_LINKER_FLAGS "-L${CMAKE_CURRENT_SOURCE_DIR}/lib64 -lNeXus \
-                        -L${CMAKE_CURRENT_SOURCE_DIR}/lib -lNeXus"
-    )
+if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/lib64)
+    set (NAPI_LINKER_FLAGS "-L${CMAKE_CURRENT_SOURCE_DIR}/lib64 -lNeXus")
+    set (NAPI_LIB "${CMAKE_CURRENT_SOURCE_DIR}/lib64/libNeXus.a")
+else()
+    set (NAPI_LINKER_FLAGS "-L${CMAKE_CURRENT_SOURCE_DIR}/lib   -lNeXus")
+    set (NAPI_LIB "${CMAKE_CURRENT_SOURCE_DIR}/lib/libNeXus.a")
+endif()
+
 set (HDF4_LINKER_FLAGS "-L${CMAKE_CURRENT_SOURCE_DIR}/lib -lmfhdf -ldf")
 set (JPEG_LINKER_FLAGS "-L${CMAKE_CURRENT_SOURCE_DIR}/lib -ljpeg")
 set (SZLB_LINKER_FLAGS "-L${CMAKE_CURRENT_SOURCE_DIR}/lib -lsz")
@@ -111,6 +116,7 @@ add_library(nexuslibrary STATIC
     src/nexusgroup.cpp
 )
 add_dependencies(nexuslibrary ${NAPI_PREFIX})
+target_link_libraries(nexuslibrary ${NAPI_LIB})
 add_custom_command(
     TARGET nexuslibrary POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:nexuslibrary> "${CMAKE_CURRENT_SOURCE_DIR}/lib/${targetfile}"
