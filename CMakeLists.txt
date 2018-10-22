@@ -64,6 +64,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/nexus)
 link_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/lib
     /usr/lib64
+    /usr/lib32
     /usr/lib
 )
 
