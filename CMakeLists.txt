@@ -79,10 +79,9 @@ set (CMAKE_CXX_FLAGS
 )
 # -- linker flags
 # package specific
-set (NAPI_LINKER_FLAGS "-L${CMAKE_CURRENT_SOURCE_DIR}/lib64 -lNeXus")
-if(APPLE)
-    set (NAPI_LINKER_FLAGS "-L${CMAKE_CURRENT_SOURCE_DIR}/lib -lNeXus")
-endif(APPLE)
+set (NAPI_LINKER_FLAGS "-L${CMAKE_CURRENT_SOURCE_DIR}/lib64 -lNeXus \
+                        -L${CMAKE_CURRENT_SOURCE_DIR}/lib -lNeXus"
+    )
 set (HDF4_LINKER_FLAGS "-L${CMAKE_CURRENT_SOURCE_DIR}/lib -lmfhdf -ldf")
 set (JPEG_LINKER_FLAGS "-L${CMAKE_CURRENT_SOURCE_DIR}/lib -ljpeg")
 set (SZLB_LINKER_FLAGS "-L${CMAKE_CURRENT_SOURCE_DIR}/lib -lsz")
