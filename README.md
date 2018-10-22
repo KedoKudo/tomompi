@@ -22,6 +22,8 @@ make; make install
 ```
 * Now all encessary libraries are under ${PROJECT_DIR}/lib, ${PROJECT_DIR}/lib64 (linux), and the header files are in ${PROJECT_DIR}/include.
 
+> NOTE: you might need to install __MPICH__, __bison__ and __flex__ if these packages are not already installed on your system by your admin.
+
 > NOTE: you might have to add ${PROJECT_DIR}/lib to your LD_LIBRARY_PATH if you cannot move these libraries to system default location safely.
 
 ## Implementation
