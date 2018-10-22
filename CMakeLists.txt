@@ -61,11 +61,14 @@ include(thirdparty/napi.cmake)
 # while compiling all the source code header files
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/nexus)
+include_directories(${HOME}/include)
 link_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/lib
     /usr/lib64
     /usr/lib32
     /usr/lib
+    ${HOME}/lib
+    ${HOME}/lib64
 )
 
 # -- compiler flags
