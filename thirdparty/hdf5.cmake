@@ -9,10 +9,10 @@ message("****************")
 set(HDF5_PREFIX hdf5)
 
 # set the source location
-set(HDF5_URL ${CMAKE_CURRENT_LIST_DIR}/hdf5-1.8.10.tar.gz)
+set(HDF5_URL ${CMAKE_CURRENT_LIST_DIR}/hdf5-1.8.13.tar.gz)
 
 # check MD5
-set(HDF5_URL_MD5  95da64de3113d940acbe11b9f2f7a67a)
+set(HDF5_URL_MD5  c03426e9e77d7766944654280b467289)
 
 # build system
 set(HDF5_MAKE       make)
