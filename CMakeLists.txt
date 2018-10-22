@@ -76,7 +76,7 @@ link_directories(
 #  Not the best way to set include directory, but somehow Orthros just keep
 #  breaks at the linking for fftw...
 set (CMAKE_CXX_FLAGS 
-    "-fPIC -std=c++11 -pthread \
+    "-fPIC -std=c++11 -pthread -ldl \
     -D__unix__ -DHDF4 -DHDF5 \
     -I${CMAKE_CURRENT_SOURCE_DIR}/include"
 )
