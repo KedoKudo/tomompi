@@ -61,14 +61,14 @@ include(thirdparty/napi.cmake)
 # while compiling all the source code header files
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/nexus)
-include_directories(${HOME}/include)
+include_directories($ENV{HOME}/include)
 link_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/lib
     /usr/lib64
     /usr/lib32
     /usr/lib
-    ${HOME}/lib
-    ${HOME}/lib64
+    $ENV{HOME}/lib
+    $ENV{HOME}/lib64
 )
 
 # -- compiler flags
@@ -106,9 +106,10 @@ set (HDF5_LIB "${CMAKE_CURRENT_SOURCE_DIR}/lib/libhdf5.a")
 set (MXML_LINKER_FLAGS "-L${CMAKE_CURRENT_SOURCE_DIR}/lib -lmxml")
 set (MXML_LIB "${CMAKE_CURRENT_SOURCE_DIR}/lib/libmxml.a")
 
-if(EXISTS "${HOME}/lib/libz.a")
-    set (ZLIB_LINKER_FLAGS "-L${HOME}/lib -lz")
-    set (ZLIB_LIB "${HOME}/lib/libz.a")
+if(EXISTS "$ENV{HOME}/lib/libz.a")
+    message("found zlib in home")
+    set (ZLIB_LINKER_FLAGS "-L$ENV{HOME}/lib -lz")
+    set (ZLIB_LIB "$ENV{HOME}/lib/libz.a")
 else()
     set (ZLIB_LINKER_FLAGS " ")
     set (ZLIB_LIB " ")
