@@ -30,7 +30,7 @@ add_subdirectory(src)
 
 # build type release by defualt
 set (CMAKE_BUILD_TYPE                  "Release")
-set (CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE     )
+# set (CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE     )
 
 # -- External Dependencies -- # 
 # -- MPI
@@ -148,7 +148,7 @@ target_link_libraries(nexuslibrary
     ${SZLB_LIB}
     ${HDF5_LIB}
     ${MXML_LIB}
-    ${ZLIB_LIB}
+    # ${ZLIB_LIB}
     )
 add_custom_command(
     TARGET nexuslibrary POST_BUILD
@@ -175,10 +175,10 @@ add_executable(tomompi
     src/logfileclass.cpp
     src/recon_algorithm.cpp
 )
-add_dependencies(tomompi nexuslibrary fft_wrapper)
+add_dependencies(tomompi fft_wrapper nexuslibrary)
 target_link_libraries(tomompi 
-    nexuslibrary
     fft_wrapper
+    nexuslibrary
     ${MPI_CXX_LIBRARIES}
 )
 
